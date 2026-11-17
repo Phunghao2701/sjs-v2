@@ -344,16 +344,16 @@
   font-weight: var(--font-weight-semibold);
 }
 
-.recharts-cartesian-axis-tick-value {
+.imc-chart-container .recharts-cartesian-axis-tick-value {
   display: none;
 }
 
-.recharts-cartesian-axis-line {
+.imc-chart-container .recharts-cartesian-axis-line {
   display: none;
 }
 
-.recharts-cartesian-grid-horizontal line,
-.recharts-cartesian-grid-vertical line {
+.imc-chart-container .recharts-cartesian-grid-horizontal line,
+.imc-chart-container .recharts-cartesian-grid-vertical line {
   stroke: var(--color-neutral-200);
   stroke-width: 0.5px;
 }

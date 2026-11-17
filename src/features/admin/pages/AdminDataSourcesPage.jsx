@@ -23,7 +23,13 @@ export default function AdminDataSourcesPage() {
       const response = await api.get(statusPath);
       setKeyStatus(response.data?.data || response.data);
     } catch (error) {
-      setMessage({ type: 'danger', text: error.response?.data?.message || 'Could not load OpenAlex key status.' });
+      if (error.response?.data?.code === 'OPENALEX_KEY_DECRYPT_FAILED') {
+        setKeyStatus({ configured: true, source: 'admin', keyUnreadable: true, encryptionReady: false });
+        setMessage({ type: 'warning', text: 'The stored key cannot be decrypted. Enter the current OpenAlex key and rotate it; the Worker will confirm that encryption is configured.' });
+      } else {
+        setKeyStatus(null);
+        setMessage({ type: 'danger', text: error.response?.data?.message || 'Could not load OpenAlex key status.' });
+      }
     } finally {
       setLoadingKey(false);
     }
@@ -96,9 +102,10 @@ export default function AdminDataSourcesPage() {
             {loadingKey ? <div className="admin-data-sources__loading"><Spinner size="sm" /> Loading key status…</div> : (
               <>
                 <div className="admin-data-sources__status"><span className={`admin-data-sources__dot ${keyStatus?.configured ? 'is-on' : ''}`} />
-                  {keyStatus?.configured ? `Configured via ${keyStatus.source === 'admin' ? 'admin settings' : 'Worker environment'}${keyStatus.maskedSuffix ? ` · ending ${keyStatus.maskedSuffix}` : ''}` : 'No key configured'}
+                  {keyStatus?.keyUnreadable ? 'An admin key is stored but cannot be decrypted' : keyStatus?.configured ? `Configured via ${keyStatus.source === 'admin' ? 'admin settings' : 'Worker environment'}${keyStatus.maskedSuffix ? ` · ending ${keyStatus.maskedSuffix}` : ''}` : 'No key configured'}
                 </div>
-                {!keyStatus?.encryptionReady && <Alert variant="warning">Worker secret OPENALEX_CONFIG_ENCRYPTION_KEY (at least 32 characters) is required before an admin key can be stored.</Alert>}
+                {keyStatus?.keyUnreadable && <Alert variant="warning">The stored key was encrypted with a different or unavailable Worker secret. Enter a replacement key and rotate it to restore OpenAlex requests.</Alert>}
+                {keyStatus && !keyStatus.keyUnreadable && !keyStatus.encryptionReady && <Alert variant="warning">Worker secret OPENALEX_CONFIG_ENCRYPTION_KEY (at least 32 characters) is required before an admin key can be stored.</Alert>}
                 <Form onSubmit={saveKey}>
                   <Form.Group className="mb-3">
                     <Form.Label>New OpenAlex key</Form.Label>
@@ -106,10 +113,10 @@ export default function AdminDataSourcesPage() {
                     <Form.Text>The key is validated with OpenAlex and stored encrypted. It is never shown after saving.</Form.Text>
                   </Form.Group>
                   <div className="admin-data-sources__actions">
-                    <Button type="submit" disabled={savingKey || !apiKey.trim() || !keyStatus?.encryptionReady}>
+                    <Button type="submit" disabled={savingKey || !apiKey.trim() || (!keyStatus?.encryptionReady && !keyStatus?.keyUnreadable)}>
                       {savingKey ? <><Spinner size="sm" /> Validating…</> : 'Validate and rotate key'}
                     </Button>
-                    {keyStatus?.source === 'admin' && <Button variant="outline-secondary" onClick={clearKey} disabled={clearingKey}>{clearingKey ? 'Removing…' : 'Use Worker environment key'}</Button>}
+                    {(keyStatus?.source === 'admin' || keyStatus?.keyUnreadable) && <Button variant="outline-secondary" onClick={clearKey} disabled={clearingKey}>{clearingKey ? 'Removing…' : 'Use Worker environment key'}</Button>}
                     <Button variant="outline-secondary" onClick={loadKeyStatus} disabled={loadingKey}>Refresh</Button>
                   </div>
                 </Form>

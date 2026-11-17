@@ -7,6 +7,25 @@ import { useTranslation } from "react-i18next";
 import { Icon } from '@iconify/react';
 import { EntityCard } from '../../../shared/components/Card';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+
+function KeywordAxisTick({ x, y, payload }) {
+  const keyword = String(payload?.value ?? '');
+  const label = keyword.length > 22 ? `${keyword.slice(0, 21)}…` : keyword;
+
+  return <g>
+    <title>{keyword}</title>
+    <text
+      x={x - 8}
+      y={y}
+      textAnchor="end"
+      dominantBaseline="central"
+      fill="#6b6b6b"
+      fontSize={11}
+      fontFamily="var(--font-display)"
+    >{label}</text>
+  </g>;
+}
+
 function KeywordsRechart({
   chartData,
   onKeywordClick
@@ -30,11 +49,7 @@ function KeywordsRechart({
       bottom: 5
     }}>
         <XAxis type="number" hide />
-        <YAxis dataKey="keyword" type="category" width={110} tick={{
-        fill: 'var(--text-muted)',
-        fontSize: 11,
-        fontFamily: 'var(--font-display)'
-      }} axisLine={false} tickLine={false} />
+        <YAxis dataKey="keyword" type="category" width={150} tick={<KeywordAxisTick />} interval={0} axisLine={false} tickLine={false} />
         <Tooltip cursor={{
         fill: 'var(--bg-section)',
         opacity: 0.5
