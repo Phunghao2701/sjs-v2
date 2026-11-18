@@ -1,4 +1,5 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import AdminFooter from './AdminFooter';
@@ -10,6 +11,9 @@ import '../../features/admin/admin.css';
  * Hỗ trợ cả cơ chế lồng route của react-router-dom (Outlet) và cơ chế bọc component con (children).
  */
 export default function AdminLayout({ children }) {
+  const location = useLocation();
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="admin-layout">
       {/* Sidebar điều hướng cố định bên trái */}
@@ -20,10 +24,19 @@ export default function AdminLayout({ children }) {
         {/* Header trên cùng */}
         <AdminHeader />
 
-        {/* Nội dung trang hiển thị ở giữa */}
-        <main className="admin-content">
-          {children || <Outlet />}
-        </main>
+        {/* Nội dung trang hiển thị ở giữa với framer-motion transition */}
+        <AnimatePresence mode="wait">
+          <motion.main
+            key={location.pathname}
+            className="admin-content"
+            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduceMotion ? undefined : { opacity: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+          >
+            {children || <Outlet />}
+          </motion.main>
+        </AnimatePresence>
 
         {/* Footer dưới cùng */}
         <AdminFooter />

@@ -161,33 +161,45 @@ export default function GeographyTerritoryChart({
                   </div>
 
                   {/* Right Column: Horizontal Bar */}
-                  <div className="flex-grow-1 position-relative d-flex align-items-center pe-2" style={{ height: '34px' }}>
+                  <div className="flex-grow-1 position-relative d-flex align-items-center" style={{ height: '34px' }}>
                     {/* Background Bar Track */}
                     <div
                       className="position-absolute w-100 h-100 rounded-3"
-                      style={{ backgroundColor: 'var(--bg-chip)', opacity: 0.4, zIndex: 0 }}
+                      style={{ backgroundColor: 'var(--bg-chip)', opacity: 0.5, zIndex: 0 }}
                     />
 
                     {/* The Fill Bar */}
                     <div
-                      className={`geography-chart-bar-horizontal rounded-3 d-flex align-items-center justify-content-end px-3 position-relative ${
-                        isSelected ? 'is-active' : ''
-                      }`}
+                      className={`geography-chart-bar-horizontal rounded-3 d-flex align-items-center ${
+                        widthPercent >= 38 ? 'justify-content-end px-3' : 'justify-content-start'
+                      } position-relative ${isSelected ? 'is-active' : ''}`}
                       style={{
-                        width: `${displayWidth}%`,
+                        width: `${Math.max(widthPercent, 3)}%`,
                         height: '100%',
                         zIndex: 1,
                         transition: 'width 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
                       }}
                     >
-                      {/* Value Label INSIDE the Horizontal Bar */}
+                      {/* Value Label INSIDE when bar is wide enough */}
+                      {widthPercent >= 38 && (
+                        <span
+                          className="fw-bold font-display text-white text-nowrap bar-value-inside"
+                          style={{ fontSize: '13px', letterSpacing: '0.01em' }}
+                        >
+                          {val > 0 ? val.toLocaleString() : '0'}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Value Label OUTSIDE when bar is narrow to prevent truncation */}
+                    {widthPercent < 38 && (
                       <span
-                        className="fw-bold font-display text-white text-nowrap bar-value-inside"
-                        style={{ fontSize: '13px', letterSpacing: '0.01em' }}
+                        className="ps-2 fw-bold font-display text-foreground text-nowrap position-relative"
+                        style={{ fontSize: '13px', letterSpacing: '0.01em', zIndex: 2 }}
                       >
                         {val > 0 ? val.toLocaleString() : '0'}
                       </span>
-                    </div>
+                    )}
                   </div>
                 </div>
               );

@@ -1,10 +1,6 @@
 import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\dashboard\components\DashboardStatCards.jsx
- */
 import StatCard from './StatCard';
+import { MotionGrid, MotionItem } from '../../../shared/ui/motion';
 
 /**
  * DashboardStatCards — renders 4 stat cards in a responsive grid.
@@ -46,7 +42,13 @@ export default function DashboardStatCards({
     growth: null,
     growthLabel: ''
   }];
-  return <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {cards.map((card) => <StatCard key={card.icon} {...card} loading={loading} />)}
-    </div>;
+  return (
+    <MotionGrid className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {cards.map((card) => (
+        <MotionItem key={card.icon}>
+          <StatCard {...card} loading={loading} />
+        </MotionItem>
+      ))}
+    </MotionGrid>
+  );
 }

@@ -142,11 +142,12 @@
 }
 
 .bar-row-container {
-  transition: transform 0.2s ease;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
 }
 
 .bar-row-container:hover {
-  transform: translateX(4px);
+  background-color: var(--bg-chip);
 }
 
 .bar-row-container:hover .geography-chart-bar-horizontal,

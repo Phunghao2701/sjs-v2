@@ -185,9 +185,9 @@ export default function FilterPanel({
     return (
       <Dropdown key={config.id} className="catalog-filter-dropdown" autoClose="outside">
         <Dropdown.Toggle
-          variant="light"
+          as="button"
           id={`catalog-filter-${config.id}`}
-          className={`h-9 px-3 text-xs rounded-control border transition-colors inline-flex items-center gap-1.5 shadow-2xs whitespace-nowrap ${
+          className={`h-9 px-3 text-xs rounded-control border transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs whitespace-nowrap after:!hidden cursor-pointer ${
             config.selectedLabel
               ? 'border-primary text-primary bg-primary-subtle font-semibold hover:bg-primary-subtle'
               : 'border-border bg-surface text-foreground font-medium hover:bg-surface-muted'
@@ -320,9 +320,9 @@ export default function FilterPanel({
         {/* More Filters Dropdown (Open Access switches) */}
         <Dropdown className="catalog-filter-dropdown" autoClose="outside">
           <Dropdown.Toggle
-            variant="light"
+            as="button"
             id="catalog-more-filters"
-            className={`h-9 px-3 text-xs rounded-control border transition-colors inline-flex items-center gap-1.5 shadow-2xs whitespace-nowrap ${
+            className={`h-9 px-3 text-xs rounded-control border transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs whitespace-nowrap after:!hidden cursor-pointer ${
               accessValue === 'open_access' || isOaDiamond
                 ? 'border-primary text-primary bg-primary-subtle font-semibold hover:bg-primary-subtle'
                 : 'border-border bg-surface text-foreground font-medium hover:bg-surface-muted'

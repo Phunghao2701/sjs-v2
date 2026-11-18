@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import useZoneStats from '../hooks/useZoneStats';
@@ -177,8 +176,8 @@ export default function GeographyPage() {
         )}
 
         {/* Main Content Layout */}
-        <Row className="g-3 sm:g-3.5">
-          <Col xs={12} lg={7} xl={8}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div className="lg:col-span-7 xl:col-span-8 min-w-0">
             <GeographyTerritoryChart
               data={countryStats}
               loading={loadingCountries}
@@ -186,34 +185,32 @@ export default function GeographyPage() {
               onSelectCountry={handleSelectCountry}
               selectedYear={selectedYear}
             />
-          </Col>
+          </div>
 
-          <Col xs={12} lg={5} xl={4}>
+          <div className="lg:col-span-5 xl:col-span-4 min-w-0">
             <GeographyRankingTable
               data={countryStats}
               loading={loadingCountries}
               selectedCountry={selectedCountry}
               onSelectCountry={handleSelectCountry}
             />
-          </Col>
-        </Row>
+          </div>
+        </div>
 
         {/* Selected Country Articles List */}
         {selectedCountry && (
-          <Row className="mt-6" ref={articlesRef}>
-            <Col xs={12}>
-              <GeographyArticleList
-                articles={articles}
-                loading={loadingArticles}
-                total={totalArticles}
-                page={articlesPage}
-                totalPages={totalPages}
-                onPageChange={setArticlesPage}
-                onDetailClick={handleDetailClick}
-                countryName={selectedCountry.name}
-              />
-            </Col>
-          </Row>
+          <div className="mt-6" ref={articlesRef}>
+            <GeographyArticleList
+              articles={articles}
+              loading={loadingArticles}
+              total={totalArticles}
+              page={articlesPage}
+              totalPages={totalPages}
+              onPageChange={setArticlesPage}
+              onDetailClick={handleDetailClick}
+              countryName={selectedCountry.name}
+            />
+          </div>
         )}
 
         {/* Login guard modal */}

@@ -13,14 +13,10 @@ export default function AuthBanner() {
     t("auth.theoDoiKeywordVaNhanThongBao"),
     t("auth.taoProjectVaQuanLyJournal")
   ];
-  return <div className="h-100 w-100 d-flex flex-column justify-content-between p-5 position-relative overflow-hidden auth-banner-container" style={{
-    backgroundColor: 'var(--bg-section)',
-    color: 'var(--text-main)',
-    minHeight: '100vh',
-    borderRight: '1px solid var(--border)'
-  }}>
+  return (
+    <div className="h-full w-full flex flex-col justify-between p-8 md:p-12 relative overflow-hidden bg-surface-muted text-foreground min-h-screen border-r border-border">
       {/* Animated ambient background glow spheres */}
-      <div className="position-absolute" style={{
+      <div className="absolute" style={{
         width: '320px',
         height: '320px',
         borderRadius: '50%',
@@ -31,7 +27,7 @@ export default function AuthBanner() {
         pointerEvents: 'none',
         animation: 'banner-pulse-glow 8s ease-in-out infinite alternate'
       }} />
-      <div className="position-absolute" style={{
+      <div className="absolute" style={{
         width: '260px',
         height: '260px',
         borderRadius: '50%',
@@ -44,97 +40,66 @@ export default function AuthBanner() {
       }} />
 
       {/* Grid Overlay with light line opacity */}
-      <div className="position-absolute inset-0" style={{
-      backgroundImage: 'linear-gradient(rgba(13, 27, 28, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(13, 27, 28, 0.03) 1px, transparent 1px)',
-      backgroundSize: '32px 32px',
-      backgroundPosition: 'center',
-      opacity: 0.85,
-      zIndex: 1,
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0
-    }} />
+      <div className="absolute inset-0" style={{
+        backgroundImage: 'linear-gradient(rgba(13, 27, 28, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(13, 27, 28, 0.03) 1px, transparent 1px)',
+        backgroundSize: '32px 32px',
+        backgroundPosition: 'center',
+        opacity: 0.85,
+        zIndex: 1,
+      }} />
 
       {/* Logo Brand */}
-      <div className="d-flex align-items-center justify-content-between" style={{
-      zIndex: 2
-    }}>
-        <Navbar.Brand onClick={() => navigate("/")} className="transition-all hover-lift">
+      <div className="flex items-center justify-between relative z-10">
+        <div onClick={() => navigate("/")} className="cursor-pointer">
           <Logo size={42} fontSize="1rem" />
-        </Navbar.Brand>
+        </div>
 
         {/* Live Academic Pulse Tag */}
-        <div className="d-none d-lg-flex align-items-center gap-2 px-3 py-1.5 rounded-full border bg-white bg-opacity-75 backdrop-blur shadow-xs text-xs" style={{ borderColor: 'var(--border)' }}>
-          <span className="position-relative d-flex" style={{ width: '8px', height: '8px' }}>
-            <span className="position-absolute w-100 h-100 rounded-circle bg-success opacity-75 animate-ping" />
-            <span className="position-relative w-100 h-100 rounded-circle bg-success" />
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full border border-border bg-surface/80 backdrop-blur shadow-xs text-xs">
+          <span className="relative flex size-2">
+            <span className="absolute size-full rounded-full bg-success opacity-75 animate-ping" />
+            <span className="relative size-full rounded-full bg-success" />
           </span>
-          <span className="fw-semibold text-muted-custom">200M+ Articles Tracked</span>
+          <span className="font-semibold text-muted-foreground">200M+ Articles Tracked</span>
         </div>
       </div>
 
       {/* Main Banner Content */}
-      <div className="my-auto position-relative" style={{
-      zIndex: 2,
-      maxWidth: '480px'
-    }}>
-        <div className="mb-3 d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill" style={{ background: 'var(--primary-light)', border: '1px solid rgba(0, 113, 188, 0.2)' }}>
-          <Icon icon="lucide:sparkles" className="text-sm" style={{ color: 'var(--primary)' }} />
-          <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>Academic Intelligence Platform</span>
+      <div className="my-auto relative z-10 max-w-[480px]">
+        <div className="mb-3 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-subtle border border-primary/20">
+          <Icon icon="lucide:sparkles" className="text-sm text-primary" />
+          <span className="text-xs font-semibold text-primary">Academic Intelligence Platform</span>
         </div>
 
-        <h1 className="font-display font-semibold text-base text-main mb-3 leading-snug tracking-tight">{t("auth.thamGiaCongDongNghienCuu")}</h1>
+        <h1 className="font-display font-semibold text-base sm:text-lg text-foreground mb-3 leading-snug tracking-tight">
+          {t("auth.thamGiaCongDongNghienCuu")}
+        </h1>
         
-        <p className="fs-6 mb-4 text-muted-custom" style={{
-        color: 'var(--text-muted)',
-        lineHeight: '1.65'
-      }}>{t("auth.cungHangNghinNhaNghienCuuSuDun")}</p>
+        <p className="text-sm mb-5 text-muted-foreground leading-relaxed">
+          {t("auth.cungHangNghinNhaNghienCuuSuDun")}
+        </p>
 
-        {/* Feature List with interactive micro-animations */}
-        <div className="d-flex flex-column mb-4" style={{
-        gap: '1.1rem'
-      }}>
-          {features.map((feat, index) => <div key={index} className="d-flex align-items-center gap-3 p-2 rounded-3 transition-all banner-feature-item" style={{
-            transition: 'all 0.25s ease'
-          }}>
-              <div className="d-flex align-items-center justify-content-center flex-shrink-0 transition-transform feature-icon-box" style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '50%',
-            background: 'var(--primary-light)',
-            border: '1.5px solid var(--primary)',
-            boxShadow: '0 2px 8px rgba(0, 113, 188, 0.15)'
-          }}>
-                <Icon icon="lucide:check" className="text-xs" style={{
-              color: 'var(--primary)',
-              strokeWidth: '3'
-            }} />
+        {/* Feature List */}
+        <div className="flex flex-col gap-3 mb-4">
+          {features.map((feat, index) => (
+            <div key={index} className="flex items-center gap-3 p-2 rounded-lg transition-colors hover:bg-surface/60">
+              <div className="flex size-7 items-center justify-center shrink-0 rounded-full bg-primary-subtle border border-primary/30 text-primary shadow-xs">
+                <Icon icon="lucide:check" className="text-xs" />
               </div>
-              <span className="text-sm font-semibold" style={{
-            color: 'var(--text-main)',
-            letterSpacing: '0.01em'
-          }}>{feat}</span>
-            </div>)}
+              <span className="text-sm font-medium text-foreground">
+                {feat}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Footer Text and Icons */}
-      <div className="d-flex align-items-center justify-content-between text-xs pt-3 border-top" style={{
-      zIndex: 2,
-      borderColor: 'rgba(0, 0, 0, 0.06)',
-      color: 'var(--text-muted)'
-    }}>
+      <div className="flex items-center justify-between text-xs pt-3 border-t border-border text-muted-foreground relative z-10">
         <span>© {new Date().getFullYear()} Trending System. All rights reserved.</span>
-        <div className="d-flex gap-3">
-          <Icon icon="lucide:globe" width="16" className="hover-lift" style={{
-          cursor: 'pointer',
-          opacity: 0.8
-        }} />
-          <Icon icon="lucide:help-circle" width="16" className="hover-lift" style={{
-          cursor: 'pointer',
-          opacity: 0.8
-        }} />
+        <div className="flex gap-3">
+          <Icon icon="lucide:globe" width={16} className="cursor-pointer hover:text-foreground transition-colors" />
+          <Icon icon="lucide:help-circle" width="16" className="cursor-pointer hover:text-foreground transition-colors" />
         </div>
       </div>
 
@@ -144,17 +109,7 @@ export default function AuthBanner() {
           50% { transform: scale(1.15) translate(-10px, 15px); opacity: 1; }
           100% { transform: scale(0.95) translate(10px, -10px); opacity: 0.8; }
         }
-        .banner-feature-item:hover {
-          background: rgba(255, 255, 255, 0.6);
-          transform: translateX(4px);
-        }
-        .banner-feature-item:hover .feature-icon-box {
-          transform: scale(1.12);
-          background: var(--primary) !important;
-        }
-        .banner-feature-item:hover .feature-icon-box svg {
-          color: #ffffff !important;
-        }
       `}</style>
-    </div>;
+    </div>
+  );
 }

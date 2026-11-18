@@ -28,10 +28,19 @@ export default function DashboardShell({ children }) {
   const reduceMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
   const drawerCloseRef = useRef(null);
+  const sidebarRef = useRef(null);
   const base = `/${lang}`;
   const activePath = location.pathname.replace(/\/$/, '').split('/').at(-1);
   const activeItem = items.find(({ path }) => path === activePath);
   const pageTitle = activeItem ? t(`navigation.${activeItem.path}`, activeItem.label) : t('navigation.projects', 'Projects');
+
+  // Ensure window and sidebar always scroll to top on page navigation
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (sidebarRef.current) {
+      sidebarRef.current.scrollTop = 0;
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!mobileOpen) return undefined;
@@ -109,7 +118,7 @@ export default function DashboardShell({ children }) {
 
       {/* Desktop Sticky Sidebar (Flex item, zero margin needed for main) */}
       <div className="hidden md:block w-[230px] shrink-0">
-        <div className="sticky top-0 h-screen overflow-y-auto">{sidebar}</div>
+        <div ref={sidebarRef} className="sticky top-0 h-screen overflow-y-auto overflow-x-hidden">{sidebar}</div>
       </div>
 
       {/* Main Content Column */}
@@ -135,9 +144,18 @@ export default function DashboardShell({ children }) {
         </header>
 
         <DashboardShellContext.Provider value>
-          <motion.main className="app-main flex-1 min-w-0" initial={reduceMotion ? false : { opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reduceMotion ? 0 : 0.2 }}>
-            {children}
-          </motion.main>
+          <AnimatePresence mode="wait">
+            <motion.main
+              key={location.pathname}
+              className="app-main flex-1 min-w-0"
+              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduceMotion ? undefined : { opacity: 0 }}
+              transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+            >
+              {children}
+            </motion.main>
+          </AnimatePresence>
         </DashboardShellContext.Provider>
       </div>
 

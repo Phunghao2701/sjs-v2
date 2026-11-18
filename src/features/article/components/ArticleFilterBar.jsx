@@ -371,9 +371,9 @@ export default function ArticleFilterBar({
     return (
       <Dropdown key={config.id} className="article-filter-dropdown" autoClose="outside">
         <Dropdown.Toggle
-          variant="light"
+          as="button"
           id={`article-filter-${config.id}`}
-          className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors inline-flex items-center gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap ${
+          className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap after:!hidden cursor-pointer ${
             config.selectedLabel ? 'border-primary text-primary bg-primary-subtle font-semibold' : 'border-border'
           }`}
           disabled={loadingFilters}
@@ -514,9 +514,9 @@ export default function ArticleFilterBar({
         {/* Access Type Dropdown */}
         <Dropdown className="article-filter-dropdown" autoClose="outside">
           <Dropdown.Toggle
-            variant="light"
+            as="button"
             id="article-access-filters"
-            className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors inline-flex items-center gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap ${
+            className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap after:!hidden cursor-pointer ${
               isMoreFiltersActive ? 'border-primary text-primary bg-primary-subtle font-semibold' : 'border-border'
             }`}
           >

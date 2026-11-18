@@ -211,10 +211,10 @@ const ProjectDetailPage = () => {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-base font-bold text-foreground">{formatNumber(total)}</span>
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {t("project.tongSo")}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-center px-2">
+            <span className="text-lg font-bold text-foreground font-mono leading-none">{formatNumber(total)}</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground mt-1">
+              {t("common.total", "Total")}
             </span>
           </div>
         </div>
@@ -290,22 +290,18 @@ const ProjectDetailPage = () => {
     if (overviewLoading) {
       return (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <Card key={i} className="p-4 space-y-2">
-                <Skeleton className="h-3 w-24" />
-                <Skeleton className="h-7 w-16" />
-              </Card>
-            ))}
-          </div>
+          <Card className="p-6 space-y-4">
+            <Skeleton className="h-5 w-48" />
+            <Skeleton className="h-[260px] w-full rounded" />
+          </Card>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <Card className="p-6 space-y-4">
               <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-[240px] w-full rounded" />
+              <Skeleton className="h-[220px] w-full rounded" />
             </Card>
             <Card className="p-6 space-y-4">
               <Skeleton className="h-5 w-40" />
-              <Skeleton className="h-[240px] w-full rounded" />
+              <Skeleton className="h-[220px] w-full rounded" />
             </Card>
           </div>
         </div>
@@ -329,31 +325,18 @@ const ProjectDetailPage = () => {
 
     return (
       <div className="space-y-6">
-        {/* Metric summary grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-4 rounded-card border border-border bg-surface">
-            <div className="text-xs font-medium text-muted-foreground">{t("project.tongSoBaiBao")}</div>
-            <div className="mt-1 text-base font-bold text-foreground">{formatNumber(summary.totalArticles)}</div>
-          </div>
-          <div className="p-4 rounded-card border border-border bg-surface">
-            <div className="text-xs font-medium text-muted-foreground">{t("project.keywordTheoDoi")}</div>
-            <div className="mt-1 text-base font-bold text-foreground">{formatNumber(summary.totalKeywords)}</div>
-          </div>
-          <div className="p-4 rounded-card border border-border bg-surface">
-            <div className="text-xs font-medium text-muted-foreground">{t("project.tongSoTapChi")}</div>
-            <div className="mt-1 text-base font-bold text-foreground">{formatNumber(summary.totalJournals)}</div>
-          </div>
-          <div className="p-4 rounded-card border border-border bg-surface">
-            <div className="text-xs font-medium text-muted-foreground">{t("project.capNhatGanNhat")}</div>
-            <div className="mt-1 text-base font-semibold text-foreground">{formatDate(summary.lastUpdatedAt)}</div>
-          </div>
-        </div>
-
         {/* Publication trend */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-base font-semibold">{t("project.xuHuongXuatBan")}</CardTitle>
-            <p className="text-xs text-muted-foreground m-0">{t("project.soLuongBaiBaoLienQuanTheoTungN")}</p>
+          <CardHeader className="flex flex-row items-center justify-between gap-4 pb-2">
+            <div>
+              <CardTitle className="text-base font-semibold">{t("project.xuHuongXuatBan")}</CardTitle>
+              <p className="text-xs text-muted-foreground m-0">{t("project.soLuongBaiBaoLienQuanTheoTungN")}</p>
+            </div>
+            {summary.lastUpdatedAt && (
+              <span className="text-[11px] font-medium text-muted-foreground whitespace-nowrap">
+                {t("project.capNhatGanNhat")}: <strong className="text-foreground">{formatDate(summary.lastUpdatedAt)}</strong>
+              </span>
+            )}
           </CardHeader>
           <CardContent>{renderLineChart(charts.publicationTrend)}</CardContent>
         </Card>
@@ -576,14 +559,14 @@ const ProjectDetailPage = () => {
           </div>
           <div>
             <div className="text-xs text-muted-foreground">{t("project.tuKhoaTheoDoi1")}</div>
-            <div className="mt-1 text-base font-bold text-foreground">
+            <div className="mt-1 text-base font-bold text-foreground font-mono">
               {keywordCount.toLocaleString('vi-VN')}
             </div>
           </div>
           <div>
-            <div className="text-xs text-muted-foreground">{t("project.canhBaoMoi24h")}</div>
-            <div className="mt-1 text-base font-bold text-foreground">
-              {project?.alerts_24h?.todayCount || 0}
+            <div className="text-xs text-muted-foreground">{t("project.tongSoTapChi", "Covered Journals")}</div>
+            <div className="mt-1 text-base font-bold text-foreground font-mono">
+              {formatNumber(overviewData?.summary?.totalJournals || 0)}
             </div>
           </div>
         </div>
@@ -686,67 +669,74 @@ const ProjectDetailPage = () => {
                 <p className="m-0 text-xs">{t("project.chuaCoBaiBaoNaoKhopVoiTuKhoaCu")}</p>
               </div>
             ) : (
-              <div className="divide-y divide-border border-t border-border">
-                {watchArticles.map((article, index) => (
-                  <div key={index} className="py-3.5 space-y-2">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span className="font-medium text-foreground">
-                        {article.journal_name || article.journal?.title || t("author.tapChiKhoaHoc")}
-                      </span>
-                      <span>
-                        {article.publication_year ||
-                          (article.publication_date && new Date(article.publication_date).getFullYear())}
-                      </span>
-                    </div>
-
-                    <Link
-                      to={`/articles/${article.article_id || article.id}/visual`}
-                      className="group block no-underline"
+              <div className="space-y-3 pt-2">
+                {watchArticles.map((article, index) => {
+                  const pubYear = article.publication_year || (article.publication_date && new Date(article.publication_date).getFullYear());
+                  const journalName = article.journal_name || article.journal?.title || t("author.tapChiKhoaHoc", "Scientific Journal");
+                  return (
+                    <div
+                      key={article.article_id || article.id || index}
+                      className="p-4 rounded-xl border border-border bg-surface-muted/20 hover:bg-surface-muted/40 transition-colors space-y-2.5"
                     >
-                      <h4 className="m-0 text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-relaxed">
-                        <LatexText text={article.title} />
-                      </h4>
-                    </Link>
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-semibold text-primary inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary-subtle text-[11px]">
+                            <Icon icon="lucide:book-marked" width="12" />
+                            {journalName}
+                          </span>
+                          {pubYear && (
+                            <span className="text-muted-foreground text-[11px] font-medium">
+                              • {pubYear}
+                            </span>
+                          )}
+                        </div>
+                        {article.matched_keywords?.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {article.matched_keywords.map((kw, kwIdx) => (
+                              <Badge key={`kw-${kwIdx}`} variant="outline" className="text-[10px] gap-1 py-0.5">
+                                <Icon icon="lucide:sparkles" width="10" />
+                                {kw}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
 
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-                      <div className="text-xs text-muted-foreground truncate">
-                        {article.doi && (
-                          <>
-                            DOI:{' '}
+                      <Link
+                        to={`/articles/${article.article_id || article.id}/visual`}
+                        className="group block no-underline"
+                      >
+                        <h4 className="m-0 text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-relaxed">
+                          <LatexText text={article.title} />
+                        </h4>
+                      </Link>
+
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-0.5 text-xs text-muted-foreground">
+                        {article.doi ? (
+                          <div className="truncate">
+                            <span className="text-muted-foreground mr-1">DOI:</span>
                             <a
                               href={article.doi.startsWith('http') ? article.doi : `https://doi.org/${article.doi}`}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-muted-foreground hover:text-primary no-underline transition-colors"
+                              className="text-muted-foreground hover:text-primary transition-colors no-underline font-mono text-[11px]"
                             >
                               {article.doi}
                             </a>
-                          </>
-                        )}
-                      </div>
+                          </div>
+                        ) : <div />}
 
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        {article.matched_areas?.map((area, aIdx) => (
-                          <Badge key={`area-${aIdx}`} variant="secondary" className="text-xs">
-                            <Icon icon="lucide:book-open" className="mr-1" width="12" />
-                            {area}
-                          </Badge>
-                        ))}
-                        {article.matched_keywords?.map((kw, kwIdx) => (
-                          <Badge key={`kw-${kwIdx}`} variant="secondary" className="text-xs">
-                            <Icon icon="lucide:sparkles" className="mr-1" width="12" />
-                            {kw}
-                          </Badge>
-                        ))}
-                        {!article.matched_keywords?.length && !article.matched_areas?.length && (
-                          <Badge variant="secondary" className="text-xs">
-                            {t("project.doTrungKhopCao")}
-                          </Badge>
-                        )}
+                        <Link
+                          to={`/articles/${article.article_id || article.id}/visual`}
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline no-underline shrink-0"
+                        >
+                          <span>{t("article.xemChiTiet", "View Analysis")}</span>
+                          <Icon icon="lucide:arrow-right" width="13" />
+                        </Link>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
 

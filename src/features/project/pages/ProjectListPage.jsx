@@ -12,6 +12,7 @@ import { StatePanel } from '../../../shared/ui/state-panel';
 import { Card } from '../../../shared/ui/card';
 import useAuth from '../../auth/hooks/useAuth';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
+import { MotionGrid, MotionItem } from '../../../shared/ui/motion';
 import { getSubjectAreasApi } from '../../catalog/api/catalogApi';
 
 const ProjectListPage = () => {

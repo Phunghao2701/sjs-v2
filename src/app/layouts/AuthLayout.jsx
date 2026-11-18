@@ -3,66 +3,31 @@
  *
  * File: app\layouts\AuthLayout.jsx
  */
-import { Row, Col } from 'react-bootstrap';
+import { motion, useReducedMotion } from 'framer-motion';
 
 export default function AuthLayout({ banner, children }) {
+  const reduceMotion = useReducedMotion();
+
   return (
-    <div 
-      className="min-vh-100 w-100 overflow-x-hidden d-flex"
-      style={{ 
-        backgroundColor: 'var(--bg-main)',
-        color: 'var(--text-main)',
-        fontFamily: 'var(--font-display)'
-      }}
-    >
-      <Row className="g-0 w-100 min-vh-100">
+    <div className="min-h-screen w-full overflow-x-hidden flex bg-background text-foreground">
+      <div className="grid grid-cols-1 md:grid-cols-2 w-full min-h-screen">
         {/* Left Column: Banner (Hidden on Mobile) */}
-        <Col 
-          md={6} 
-          className="d-none d-md-block h-100 min-vh-100 position-sticky top-0"
-        >
+        <div className="hidden md:block h-full min-h-screen sticky top-0 border-r border-border">
           {banner}
-        </Col>
+        </div>
 
         {/* Right Column: Auth Forms */}
-        <Col 
-          xs={12} 
-          md={6} 
-          className="d-flex align-items-center justify-content-center py-5 px-3 px-sm-4 px-md-5 min-vh-100 overflow-y-auto"
-          style={{ backgroundColor: 'var(--bg-main)' }}
-        >
-          <div 
-            className="w-100" 
-            style={{ 
-              maxWidth: '440px',
-              animation: 'slide-up 0.4s ease-out'
-            }}
+        <div className="flex items-center justify-center py-8 px-4 sm:px-6 md:px-10 min-h-screen overflow-y-auto bg-surface">
+          <motion.div 
+            className="w-full max-w-[440px]"
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.28, ease: 'easeOut' }}
           >
             {children}
-          </div>
-        </Col>
-      </Row>
-
-      {/* Animation Styles */}
-      <style>{`
-        @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(16px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes fade-in {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fade-in {
-          animation: fade-in 0.2s ease-out forwards;
-        }
-      `}</style>
+          </motion.div>
+        </div>
+      </div>
     </div>
   );
 }
