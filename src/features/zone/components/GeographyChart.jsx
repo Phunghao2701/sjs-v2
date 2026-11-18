@@ -18,7 +18,7 @@ function SimpleSvgBarChart({
         color: 'var(--text-muted)'
       }} />
         <p className="text-muted-custom mb-0" style={{
-        fontSize: '0.85rem'
+        fontSize: '14px'
       }}>{resolvedEmptyMessage}</p>
       </div>;
   }
@@ -70,7 +70,7 @@ function SimpleSvgBarChart({
             </rect>
             {/* Label below bar, rotated */}
             <text x={x + barWidth / 2} y={PAD.top + chartH + 16} textAnchor="end" transform={`rotate(-45, ${x + barWidth / 2}, ${PAD.top + chartH + 16})`} style={{
-          fontSize: 10,
+          fontSize: 13,
           fill: 'var(--text-main)',
           fontFamily: 'var(--font-display)',
           fontWeight: 500
@@ -114,13 +114,13 @@ export default function GeographyChart({
             color
           }} />
             <h3 className="font-display fw-bold text-main mb-0" style={{
-            fontSize: '1.1rem'
+            fontSize: '16px'
           }}>
               {title}
             </h3>
           </div>
           <p className="text-muted-custom mb-0" style={{
-          fontSize: '0.8rem'
+          fontSize: '13px'
         }}>{t("zone.bieuDoTrucQuanHoaSanLuongBaiBa")}</p>
         </div>
       </div>

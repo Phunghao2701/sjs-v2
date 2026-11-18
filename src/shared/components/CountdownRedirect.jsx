@@ -13,7 +13,7 @@ const CountdownRedirect = ({
   } = useTranslation();
   return <div className="mb-4">
       <p className="text-center mb-2" style={{
-      fontSize: '0.875rem',
+      fontSize: '14px',
       color: 'var(--text-muted, #6B6B6B)'
     }}>
         {t("common.tuDongChuyenDenTrangDangNhapSa")}

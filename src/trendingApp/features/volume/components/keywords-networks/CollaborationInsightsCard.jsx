@@ -84,11 +84,11 @@ const CollaborationInsightsCard = ({ data, projectId, filters }) => {
         <MoleculeIcon />
         
         {/* Custom title class without h2 to bypass global dark styling rules */}
-        <div style={{ fontSize: '1.75rem', fontWeight: 800, lineHeight: 1.2, marginBottom: '16px', color: '#ffffff' }}>
+        <div style={{ fontSize: '16px', fontWeight: 800, lineHeight: 1.2, marginBottom: '16px', color: '#ffffff' }}>
           {t('volume.collaborationInsights', 'Collaboration Insights')}
         </div>
         
-        <p style={{ fontSize: '0.875rem', lineHeight: '1.6', color: '#ffffff', opacity: 0.9 }}>
+        <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#ffffff', opacity: 0.9 }}>
           {description}
         </p>
       </div>
@@ -99,8 +99,8 @@ const CollaborationInsightsCard = ({ data, projectId, filters }) => {
             <RocketIcon />
           </div>
           <div>
-            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255, 255, 255, 0.8)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('volume.emergingLink', 'EMERGING LINK')}</div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>{emergingLink}</div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.8)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('volume.emergingLink', 'EMERGING LINK')}</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>{emergingLink}</div>
           </div>
         </div>
         
@@ -109,14 +109,14 @@ const CollaborationInsightsCard = ({ data, projectId, filters }) => {
             <MapPinIcon />
           </div>
           <div>
-            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255, 255, 255, 0.8)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('volume.criticalNode', 'CRITICAL NODE')}</div>
-            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>{criticalNode}</div>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.8)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('volume.criticalNode', 'CRITICAL NODE')}</div>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#ffffff', marginTop: '2px' }}>{criticalNode}</div>
           </div>
         </div>
       </div>
 
 
-      <button onClick={handleExport} className="kn-btn-primary" style={{ backgroundColor: '#111827', color: 'white', borderRadius: '6px', padding: '14px', fontSize: '0.875rem', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+      <button onClick={handleExport} className="kn-btn-primary" style={{ backgroundColor: '#111827', color: 'white', borderRadius: '6px', padding: '14px', fontSize: '14px', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
         {t('volume.exportRawMatrix', 'Export Raw Matrix')} <FiDownload style={{ opacity: 0.7 }} />
       </button>
     </div>

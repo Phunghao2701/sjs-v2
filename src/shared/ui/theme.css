@@ -1,0 +1,491 @@
+/* Trending System design tokens: primitive -> semantic -> component. */
+:root {
+  --ds-blue-700: #005a96;
+  --ds-blue-600: #0071bc;
+  --ds-blue-100: #e6f3fa;
+  --ds-blue-50: #f2f9fd;
+  --ds-neutral-950: #0d1b1c;
+  --ds-neutral-700: #344054;
+  --ds-neutral-600: #475467;
+  --ds-neutral-500: #667085;
+  --ds-neutral-300: #d0d5dd;
+  --ds-neutral-200: #e4e7ec;
+  --ds-neutral-100: #f2f4f7;
+  --ds-neutral-50: #f8fafc;
+  --ds-white: #fff;
+  --ds-green-700: #067647;
+  --ds-green-100: #dcfae6;
+  --ds-red-700: #b42318;
+  --ds-red-100: #fee4e2;
+  --ds-amber-800: #93370d;
+  --ds-amber-100: #fef0c7;
+
+  --ds-background: var(--ds-neutral-50);
+  --ds-surface: var(--ds-white);
+  --ds-surface-muted: var(--ds-neutral-100);
+  --ds-foreground: var(--ds-neutral-950);
+  --ds-muted-foreground: var(--ds-neutral-600);
+  --ds-subtle-foreground: var(--ds-neutral-500);
+  --ds-border: var(--ds-neutral-200);
+  --ds-primary: var(--ds-blue-600);
+  --ds-primary-hover: var(--ds-blue-700);
+  --ds-primary-subtle: var(--ds-blue-100);
+  --ds-primary-subtle-hover: var(--ds-blue-50);
+  --ds-focus: color-mix(in srgb, var(--ds-primary) 28%, transparent);
+  --ds-success: var(--ds-green-700);
+  --ds-success-subtle: var(--ds-green-100);
+  --ds-danger: var(--ds-red-700);
+  --ds-danger-subtle: var(--ds-red-100);
+  --ds-warning: var(--ds-amber-800);
+  --ds-warning-subtle: var(--ds-amber-100);
+  --ds-font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --ds-font-serif: Georgia, "Times New Roman", serif;
+  --ds-font-size-caption: 13px;
+  --ds-font-size-body: 14px;
+  --ds-font-size-emphasis: 15px;
+  --ds-font-size-heading: 16px;
+  --ds-page-gutter: clamp(1rem, 2vw, 2rem);
+  --ds-motion-fast: 150ms;
+  --ds-motion-base: 200ms;
+  --ds-radius-control: 0.5rem;
+  --ds-radius-card: 0.75rem;
+  --ds-radius-panel: 1rem;
+  --ds-shadow-card: 0 1px 3px rgb(16 24 40 / 8%);
+  --ds-shadow-popover: 0 8px 24px rgb(16 24 40 / 12%);
+  --ds-z-dropdown: 20;
+  --ds-z-sticky: 30;
+  --ds-z-overlay: 40;
+  --ds-z-modal: 50;
+
+  /* Legacy aliases keep older feature styles visually aligned during migration. */
+  --bg-main: var(--ds-surface);
+  --bg-section: var(--ds-surface-muted);
+  --bg-chip: var(--ds-surface-muted);
+  --bg-card: var(--ds-surface);
+  --border: var(--ds-border);
+  --text-main: var(--ds-foreground);
+  --text-muted: var(--ds-muted-foreground);
+  --primary: var(--ds-primary);
+  --primary-light: var(--ds-primary-subtle);
+  --btn-dark: var(--ds-primary-hover);
+  --q1-color: var(--ds-primary);
+  --dark-bg: var(--bg-main);
+  --dark-card: var(--bg-card);
+  --dark-border: var(--border);
+  --brand-accent: var(--primary);
+  --glow-accent: color-mix(in srgb, var(--ds-primary) 8%, transparent);
+  --font-display: var(--ds-font-sans);
+}
+
+@theme inline {
+  --color-background: var(--ds-background);
+  --color-surface: var(--ds-surface);
+  --color-surface-muted: var(--ds-surface-muted);
+  --color-foreground: var(--ds-foreground);
+  --color-muted-foreground: var(--ds-muted-foreground);
+  --color-subtle-foreground: var(--ds-subtle-foreground);
+  --color-border: var(--ds-border);
+  --color-primary: var(--ds-primary);
+  --color-primary-hover: var(--ds-primary-hover);
+  --color-primary-subtle: var(--ds-primary-subtle);
+  --color-primary-subtle-hover: var(--ds-primary-subtle-hover);
+  --color-success: var(--ds-success);
+  --color-success-subtle: var(--ds-success-subtle);
+  --color-danger: var(--ds-danger);
+  --color-danger-subtle: var(--ds-danger-subtle);
+  --color-warning: var(--ds-warning);
+  --color-warning-subtle: var(--ds-warning-subtle);
+  --font-sans: var(--ds-font-sans);
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+  --radius-control: var(--ds-radius-control);
+  --radius-card: var(--ds-radius-card);
+  --radius-panel: var(--ds-radius-panel);
+  --shadow-card: var(--ds-shadow-card);
+  --shadow-popover: var(--ds-shadow-popover);
+
+  /* Map common Tailwind palette utilities onto the product neutral/brand ramps. */
+  --color-slate-50: var(--ds-background);
+  --color-slate-100: var(--ds-surface-muted);
+  --color-slate-200: var(--ds-border);
+  --color-slate-300: var(--ds-neutral-300);
+  --color-slate-400: var(--ds-subtle-foreground);
+  --color-slate-500: var(--ds-subtle-foreground);
+  --color-slate-600: var(--ds-muted-foreground);
+  --color-slate-700: var(--ds-neutral-700);
+  --color-slate-900: var(--ds-foreground);
+  --color-sky-50: var(--ds-primary-subtle-hover);
+  --color-sky-100: var(--ds-primary-subtle);
+  --color-sky-200: var(--ds-primary-subtle);
+  --color-sky-700: var(--ds-primary-hover);
+  --color-blue-500: var(--ds-primary);
+  --color-blue-600: var(--ds-primary);
+  --color-blue-700: var(--ds-primary-hover);
+  /* Legacy brand utilities are aliases; orange is retained for data semantics only. */
+  --color-orange-50: var(--ds-primary-subtle-hover);
+  --color-orange-100: var(--ds-primary-subtle);
+  --color-orange-500: var(--ds-primary);
+  --color-orange-600: var(--ds-primary);
+  --color-orange-700: var(--ds-primary-hover);
+}
+
+body {
+  font-family: var(--ds-font-sans);
+  font-size: var(--ds-font-size-body);
+  color: var(--ds-foreground);
+  background: var(--ds-background);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Keep the shared product typography compact and consistent across routes without blocking utility classes. */
+:where(h1, h2, h3, h4, h5, h6) {
+  font-size: var(--ds-font-size-heading);
+}
+
+:where(small, .small, .fs-6) {
+  font-size: var(--ds-font-size-caption);
+}
+
+/* Default heading styles for .app-main: applies base typography without blocking utility classes like text-xl, text-2xl, font-bold */
+.app-main :where(h1, h2, h3, h4, h5, h6):not([class*="text-"]) {
+  font-size: var(--ds-font-size-heading);
+}
+.app-main :where(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ds-font-sans);
+  line-height: 1.35;
+}
+
+/* Bootstrap surfaces used by legacy feature pages share the same design tokens. */
+:root {
+  --bs-primary: var(--ds-primary);
+  --bs-primary-rgb: 0, 113, 188;
+  --bs-primary-bg-subtle: var(--ds-primary-subtle);
+  --bs-primary-border-subtle: color-mix(in srgb, var(--ds-primary) 24%, white);
+  --bs-primary-text-emphasis: var(--ds-primary-hover);
+  --bs-link-color: var(--ds-primary);
+  --bs-link-hover-color: var(--ds-primary-hover);
+  --bs-border-color: var(--ds-border);
+  --bs-body-color: var(--ds-foreground);
+  --bs-body-bg: var(--ds-background);
+  --bs-body-font-size: var(--ds-font-size-body);
+  --bs-h1-font-size: var(--ds-font-size-heading);
+  --bs-h2-font-size: var(--ds-font-size-heading);
+  --bs-h3-font-size: var(--ds-font-size-heading);
+  --bs-h4-font-size: var(--ds-font-size-heading);
+  --bs-h5-font-size: var(--ds-font-size-heading);
+  --bs-h6-font-size: var(--ds-font-size-heading);
+  --bs-border-radius: var(--ds-radius-control);
+  --bs-border-radius-lg: var(--ds-radius-card);
+  --bs-border-radius-xl: var(--ds-radius-panel);
+}
+
+.btn-primary {
+  --bs-btn-color: var(--ds-white);
+  --bs-btn-bg: var(--ds-primary);
+  --bs-btn-border-color: var(--ds-primary);
+  --bs-btn-hover-color: var(--ds-white);
+  --bs-btn-hover-bg: var(--ds-primary-hover);
+  --bs-btn-hover-border-color: var(--ds-primary-hover);
+  --bs-btn-active-bg: var(--ds-primary-hover);
+  --bs-btn-active-border-color: var(--ds-primary-hover);
+  --bs-btn-disabled-bg: var(--ds-primary);
+  --bs-btn-disabled-border-color: var(--ds-primary);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--ds-primary);
+  --bs-btn-border-color: var(--ds-primary);
+  --bs-btn-hover-color: var(--ds-white);
+  --bs-btn-hover-bg: var(--ds-primary);
+  --bs-btn-hover-border-color: var(--ds-primary);
+  --bs-btn-active-bg: var(--ds-primary-hover);
+  --bs-btn-active-border-color: var(--ds-primary-hover);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--ds-neutral-700);
+  --bs-btn-border-color: var(--ds-border);
+  --bs-btn-hover-color: var(--ds-foreground);
+  --bs-btn-hover-bg: var(--ds-surface-muted);
+  --bs-btn-hover-border-color: var(--ds-neutral-300);
+  --bs-btn-active-color: var(--ds-foreground);
+  --bs-btn-active-bg: var(--ds-surface-muted);
+  --bs-btn-active-border-color: var(--ds-neutral-300);
+}
+
+.card,
+.modal-content,
+.dropdown-menu {
+  border-color: var(--ds-border);
+  border-radius: var(--ds-radius-card);
+  box-shadow: var(--ds-shadow-card);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+  border-color: var(--ds-border);
+  border-radius: var(--ds-radius-control);
+  color: var(--ds-foreground);
+  background-color: var(--ds-surface);
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--ds-primary);
+  box-shadow: 0 0 0 0.2rem var(--ds-focus);
+}
+
+.form-control[aria-invalid="true"],
+.form-select[aria-invalid="true"],
+input[aria-invalid="true"],
+textarea[aria-invalid="true"] {
+  border-color: var(--ds-danger);
+}
+
+.form-control[aria-invalid="true"]:focus,
+.form-select[aria-invalid="true"]:focus,
+input[aria-invalid="true"]:focus,
+textarea[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--ds-danger) 20%, transparent);
+}
+
+.form-check-input:checked {
+  background-color: var(--ds-primary);
+  border-color: var(--ds-primary);
+}
+
+.dropdown-item:focus,
+.dropdown-item:hover,
+.list-group-item-action:focus,
+.list-group-item-action:hover {
+  color: var(--ds-foreground);
+  background-color: var(--ds-surface-muted);
+}
+
+.nav-tabs {
+  border-color: var(--ds-border);
+}
+
+.nav-tabs .nav-link {
+  color: var(--ds-muted-foreground);
+  border-color: transparent;
+}
+
+.nav-tabs .nav-link:hover,
+.nav-tabs .nav-link:focus {
+  color: var(--ds-primary-hover);
+  border-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--ds-primary);
+  border-color: var(--ds-border) var(--ds-border) var(--ds-surface);
+}
+
+.page-link {
+  color: var(--ds-primary);
+}
+
+.page-link:hover,
+.page-link:focus {
+  color: var(--ds-primary-hover);
+  background-color: var(--ds-primary-subtle-hover);
+}
+
+.page-item.active .page-link {
+  color: var(--ds-white);
+  border-color: var(--ds-primary);
+  background-color: var(--ds-primary);
+}
+
+/* Legacy route roots align to the same centered dashboard canvas. */
+.app-main > .container,
+.app-main > .container-fluid,
+.admin-content > .container,
+.admin-content > .container-fluid {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+}
+
+.app-main > .container-fluid,
+.admin-content > .container-fluid {
+  padding-inline: 0;
+}
+
+.app-main {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Legacy feature pages may still carry this class; the authenticated shell
+   owns the canvas background so routes do not switch to a separate grid skin. */
+.app-main .grid-bg {
+  background-color: transparent;
+  background-image: none;
+}
+
+.app-topbar {
+  box-shadow: 0 1px 2px rgb(16 24 40 / 3%);
+}
+
+@media (min-width: 768px) {
+  .app-topbar {
+    display: flex !important;
+  }
+}
+
+.app-sidebar nav a,
+.app-sidebar nav a:visited {
+  color: var(--ds-muted-foreground, #475467) !important;
+  text-decoration: none !important;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.45rem 0.625rem;
+  min-height: 36px;
+  border-radius: var(--ds-radius-control, 8px);
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease-in-out;
+}
+
+.app-sidebar nav a svg {
+  color: var(--ds-muted-foreground, #64748b) !important;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: color 0.15s ease-in-out;
+}
+
+.app-sidebar nav a:hover,
+.app-sidebar nav a:focus-visible {
+  color: var(--ds-foreground, #0f172a) !important;
+  background-color: var(--ds-surface-muted, #f1f5f9) !important;
+  text-decoration: none !important;
+}
+
+.app-sidebar nav a:hover svg,
+.app-sidebar nav a:focus-visible svg {
+  color: var(--ds-foreground, #0f172a) !important;
+}
+
+.app-sidebar nav a.active,
+.app-sidebar nav a[aria-current="page"] {
+  color: var(--ds-primary, #0071bc) !important;
+  background-color: var(--ds-primary-subtle, #e0f2fe) !important;
+  border-left-color: var(--ds-primary, #0071bc) !important;
+  font-weight: 600 !important;
+}
+
+.app-sidebar nav a.active svg,
+.app-sidebar nav a[aria-current="page"] svg {
+  color: var(--ds-primary, #0071bc) !important;
+}
+
+.dashboard-welcome {
+  background:
+    radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--ds-primary-subtle) 68%, white) 0, transparent 46%),
+    var(--ds-surface);
+}
+
+.dashboard-welcome__cta {
+  min-height: 44px;
+  border-radius: var(--ds-radius-control);
+}
+
+.app-main :where(.container, .container-fluid) {
+  --bs-gutter-x: clamp(1rem, 2vw, 2rem);
+}
+
+.app-main :where(.card, .glass-card, .journal-dark-card) {
+  border-color: var(--ds-border);
+  border-radius: var(--ds-radius-card);
+  background-color: var(--ds-surface);
+}
+
+/* Admin keeps its task-specific navigation but shares researcher surface and control rules. */
+.admin-layout {
+  color: var(--ds-foreground);
+  font-family: var(--ds-font-sans);
+}
+
+.admin-content > * {
+  max-width: 1600px;
+  margin-inline: auto;
+}
+
+.admin-content :where(.admin-card, .card, .modal-content, .dropdown-menu) {
+  border-color: var(--ds-border);
+  border-radius: var(--ds-radius-card);
+  box-shadow: var(--ds-shadow-card);
+}
+
+.admin-content :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea, .form-control, .form-select) {
+  border-color: var(--ds-border);
+  border-radius: var(--ds-radius-control);
+  color: var(--ds-foreground);
+  background-color: var(--ds-surface);
+}
+
+.admin-content :where(input, select, textarea, .form-control, .form-select):focus {
+  border-color: var(--ds-primary);
+  box-shadow: 0 0 0 0.2rem var(--ds-focus);
+}
+
+.admin-content :where(.admin-table th, table thead th) {
+  color: var(--ds-muted-foreground);
+  background-color: var(--ds-background);
+}
+
+.admin-content :where(.admin-table tbody tr:hover, table tbody tr:hover) > * {
+  background-color: var(--ds-primary-subtle-hover);
+}
+
+.admin-content :where(a:not(.btn):not([class*="nav-link"])) {
+  color: var(--ds-primary);
+}
+
+.admin-content :where(a:not(.btn):not([class*="nav-link"]):hover) {
+  color: var(--ds-primary-hover);
+}
+
+.app-main :where(.breadcrumb-item a, .breadcrumb-item span, a.link-primary) {
+  color: var(--ds-primary);
+}
+
+.app-main :where(.breadcrumb-item a:hover, .breadcrumb-item span:hover, a.link-primary:hover) {
+  color: var(--ds-primary-hover);
+}
+
+.app-main a:not(.btn):not([class*="nav-link"]) {
+  text-decoration: none;
+}
+
+.app-main a:not(.btn):not([class*="nav-link"]):hover {
+  text-decoration: underline;
+}
+
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--ds-primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

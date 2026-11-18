@@ -66,7 +66,7 @@ export default function KeywordTopicCard({
             color: 'var(--primary)'
           }} />
               <span className="text-uppercase fw-semibold" style={{
-            fontSize: '0.7rem',
+            fontSize: '13px',
             color: 'var(--text-muted)',
             letterSpacing: '0.5px'
           }}>
@@ -96,7 +96,7 @@ export default function KeywordTopicCard({
             color: 'var(--primary)'
           }} />
               <span className="text-uppercase fw-semibold" style={{
-            fontSize: '0.7rem',
+            fontSize: '13px',
             color: 'var(--text-muted)',
             letterSpacing: '0.5px'
           }}>{t("article.topicsDangPhatTrien")}</span>

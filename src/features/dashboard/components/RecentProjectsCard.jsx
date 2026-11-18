@@ -1,211 +1,136 @@
-import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\dashboard\components\RecentProjectsCard.jsx
- */
-import { useState } from 'react';
+﻿import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { EntityCard } from '../../../shared/components/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/ui/card';
+import { Button } from '../../../shared/ui/button';
+import { formatCount } from '../../../shared/utils/formatNumber';
 
-function ProjectStatusBadge({
-  status
-}) {
+export default function RecentProjectsCard({ projects = [], loading, error, onViewAll, onProjectClick }) {
   const { t } = useTranslation();
-  
-  const STATUS_CONFIG = {
-    active: {
-      label: t("admin.hoatDong"),
-      bg: 'var(--bg-chip)',
-      color: 'var(--text-main)',
-      border: 'var(--border)'
-    },
-    new: {
-      label: 'New',
-      bg: 'var(--primary-light)',
-      color: 'var(--primary)',
-      border: 'transparent'
-    },
-    paused: {
-      label: t("dashboard.tamDung"),
-      bg: 'var(--bg-section)',
-      color: 'var(--text-muted)',
-      border: 'var(--border)'
-    },
-    archived: {
-      label: t("dashboard.luuTru"),
-      bg: 'var(--bg-section)',
-      color: 'var(--text-muted)',
-      border: 'var(--border)'
-    },
-    deleted: {
-      label: 'Deleted',
-      bg: '#fee2e2',
-      color: '#dc2626',
-      border: 'transparent'
-    }
+  const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+  const pageSize = 3;
+  const totalPages = Math.max(1, Math.ceil(projects.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const visibleProjects = projects.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const labels = {
+    active: t('admin.hoatDong', 'Active'),
+    new: 'New',
+    paused: t('dashboard.tamDung', 'Paused'),
+    archived: t('dashboard.luuTru', 'Archived'),
+    deleted: 'Deleted'
   };
 
-  const cfg = STATUS_CONFIG[status?.toLowerCase()] ?? STATUS_CONFIG.active;
-  return <span className="d-inline-flex align-items-center px-2 py-1 rounded-pill font-display flex-shrink-0 text-nowrap" style={{
-    fontSize: '0.7rem',
-    fontWeight: 600,
-    backgroundColor: cfg.bg,
-    color: cfg.color,
-    border: `1px solid ${cfg.border}`
-  }}>
-      {cfg.label}
-    </span>;
-}
+  return (
+    <Card className="h-full min-w-0 flex flex-col overflow-hidden">
+      <CardHeader>
+        <CardTitle>
+          <Icon icon="lucide:folder-open" width={16} className="shrink-0 text-primary" />
+          <span>{t('dashboard.projectsGanDay', 'Recent Projects')}</span>
+        </CardTitle>
+        {onViewAll && (
+          <button
+            type="button"
+            onClick={onViewAll}
+            className="shrink-0 text-[11px] text-primary hover:text-primary-hover font-medium inline-flex items-center gap-1 transition-colors cursor-pointer"
+          >
+            <span>{t('dashboard.xemTatCa', 'See all')}</span>
+            <Icon icon="lucide:arrow-right" width={13} />
+          </button>
+        )}
+      </CardHeader>
 
-/**
- * RecentProjectItem — một row project trong danh sách
- */
-function RecentProjectItem({
-  project,
-  onClick
-}) {
-  const {
-    t
-  } = useTranslation();
-  const name = project.project_name ?? project.name ?? project.title ?? 'Untitled';
-  const journalCount = project.journal_count ?? project.journals?.length ?? 0;
-  const articleCount = project.article_count ?? 0;
-  const status = project.status ?? 'active';
-
-  // Avatar initials from name (Up to 3 letters)
-  const initials = name.split(' ').filter(w => w.length > 0).slice(0, 3).map(w => w[0]?.toUpperCase() ?? '').join('');
-  return <div className="d-flex align-items-center gap-3 py-3 px-3 rounded-3" style={{
-    cursor: 'pointer',
-    transition: 'background 0.15s ease',
-    borderBottom: '1px solid var(--border)'
-  }} onClick={onClick} onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-section)'} onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}>
-      {/* Avatar */}
-      <div className="d-flex align-items-center justify-content-center flex-shrink-0 text-white font-display" style={{
-      width: 40,
-      height: 40,
-      borderRadius: 10,
-      background: 'var(--btn-dark)',
-      fontSize: initials.length >= 3 ? '0.65rem' : '0.75rem',
-      fontWeight: 700
-    }}>
-        {initials}
-      </div>
-
-      {/* Info */}
-      <div className="flex-grow-1" style={{
-      minWidth: 0
-    }}>
-        <div className="text-main fw-semibold text-truncate" style={{
-        fontSize: '0.85rem'
-      }} title={name}>
-          {name}
-        </div>
-        <div className="text-muted-custom text-truncate" style={{
-        fontSize: '0.72rem'
-      }}>
-          {journalCount} {t("project.tapChi")} · {articleCount} {t("author.baiBao")}</div>
-      </div>
-
-      {/* Status */}
-      <ProjectStatusBadge status={status} />
-    </div>;
-}
-
-/**
- * RecentProjectsCard — card chứa danh sách 3 project gần đây
- */
-export default function RecentProjectsCard({
-  projects,
-  loading,
-  error,
-  onViewAll,
-  onProjectClick
-}) {
-  const {
-    t
-  } = useTranslation();
-  const ITEMS_PER_PAGE = 4;
-  const [page, setPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil((projects?.length ?? 0) / ITEMS_PER_PAGE));
-  const paginatedProjects = projects.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
-  const actions = onViewAll ? <button className="btn btn-link p-0 text-decoration-none" onClick={onViewAll} style={{
-    fontSize: '0.75rem',
-    color: 'var(--primary)'
-  }} onMouseEnter={e => {
-    e.currentTarget.style.textDecoration = 'underline';
-    e.currentTarget.style.textUnderlineOffset = '4px';
-  }} onMouseLeave={e => {
-    e.currentTarget.style.textDecoration = 'none';
-  }}>{t("dashboard.xemTatCa")}</button> : null;
-  const description = <div className="px-1">
-      {loading ? [1, 2, 3].map(i => <div key={i} className="d-flex align-items-center gap-3 px-3 py-3">
-            <div className="skeleton-shimmer rounded-3" style={{
-        width: 40,
-        height: 40,
-        flexShrink: 0
-      }} />
-            <div className="flex-grow-1">
-              <div className="skeleton-shimmer rounded mb-1" style={{
-          width: '70%',
-          height: 14
-        }} />
-              <div className="skeleton-shimmer rounded" style={{
-          width: '50%',
-          height: 11
-        }} />
+      <CardContent className="flex-1 flex flex-col justify-between">
+        {loading ? (
+          <div role="status" aria-label={t('common.dangCapNhat', 'Loading')} className="space-y-2.5">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-11 animate-pulse rounded-md bg-surface-muted" />
+            ))}
+          </div>
+        ) : error ? (
+          <div className="py-6 text-center text-xs text-danger">
+            <Icon icon="lucide:alert-circle" width={22} className="mx-auto mb-1.5" />
+            {error}
+          </div>
+        ) : projects.length === 0 ? (
+          <div className="py-6 text-center flex flex-col items-center justify-center my-auto">
+            <div className="size-9 rounded-full bg-primary-subtle text-primary flex items-center justify-center mb-2">
+              <Icon icon="lucide:folder-plus" width={18} />
             </div>
-          </div>) : error ? <div className="text-center py-5 px-3">
-          <Icon icon="lucide:alert-circle" width={32} style={{
-        color: '#ef4444'
-      }} />
-          <p className="text-muted-custom mt-2 mb-0" style={{
-        fontSize: '0.8rem'
-      }}>{error}</p>
-        </div> : projects.length === 0 ? <div className="text-center py-5 px-3">
-          <Icon icon="lucide:folder-plus" width={36} style={{
-        color: 'var(--text-muted)'
-      }} />
-          <p className="text-main fw-semibold mt-2 mb-1" style={{
-        fontSize: '0.85rem'
-      }}>{t("dashboard.chuaCoProjectNao")}</p>
-          <p className="text-muted-custom mb-0" style={{
-        fontSize: '0.75rem'
-      }}>{t("dashboard.taoProjectDauTienDeBatDauTheoD")}</p>
-        </div> : <>
-          {paginatedProjects.map((p, i) => <RecentProjectItem key={p.project_id ?? p.id ?? i} project={p} onClick={() => onProjectClick?.(p)} />)}
+            <p className="mb-0.5 text-xs font-semibold text-foreground">
+              {t('dashboard.chuaCoProjectNao', 'No projects yet')}
+            </p>
+            <p className="m-0 text-[11px] text-muted-foreground mb-3 max-w-xs">
+              {t('dashboard.taoProjectDauTienDeBatDauTheoD', 'Create your first project to start tracking.')}
+            </p>
+            <Button size="sm" onClick={() => navigate('/projects/create')} className="gap-1.5 text-xs h-7 px-3">
+              <Icon icon="lucide:plus" width={13} />
+              <span>{t('dashboard.taoProject', 'Create Project')}</span>
+            </Button>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col justify-between">
+            <div className="space-y-1.5">
+              {visibleProjects.map((project, i) => {
+                const name = project.project_name ?? project.name ?? project.title ?? 'Untitled';
+                const initials = name
+                  .split(' ')
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((word) => word[0].toUpperCase())
+                  .join('');
+                const status = String(project.status ?? 'active').toLowerCase();
+                const journalsCount = project.journal_count ?? project.journals?.length ?? 0;
+                const articlesCount = project.article_count ?? 0;
 
-          {totalPages > 1 && <div className="d-flex align-items-center justify-content-between gap-2 px-3 pt-3 pb-2">
-              <button type="button" className="btn btn-sm" onClick={() => setPage(prev => Math.max(1, prev - 1))} disabled={page === 1} style={{
-          border: '1px solid var(--border)',
-          background: 'var(--bg-card)',
-          color: page === 1 ? 'var(--text-muted)' : 'var(--text-main)',
-          fontSize: '0.72rem',
-          fontWeight: 600
-        }}>{t("dashboard.truoc")}</button>
+                return (
+                  <button
+                    key={project.project_id ?? project.id ?? i}
+                    type="button"
+                    onClick={() => onProjectClick?.(project)}
+                    className="flex w-full min-w-0 items-center gap-2.5 rounded-lg border border-border/40 bg-surface px-2.5 py-2 text-left transition-colors hover:border-primary/40 hover:bg-surface-muted/40 focus-visible:outline-2 focus-visible:outline-primary cursor-pointer group"
+                  >
+                    <span className="flex size-7.5 shrink-0 items-center justify-center rounded-md bg-primary-subtle text-[11px] font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                      {initials}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-xs font-semibold text-foreground group-hover:text-primary transition-colors" title={name}>
+                        {name}
+                      </span>
+                      <span className="block truncate text-[11px] text-muted-foreground mt-0.5">
+                        {journalsCount} {t('project.tapChi', 'journals')} · {formatCount(articlesCount)} {t('author.baiBao', 'papers')}
+                      </span>
+                    </span>
+                    <span className="shrink-0 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-medium flex items-center gap-1">
+                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                      {labels[status] ?? labels.active}
+                    </span>
+                  </button>
+                );
+              })}
 
-              <span className="text-muted-custom" style={{
-          fontSize: '0.72rem'
-        }}>
-                {t("dashboard.trang")} {page}/{totalPages}
-              </span>
+              {visibleProjects.length < 3 && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/projects/create')}
+                  className="w-full flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-border py-2 text-[11px] font-medium text-muted-foreground hover:border-primary/50 hover:text-primary hover:bg-primary-subtle/20 transition-colors cursor-pointer"
+                >
+                  <Icon icon="lucide:plus" width={13} />
+                  <span>{t('dashboard.taoProjectMoi', 'Create New Project')}</span>
+                </button>
+              )}
+            </div>
 
-              <button type="button" className="btn btn-sm" onClick={() => setPage(prev => Math.min(totalPages, prev + 1))} disabled={page === totalPages} style={{
-          border: '1px solid var(--border)',
-          background: 'var(--bg-card)',
-          color: page === totalPages ? 'var(--text-muted)' : 'var(--text-main)',
-          fontSize: '0.72rem',
-          fontWeight: 600
-        }}>
-                {t("dashboard.sau")} →
-              </button>
-            </div>}
-        </>}
-    </div>;
-  return <EntityCard className="h-100" title={<span className="d-flex align-items-center gap-2">
-          <Icon icon="lucide:folder-open" width={16} style={{
-      color: 'var(--primary)'
-    }} />
-          <span>{t("dashboard.projectsGanDay")}</span>
-        </span>} actions={actions} description={description} bodyClassName="flex-column align-items-stretch" />;
+            {/* Bottom grounded footer */}
+            <div className="pt-2.5 mt-3 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
+              <span>{t('dashboard.tongSoProject', 'Total projects')}</span>
+              <span className="font-semibold text-foreground font-mono">{projects.length}</span>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }

@@ -8,6 +8,10 @@ import { JournalTable } from '../components/JournalTable/JournalTable';
 import { SummaryCards } from '../components/SummaryCards/SummaryCards';
 import DashboardFooter from '../../../shared/components/layout/DashboardFooter';
 import { useTrackedJournalsQuery } from '../hooks/useTrackedJournals';
+import { Skeleton } from '../../../../shared/ui/skeleton';
+import { StatePanel } from '../../../../shared/ui/state-panel';
+import { Card } from '../../../../shared/ui/card';
+import { Icon } from '@iconify/react';
 import styles from '../styles/Analytics.module.css';
 
 /**
@@ -85,15 +89,21 @@ export const AnalyticsDashboard = () => {
 
       <div className={styles.pageContent}>
         {showLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', gap: '16px' }}>
-            <div className="update-icon spin" style={{ width: '32px', height: '32px', border: '3px solid var(--color-primary-orange)', borderTopColor: 'transparent', borderRadius: '50%' }}></div>
-            <div style={{ color: 'var(--color-neutral-500)', fontSize: '14px' }}>{t('common.loading', 'Loading tracked journals...')}</div>
+          <div className="space-y-4 py-4">
+            <Card className="p-6 space-y-3">
+              <Skeleton className="h-6 w-48 rounded" />
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-12 w-full rounded" />
+              ))}
+            </Card>
           </div>
         ) : error && !hasData ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '300px', gap: '12px', border: 'var(--border-light)', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)' }}>
-            <div style={{ color: '#ef4444', fontSize: '16px', fontWeight: 'bold' }}>{t('common.error', 'Error Loading Data')}</div>
-            <div style={{ color: 'var(--color-neutral-500)', fontSize: '14px' }}>{error.message || t('analytics.unableToConnect', 'Unable to connect to the server.')}</div>
-          </div>
+          <StatePanel
+            variant="error"
+            icon={<Icon icon="lucide:alert-triangle" width="32" className="text-danger" />}
+            title={t('common.error', 'Error Loading Data')}
+            description={error.message || t('analytics.unableToConnect', 'Unable to connect to the server.')}
+          />
         ) : (
           <>
             <JournalTable

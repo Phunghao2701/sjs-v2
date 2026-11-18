@@ -9,7 +9,7 @@ export default function AdminFooter() {
   return (
     <div 
       className="d-flex flex-column flex-md-row align-items-center justify-content-between px-4 py-3 border-top mt-auto bg-white"
-      style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}
+      style={{ fontSize: '13px', color: 'var(--text-muted)' }}
     >
       {/* Copyright branding */}
       <div className="mb-2 mb-md-0">

@@ -1,11 +1,13 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, Form, InputGroup } from 'react-bootstrap';
+import { Row, Col, Card, Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { Button } from '../../../shared/ui/button';
 import { useJournalManagement } from '../../journal/hooks/useJournalManagement';
 import Pagination from '../../../shared/components/Pagination';
 import SwitchJournalModal from '../components/modals/SwitchJournalModal';
+import { PageHeader } from '../../../shared/ui/page-layout';
 
 /**
  * VolumeArchivePage - Màn hình Lưu trữ các Tập (Volume Archive) của Tạp chí đang chọn (Figma Screen Page 10).
@@ -71,31 +73,27 @@ export default function VolumeArchivePage() {
     setSelectedVolume(volumeId);
     navigate(`${basePath}/journals/repository`);
   };
-  return <div className="d-flex flex-column gap-3 text-start">
-        {/* Breadcrumb */}
-        <div>
-          <div className="admin-breadcrumb mb-2">
-            <span className="cursor-pointer text-muted-custom" onClick={() => navigate(`${basePath}/journals/repository`)}>
-              Repository
-            </span>
-            <Icon icon="lucide:chevron-right" className="mx-1" />
-            <span className="admin-breadcrumb__current">Volume Archive</span>
-          </div>
-          
-          <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div>
-              <h2 className="font-display fw-bold text-main mb-1">Volume Archive</h2>
-              <p className="text-muted-custom small mb-0">
-                Explore the historical collection of published volumes and issue logs for{' '}
-                <span className="fw-semibold text-main">{currentJournal?.title}</span>.
-              </p>
-            </div>
-            <Button variant="outline-dark" className="d-flex align-items-center gap-1.5 py-2 px-3 btn-custom-sm font-display" onClick={() => setShowSwitchModal(true)}>
-              <Icon icon="lucide:refresh-cw" width="14" />
-              <span>Change Journal</span>
-            </Button>
-          </div>
-        </div>
+  return (
+    <div className="d-flex flex-column gap-4 text-start">
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Repository', to: `${basePath}/journals/repository` },
+          { label: 'Volume Archive' }
+        ]}
+        title="Volume Archive"
+        description={`Explore the historical collection of published volumes and issue logs for ${currentJournal?.title || 'the selected journal'}.`}
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1.5 font-display"
+            onClick={() => setShowSwitchModal(true)}
+          >
+            <Icon icon="lucide:refresh-cw" width="14" />
+            <span>Change Journal</span>
+          </Button>
+        }
+      />
 
         {/* Filter Bar */}
         <div className="bg-white p-4 rounded-3 border mb-2 mt-2" style={{
@@ -120,7 +118,7 @@ export default function VolumeArchivePage() {
                   <Form.Control type="text" placeholder={t("admin.searchByVolumeNumberEgVolume1")} value={search} onChange={e => setSearch(e.target.value)} style={{
                 backgroundColor: 'var(--bg-chip)',
                 borderColor: 'var(--border)',
-                fontSize: '0.9rem'
+                fontSize: '14px'
               }} />
                 </InputGroup>
               </Form.Group>
@@ -137,7 +135,7 @@ export default function VolumeArchivePage() {
                 <Form.Select value={frequencyFilter} onChange={e => setFrequencyFilter(e.target.value)} style={{
               backgroundColor: 'var(--bg-chip)',
               borderColor: 'var(--border)',
-              fontSize: '0.9rem',
+              fontSize: '14px',
               cursor: 'pointer'
             }}>
                   <option value="All">All Periods</option>
@@ -159,7 +157,7 @@ export default function VolumeArchivePage() {
                 <Form.Select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{
               backgroundColor: 'var(--bg-chip)',
               borderColor: 'var(--border)',
-              fontSize: '0.9rem',
+              fontSize: '14px',
               cursor: 'pointer'
             }}>
                   <option value="newest">Newest to Oldest</option>
@@ -226,10 +224,10 @@ export default function VolumeArchivePage() {
                       <div className="d-flex gap-2 w-100 mt-auto pt-3 border-top" style={{
                 borderColor: 'var(--border)'
               }}>
-                        <Button className="w-100 font-display fw-semibold btn-custom-sm admin-btn-outline-accent d-flex align-items-center justify-content-center gap-1.5 py-2" onClick={() => handleViewDetails(vol.id)}>
+                        <Button variant="outline" size="sm" className="w-100 font-display font-semibold d-flex align-items-center justify-content-center gap-1.5" onClick={() => handleViewDetails(vol.id)}>
                           <span>View Details</span>
                         </Button>
-                        <Button variant="outline-dark" className="btn-custom-sm d-flex align-items-center justify-content-center p-2 rounded-2" title="Restore/History" onClick={() => alert(`Showing history for ${vol.volumeNumber}...`)}>
+                        <Button variant="outline" size="sm" className="d-flex align-items-center justify-content-center p-2 rounded-2" title="Restore/History" onClick={() => alert(`Showing history for ${vol.volumeNumber}...`)}>
                           <Icon icon="lucide:history" width="16" />
                         </Button>
                       </div>
@@ -245,5 +243,6 @@ export default function VolumeArchivePage() {
 
         {/* Switch Journal Modal */}
         <SwitchJournalModal show={showSwitchModal} handleClose={() => setShowSwitchModal(false)} />
-      </div>;
+    </div>
+  );
 }

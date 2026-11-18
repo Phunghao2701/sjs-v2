@@ -1,22 +1,22 @@
 :root {
   /* Colors */
-  --color-primary-orange: #0071BC; /* Trending System brand blue */
-  --color-primary-orange-hover: #005A96;
-  --color-primary-orange-light: #E6F3FA;
+  --color-primary-orange: var(--ds-primary); /* Legacy analytics token -> shared brand */
+  --color-primary-orange-hover: var(--ds-primary-hover);
+  --color-primary-orange-light: var(--ds-primary-subtle);
   
-  --color-neutral-50: #F9FAFB;
-  --color-neutral-100: #F3F4F6;
-  --color-neutral-200: #E5E7EB;
-  --color-neutral-300: #D1D5DB;
-  --color-neutral-400: #9CA3AF;
-  --color-neutral-500: #6B7280;
-  --color-neutral-600: #4B5563;
-  --color-neutral-700: #374151;
-  --color-neutral-800: #1F2937;
-  --color-neutral-900: #111827;
+  --color-neutral-50: var(--ds-background);
+  --color-neutral-100: var(--ds-surface-muted);
+  --color-neutral-200: var(--ds-border);
+  --color-neutral-300: var(--ds-neutral-300);
+  --color-neutral-400: var(--ds-subtle-foreground);
+  --color-neutral-500: var(--ds-subtle-foreground);
+  --color-neutral-600: var(--ds-muted-foreground);
+  --color-neutral-700: var(--ds-neutral-700);
+  --color-neutral-800: var(--ds-foreground);
+  --color-neutral-900: var(--ds-foreground);
   
-  --color-surface: #FFFFFF;
-  --color-background: var(--color-neutral-50);
+  --color-surface: var(--ds-surface);
+  --color-background: var(--ds-background);
   
   /* Chart Colors */
   --color-chart-1: #3B82F6; /* Blue */
@@ -26,17 +26,17 @@
   --color-chart-5: #EC4899; /* Pink */
   
   /* Typography */
-  --font-family-base: 'Source Serif 4', serif;
+  --font-family-base: var(--ds-font-sans);
   
-  --font-size-page-title: 28px;
-  --font-size-section-title: 18px;
-  --font-size-card-title: 12px;
-  --font-size-kpi-value: 40px;
+  --font-size-page-title: 16px;
+  --font-size-section-title: 16px;
+  --font-size-card-title: 13px;
+  --font-size-kpi-value: 16px;
   --font-size-body: 14px;
-  --font-size-metadata: 12px;
-  --font-size-tab: 16px;
+  --font-size-metadata: 13px;
+  --font-size-tab: 14px;
   --font-size-ranking: 14px;
-  --font-size-legend: 11px;
+  --font-size-legend: 13px;
   
   --font-weight-regular: 400;
   --font-weight-medium: 500;
@@ -73,7 +73,7 @@
   --breakpoint-xl: 1440px;
 }
 
-body {
+.trending-analytics-shell {
   font-family: var(--font-family-base);
   color: var(--color-neutral-800);
   background-color: var(--color-background);

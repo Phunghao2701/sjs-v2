@@ -16,7 +16,7 @@ const CoreClustersCard = ({ data }) => {
   return (
     <div className="kn-card" style={{ justifyContent: 'space-between' }}>
       <div>
-        <h3 className="kn-card-subtitle" style={{ color: 'var(--color-neutral-400)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem', fontWeight: 700, marginBottom: '24px' }}>
+        <h3 className="kn-card-subtitle" style={{ color: 'var(--color-neutral-400)', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '13px', fontWeight: 700, marginBottom: '24px' }}>
           {t('volume.coreClustersUpper', 'CORE CLUSTERS')}
         </h3>
         
@@ -27,7 +27,7 @@ const CoreClustersCard = ({ data }) => {
             </div>
             <div className="kn-stat-label" style={{ color: 'var(--color-neutral-600)' }}>{label}</div>
           </div>
-          {rawVolume > 0 && <FiTrendingUp style={{ color: 'var(--color-primary-orange)', fontSize: '24px' }} />}
+          {rawVolume > 0 && <FiTrendingUp style={{ color: 'var(--color-primary-orange)', fontSize: '16px' }} />}
         </div>
         
         <div style={{ position: 'relative', margin: '24px 0 16px 0' }}>
@@ -36,7 +36,7 @@ const CoreClustersCard = ({ data }) => {
         </div>
       </div>
       
-      <p className="kn-stat-desc" style={{ color: 'var(--color-neutral-50)', fontSize: '0.875rem' }}>
+      <p className="kn-stat-desc" style={{ color: 'var(--color-neutral-50)', fontSize: '14px' }}>
         {topItem ? (
           t('volume.coreClustersDesc', { 
             growth, 

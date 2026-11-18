@@ -3,6 +3,9 @@ import { t } from "i18next";
 import { PrimaryInformationSection, MetadataSection, ManuscriptFilesSection, ReviewStatusPanel, DeleteArticleModal } from '../components/update-article';
 import { toast } from '../../../shared/utils/toast';
 import useUpdateArticle from '../hooks/useUpdateArticle';
+import { PageHeader } from '../../../shared/ui/page-layout';
+import { Skeleton } from '../../../shared/ui/skeleton';
+import { StatePanel } from '../../../shared/ui/state-panel';
 export default function UpdateArticlePage() {
   const { t: _t } = useTranslation();
   const {
@@ -33,31 +36,42 @@ export default function UpdateArticlePage() {
     handleConfirmDelete
   } = useUpdateArticle();
   if (loading) {
-    return <div className="admin-state-card">
-        <span className="admin-state-dot" />
-        <span>Loading article details from API...</span>
-      </div>;
-  }
-  if (error) {
-    return <div className="admin-state-card admin-state-card--error">
-        <span className="admin-state-dot" />
-        <span>{error}</span>
-      </div>;
-  }
-  return <>
-      <p className="admin-breadcrumb">
-        Management / Articles / <span className="admin-breadcrumb__current">Update Article</span>
-      </p>
-
-      <div className="admin-page-header">
-        <div className="admin-page-header__copy">
-          <p className="admin-page-kicker">Article Operations</p>
-          <h1 className="admin-page-title">Update Article</h1>
-          <p className="admin-page-lede">
-            Modify manuscript details, metadata, and publication status for the selected research record.
-          </p>
+    return (
+      <div className="p-6 space-y-4 max-w-4xl mx-auto">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-96" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+          <div className="md:col-span-2 space-y-4">
+            <Skeleton className="h-48 w-full rounded-xl" />
+            <Skeleton className="h-32 w-full rounded-xl" />
+          </div>
+          <Skeleton className="h-64 w-full rounded-xl" />
         </div>
       </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="p-6 max-w-2xl mx-auto">
+        <StatePanel
+          variant="error"
+          title="Error Loading Article"
+          description={error}
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Management' },
+          { label: 'Articles', to: '/admin/articles' },
+          { label: 'Update Article' }
+        ]}
+        title="Update Article"
+        description="Modify manuscript details, metadata, and publication status for the selected research record."
+      />
 
       <div className={`admin-update-article-row${submitting ? ' admin-form-disabled' : ''}`}>
         <div className="admin-update-article-main">
@@ -81,5 +95,6 @@ export default function UpdateArticlePage() {
       </div>
 
       <DeleteArticleModal show={showDeleteModal} onClose={() => setShowDeleteModal(false)} onConfirm={handleConfirmDelete} articleTitle={title} />
-    </>;
+    </div>
+  );
 }

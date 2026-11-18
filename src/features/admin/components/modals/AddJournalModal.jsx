@@ -3,7 +3,7 @@ import { t } from "i18next";
 import { useState, useEffect } from 'react';
 import { Modal, Form, Row, Col } from 'react-bootstrap';
 import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
-import PrimaryButton from '../../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../../shared/ui/button';
 export default function AddJournalModal({
   show,
   handleClose
@@ -245,10 +245,10 @@ export default function AddJournalModal({
 
         </Modal.Body>
         <Modal.Footer className="border-top-0 pt-0">
-          <PrimaryButton variant="outline" onClick={handleClose} className="px-4">{t("admin.huy")}</PrimaryButton>
-          <PrimaryButton type="submit" className="px-4">
+          <Button variant="outline" size="sm" onClick={handleClose} className="px-4">{t("admin.huy")}</Button>
+          <Button type="submit" size="sm" className="px-4">
             + Create Journal
-          </PrimaryButton>
+          </Button>
         </Modal.Footer>
       </Form>
     </Modal>;

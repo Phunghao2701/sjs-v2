@@ -17,6 +17,8 @@ import Logo from "../../../shared/components/Logo";
 import useAuth from "../../auth/hooks/useAuth";
 import { useUserStore } from "../../../app/store/userStore";
 import ROUTES from "../../../app/routes/routePaths";
+import { useContext } from 'react';
+import { DashboardShellContext } from '../../../shared/components/DashboardShell';
 // Single source of truth for supported languages — shared by desktop & mobile switchers.
 const LANGUAGES = [
   { code: "vi", label: "Tiếng Việt" },
@@ -44,6 +46,7 @@ export default function Header() {
     LANGUAGES.find((lang) => language.startsWith(lang.code)) || LANGUAGES[0];
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const inDashboardShell = useContext(DashboardShellContext);
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 20) {
@@ -55,6 +58,7 @@ export default function Header() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+  if (inDashboardShell) return null;
   const navigateWithLang = (path) => {
     if (path.startsWith("/")) {
       const segments = path.split("/").filter(Boolean);
@@ -266,9 +270,8 @@ export default function Header() {
                       <div className="px-3 py-2 text-xs font-bold text-main border-bottom pb-2 mb-1">
                         <span>{t("landing.nguoiDung")}</span>
                         <div
-                          className="text-muted-custom font-normal mt-0.5 text-truncate"
+                          className="text-muted-custom font-normal mt-0.5 text-truncate text-xs"
                           style={{
-                            fontSize: "10px",
                             color: "var(--text-muted)",
                           }}
                         >
@@ -409,8 +412,7 @@ export default function Header() {
                   {t("landing.nguoiDung")}
                 </span>
                 <span
-                  className="text-muted text-truncate"
-                  style={{ fontSize: "10px", marginTop: "1px" }}
+                  className="text-muted text-truncate text-xs mt-0.5"
                 >
                   {email}
                 </span>

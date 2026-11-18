@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useState, useEffect } from 'react';
 import { Modal, Form, ListGroup } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
-import PrimaryButton from '../../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../../shared/ui/button';
 import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
 
 /**
@@ -110,12 +110,12 @@ export default function SwitchJournalModal({
       </Modal.Body>
 
       <Modal.Footer className="border-top-0 pt-0 d-flex justify-content-end align-items-center gap-3">
-        <PrimaryButton variant="outline" onClick={handleClose}>
+        <Button variant="outline" size="sm" onClick={handleClose}>
           Cancel
-        </PrimaryButton>
-        <PrimaryButton onClick={handleConfirmSelect} disabled={!tempSelectedId}>
+        </Button>
+        <Button size="sm" onClick={handleConfirmSelect} disabled={!tempSelectedId}>
           Select Journal
-        </PrimaryButton>
+        </Button>
       </Modal.Footer>
     </Modal>;
 }

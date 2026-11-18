@@ -1,129 +1,141 @@
-import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\dashboard\components\PublicationTrendChart.jsx
- */
 import { useState } from 'react';
+import { useTranslation } from "react-i18next";
 import { Icon } from '@iconify/react';
-import '../Dashboard.css';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/ui/card';
 import ChartRangeDropdown from './ChartRangeDropdown';
 
-/**
- * PublicationTrendChart — line chart xu hướng publication theo năm.
- * Dùng SVG thuần (không cần thư viện nặng như Chart.js / Recharts)
- * để giữ bundle nhỏ. Có thể swap thành Recharts sau này.
- *
- * Props:
- *   analytics  - object trả từ BE: { years: [...], series: [{label, data:[...]}] }
- *   loading
- *   error
- */
-
 const LINE_COLORS = ['var(--primary)', '#3b82f6', '#10b981', '#a855f7'];
-function SimpleSvgChart({
-  years,
-  series
-}) {
-  const {
-    t
-  } = useTranslation();
+
+function SimpleSvgChart({ years, series }) {
+  const { t } = useTranslation();
   const [hoveredPoint, setHoveredPoint] = useState(null);
   if (!years?.length || !series?.length) return null;
-  const W = 480,
-    H = 160,
-    PAD = {
-      top: 12,
-      right: 16,
-      bottom: 28,
-      left: 36
-    };
+
+  const W = 1000;
+  const H = 160;
+  const PAD = { top: 14, right: 20, bottom: 14, left: 20 };
   const chartW = W - PAD.left - PAD.right;
   const chartH = H - PAD.top - PAD.bottom;
 
-  // flatten all values to get global min/max
   const allVals = series.flatMap(s => s.data ?? []).filter(Number.isFinite);
   const minVal = Math.min(0, ...allVals);
   const maxVal = Math.max(1, ...allVals);
-  const xScale = i => PAD.left + i / (years.length - 1 || 1) * chartW;
-  const yScale = v => PAD.top + chartH - (v - minVal) / (maxVal - minVal || 1) * chartH;
-  return <div className="position-relative w-100 h-100">
-      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" style={{
-      overflow: 'visible'
-    }}>
-        {/* Grid lines */}
-        {[0, 0.25, 0.5, 0.75, 1].map(t => {
-        const y = PAD.top + (1 - t) * chartH;
-        return <line key={t} x1={PAD.left} x2={PAD.left + chartW} y1={y} y2={y} stroke="var(--border)" strokeWidth={0.6} strokeDasharray="3 3" />;
-      })}
+  const xScale = i => PAD.left + (i / (years.length - 1 || 1)) * chartW;
+  const yScale = v => PAD.top + chartH - ((v - minVal) / (maxVal - minVal || 1)) * chartH;
 
-        {/* X axis labels */}
-        {years.map((yr, i) => {
-        // Calculate dynamic step to avoid label overlaps for long year ranges
-        const maxLabels = 8;
-        const step = Math.ceil(years.length / maxLabels);
+  return (
+    <div className="relative w-full">
+      <div className="h-[140px] w-full relative">
+        <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" className="w-full h-full overflow-visible">
+          {/* Subtle Grid lines */}
+          {[0, 0.33, 0.66, 1].map((tick) => {
+            const y = PAD.top + (1 - tick) * chartH;
+            return (
+              <line
+                key={tick}
+                x1={PAD.left}
+                x2={PAD.left + chartW}
+                y1={y}
+                y2={y}
+                stroke="var(--border)"
+                strokeWidth={1}
+                strokeDasharray="3 3"
+                vectorEffect="non-scaling-stroke"
+              />
+            );
+          })}
 
-        // Always show the first and the last years, and other years at step intervals
-        const shouldShow = i === 0 || i === years.length - 1 || i % step === 0;
+          {/* Series lines */}
+          {series.map((s, si) => {
+            if (!s.data?.length) return null;
+            const color = LINE_COLORS[si % LINE_COLORS.length];
+            const pts = s.data.map((v, i) => `${xScale(i)},${yScale(v ?? 0)}`).join(' ');
+            const pts0 = `${xScale(0)},${yScale(0)}`;
+            const ptsN = `${xScale(s.data.length - 1)},${yScale(0)}`;
 
-        // Prevent showing label if it is too close to the last year label
-        const isTooCloseToLast = i % step === 0 && years.length - 1 - i < step * 0.5 && i !== years.length - 1;
-        if (!shouldShow || isTooCloseToLast) return null;
-        return <text key={yr} x={xScale(i)} y={H - 4} textAnchor="middle" style={{
-          fontSize: 9,
-          fill: 'var(--text-muted)',
-          fontFamily: 'var(--font-display)'
-        }}>
-              {yr}
-            </text>;
-      })}
+            return (
+              <g key={si}>
+                <polygon
+                  points={`${pts0} ${pts} ${ptsN}`}
+                  fill={color}
+                  fillOpacity={0.07}
+                />
+                <polyline
+                  points={pts}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={2}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  vectorEffect="non-scaling-stroke"
+                />
+                {s.data.map((v, i) => (
+                  <circle
+                    key={i}
+                    cx={xScale(i)}
+                    cy={yScale(v ?? 0)}
+                    r={3.5}
+                    fill={color}
+                    stroke="var(--surface)"
+                    strokeWidth={1.5}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                ))}
+                {s.data.map((v, i) => (
+                  <circle
+                    key={`hover-${i}`}
+                    cx={xScale(i)}
+                    cy={yScale(v ?? 0)}
+                    r={16}
+                    fill="transparent"
+                    className="cursor-pointer"
+                    onMouseEnter={() =>
+                      setHoveredPoint({
+                        year: years[i],
+                        value: v ?? 0,
+                        xPercent: (xScale(i) / W) * 100,
+                        yPercent: (yScale(v ?? 0) / H) * 100,
+                      })
+                    }
+                    onMouseLeave={() => setHoveredPoint(null)}
+                  />
+                ))}
+              </g>
+            );
+          })}
+        </svg>
 
-        {/* Series lines */}
-        {series.map((s, si) => {
-        if (!s.data?.length) return null;
-        const color = LINE_COLORS[si % LINE_COLORS.length];
-        const pts = s.data.map((v, i) => `${xScale(i)},${yScale(v ?? 0)}`).join(' ');
-        const pts0 = `${xScale(0)},${yScale(0)}`;
-        const ptsN = `${xScale(s.data.length - 1)},${yScale(0)}`;
+        {hoveredPoint && (
+          <div
+            className="pointer-events-none absolute z-10 -translate-x-1/2 -translate-y-full rounded-control border border-border bg-surface px-2 py-1 shadow-popover text-[11px]"
+            style={{
+              left: `${hoveredPoint.xPercent}%`,
+              top: `${hoveredPoint.yPercent}%`,
+              marginTop: '-6px',
+            }}
+          >
+            <div className="font-semibold text-muted-foreground text-[10px]">
+              {t("article.nam", "Year")} {hoveredPoint.year}
+            </div>
+            <div className="font-bold text-primary tabular-nums">
+              {hoveredPoint.value.toLocaleString()} {t("author.baiBao", "articles")}
+            </div>
+          </div>
+        )}
+      </div>
 
-        // Hide small dots visually if there are too many data points (to keep the line clean)
-        const showDots = years.length <= 25;
-        return <g key={si}>
-              {/* Area fill */}
-              <polygon points={`${pts0} ${pts} ${ptsN}`} fill={color} fillOpacity={0.08} style={{ transition: 'all 0.35s ease' }} />
-              {/* Line */}
-              <polyline points={pts} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" style={{ transition: 'all 0.35s ease' }} />
-              {/* Dots */}
-              {showDots && s.data.map((v, i) => <circle key={i} cx={xScale(i)} cy={yScale(v ?? 0)} r={3} fill={color} stroke="var(--bg-card)" strokeWidth={1.5} style={{ transition: 'all 0.35s ease' }} />)}
-              {/* Transparent larger hover targets (always active) */}
-              {s.data.map((v, i) => <circle key={`hover-${i}`} cx={xScale(i)} cy={yScale(v ?? 0)} r={12} fill="transparent" style={{
-            cursor: 'pointer'
-          }} onMouseEnter={() => setHoveredPoint({
-            year: years[i],
-            value: v ?? 0,
-            x: xScale(i),
-            y: yScale(v ?? 0)
-          })} onMouseLeave={() => setHoveredPoint(null)} />)}
-            </g>;
-      })}
-      </svg>
-      {/* Tooltip Overlay */}
-      {hoveredPoint && <div className="chart-svg-tooltip" style={{
-      left: `${hoveredPoint.x / W * 100}%`,
-      top: `${hoveredPoint.y / H * 100}%`,
-      transform: 'translate(-50%, -100%) translateY(-8px)'
-    }}>
-          <div className="fw-semibold mb-0" style={{
-        fontSize: '10px',
-        color: 'var(--text-muted)'
-      }}>{t("article.nam")}{hoveredPoint.year}</div>
-          <div className="fw-bold" style={{
-        fontSize: '12px',
-        color: 'var(--primary)'
-      }}>{hoveredPoint.value}{t("author.baiBao")}</div>
-        </div>}
-    </div>;
+      {/* HTML X-Axis Labels */}
+      <div className="flex justify-between items-center px-4 pt-1.5 border-t border-border/50 text-[11px] font-mono text-muted-foreground select-none">
+        {years.map((yr) => (
+          <span key={yr} className="hover:text-foreground transition-colors">
+            {yr}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
 }
+
 export default function PublicationTrendChart({
   analytics,
   loading,
@@ -133,88 +145,89 @@ export default function PublicationTrendChart({
   selectedRange,
   onRangeChange
 }) {
-  const {
-    t
-  } = useTranslation();
-  // Normalise BE response shape
+  const { t } = useTranslation();
+
   const years = analytics?.years ?? analytics?.year_range ?? [];
   const series = analytics?.series ?? (analytics?.data ? [{
     label: t("articles"),
     data: analytics.data
   }] : []);
-  const legend = series.length > 0 ? <div className="d-flex flex-wrap gap-3 justify-content-end me-3">
-      {series.map((s, i) => <div key={i} className="d-flex align-items-center gap-1">
-          <div style={{
-        width: 10,
-        height: 3,
-        borderRadius: 2,
-        backgroundColor: LINE_COLORS[i % LINE_COLORS.length]
-      }} />
-          <span className="text-muted-custom" style={{
-        fontSize: '0.65rem'
-      }}>{s.label ? t(s.label, s.label) : `Series ${i + 1}`}</span>
-        </div>)}
-    </div> : null;
-  const description = <>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <p className="text-muted-custom mb-0" style={{
-          fontSize: '0.72rem'
-        }}>{t("dashboard.soBaiBaoTheoNamTrongProjectsCu")}</p>
-        {isFetching && (
-          <span className="d-inline-flex align-items-center gap-1 text-muted-custom" style={{ fontSize: '0.7rem' }}>
-            <Icon icon="lucide:loader" className="spin-animation" width={12} />
-            <span>{t("common.dangCapNhat", "Đang cập nhật...")}</span>
-          </span>
-        )}
-      </div>
-      <div style={{
-      minHeight: 160
-    }}>
-        {loading && years.length === 0 ? <div className="skeleton-shimmer rounded-3 w-100" style={{
-        height: 160
-      }} /> : error && years.length === 0 ? <div className="d-flex flex-column align-items-center justify-content-center gap-2 py-5">
-            <Icon icon="lucide:alert-triangle" width={28} style={{
-          color: '#ef4444'
-        }} />
-            <p className="text-muted-custom mb-0" style={{
-          fontSize: '0.8rem'
-        }}>{error}</p>
-            {onRetry && <button className="btn btn-sm btn-outline-primary mt-2" onClick={onRetry}>{t("article.thuLai")}</button>}
-          </div> : years.length === 0 ? <div className="d-flex flex-column align-items-center justify-content-center gap-2 py-5">
-            <Icon icon="lucide:bar-chart-2" width={36} style={{
-          color: 'var(--text-muted)'
-        }} />
-            <p className="text-main fw-semibold mb-1" style={{
-          fontSize: '0.85rem'
-        }}>{t("dashboard.chuaCoDuLieuXuHuongPublication")}</p>
-            <p className="text-muted-custom mb-0" style={{
-          fontSize: '0.75rem'
-        }}>{t("dashboard.taoProjectDauTienDeBatDauTheoD")}</p>
-          </div> : <div style={{
-            opacity: isFetching ? 0.6 : 1,
-            transition: 'opacity 0.25s ease',
-            width: '100%',
-            height: '100%'
-          }}>
-            <SimpleSvgChart years={years} series={series} />
-          </div>}
-      </div>
-    </>;
-  return <div className="publication-trend-card h-100">
-      <div className="ptc-header">
-        <div className="ptc-title">
-          <Icon icon="lucide:trending-up" width={16} style={{
-          color: 'var(--primary)'
-        }} />
-          <span>{t("dashboard.xuHuongPublication")}</span>
+
+  const legend = series.length > 0 ? (
+    <div className="flex flex-wrap items-center gap-2.5">
+      {series.map((s, i) => (
+        <div key={i} className="flex items-center gap-1 text-[11px] text-muted-foreground">
+          <div
+            className="h-1.5 w-2.5 rounded-sm"
+            style={{ backgroundColor: LINE_COLORS[i % LINE_COLORS.length] }}
+          />
+          <span>{s.label ? t(s.label, s.label) : `Series ${i + 1}`}</span>
         </div>
-        <div className="ptc-actions d-flex align-items-center">
+      ))}
+    </div>
+  ) : null;
+
+  return (
+    <Card className="h-full min-w-0 flex flex-col overflow-hidden">
+      <CardHeader>
+        <CardTitle>
+          <Icon icon="lucide:trending-up" width={16} className="text-primary" />
+          <span>{t("dashboard.xuHuongPublication")}</span>
+        </CardTitle>
+        <div className="flex items-center gap-2.5">
           {legend}
           {onRangeChange && <ChartRangeDropdown value={selectedRange} onChange={onRangeChange} />}
         </div>
-      </div>
-      <div className="ptc-body">
-        {description}
-      </div>
-    </div>;
+      </CardHeader>
+
+      <CardContent className="flex-1 flex flex-col justify-between">
+        <div className="flex justify-between items-center mb-1.5 text-[11px] text-muted-foreground">
+          <p className="m-0 truncate">{t("dashboard.soBaiBaoTheoNamTrongProjectsCu")}</p>
+          {isFetching && (
+            <span className="inline-flex items-center gap-1 text-muted-foreground shrink-0 ml-2">
+              <Icon icon="lucide:loader" className="animate-spin" width={11} />
+              <span>{t("common.dangCapNhat", "Updating...")}</span>
+            </span>
+          )}
+        </div>
+
+        <div className="min-h-[160px] flex items-center justify-center">
+          {loading && years.length === 0 ? (
+            <div className="h-[160px] w-full animate-pulse rounded-lg bg-surface-muted" />
+          ) : error && years.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-1.5 py-6 text-center">
+              <Icon icon="lucide:alert-triangle" width={22} className="text-danger" />
+              <p className="text-xs text-muted-foreground m-0">{error}</p>
+              {onRetry && (
+                <button
+                  type="button"
+                  className="mt-1 text-xs font-semibold text-primary hover:underline"
+                  onClick={onRetry}
+                >
+                  {t("article.thuLai")}
+                </button>
+              )}
+            </div>
+          ) : years.length === 0 ? (
+            <div className="flex flex-col items-center justify-center gap-1.5 py-6 text-center">
+              <Icon icon="lucide:bar-chart-2" width={28} className="text-muted-foreground" />
+              <p className="text-xs font-semibold text-foreground mb-0">
+                {t("dashboard.chuaCoDuLieuXuHuongPublication")}
+              </p>
+              <p className="text-[11px] text-muted-foreground m-0">
+                {t("dashboard.taoProjectDauTienDeBatDauTheoD")}
+              </p>
+            </div>
+          ) : (
+            <div
+              className="w-full transition-opacity duration-200"
+              style={{ opacity: isFetching ? 0.6 : 1 }}
+            >
+              <SimpleSvgChart years={years} series={series} />
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

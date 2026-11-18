@@ -28,14 +28,14 @@
 
 .modalHeader h3 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 16px;
   color: #1e293b;
 }
 
 .closeBtn {
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 16px;
   cursor: pointer;
   color: #64748b;
   transition: color 0.2s;
@@ -64,7 +64,7 @@
 }
 
 .loadingText {
-  font-size: 12px;
+  font-size: 13px;
   color: #64748b;
 }
 
@@ -94,7 +94,7 @@
 
 .currentKeywords h4 {
   margin: 0 0 12px 0;
-  font-size: 0.9rem;
+  font-size: 14px;
   color: #475569;
 }
 

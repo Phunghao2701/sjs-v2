@@ -5,17 +5,13 @@
 
 /* Main page layout wrapper */
 .geography-page-wrapper {
-  background-color: var(--bg-main);
-  min-height: 100vh;
-  padding-top: 80px;
-  padding-bottom: 80px;
-  position: relative;
+  width: 100%;
 }
 
 /* Breadcrumb styling */
 .geography-breadcrumb {
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: 14px;
   color: var(--text-muted);
   margin-bottom: 0.75rem;
 }
@@ -37,7 +33,7 @@
 .geography-subtitle {
   font-family: var(--font-display);
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
 }
@@ -48,7 +44,7 @@
   border: 1px solid var(--border);
   color: var(--text-main);
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 500;
   border-radius: 8px;
   padding: 0.45rem 2rem 0.45rem 0.75rem;
@@ -79,7 +75,7 @@
 
 .geography-search-input {
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 14px;
   background-color: var(--bg-chip) !important;
   border: 1px solid var(--border) !important;
   color: var(--text-main) !important;
@@ -118,12 +114,12 @@
 
 .geography-table {
   font-family: var(--font-display) !important;
-  font-size: 0.85rem;
+  font-size: 14px;
 }
 
 .geography-table th {
   color: var(--text-muted) !important;
-  font-size: 0.72rem;
+  font-size: 13px;
   font-weight: 600 !important;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -180,7 +176,7 @@
   color: #ffffff !important;
   padding: 6px 10px;
   border-radius: 6px;
-  font-size: 0.72rem;
+  font-size: 13px;
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
   pointer-events: none;
@@ -215,7 +211,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 13px;
   font-weight: 500;
   padding: 0.22rem 0.55rem;
   transition: all 0.18s ease;
@@ -235,7 +231,7 @@
   border: 1px solid rgba(47, 198, 70, 0.18);
   border-radius: 6px;
   font-family: var(--font-display);
-  font-size: 0.7rem;
+  font-size: 13px;
   font-weight: 600;
   padding: 0.22rem 0.55rem;
 }
@@ -254,7 +250,7 @@
   color: var(--text-main);
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 14px;
   line-height: 1.45;
   transition: color 0.15s ease;
 }
@@ -266,7 +262,7 @@
 .geography-link-accent {
   color: var(--primary);
   font-weight: 600;
-  font-size: 0.78rem;
+  font-size: 13px;
   display: inline-flex;
   align-items: center;
   gap: 2px;

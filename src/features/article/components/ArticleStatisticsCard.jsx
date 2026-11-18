@@ -53,7 +53,7 @@ export default function ArticleStatisticsCard({
         backgroundColor: 'var(--bg-section)'
       }}>
           <div className="text-muted-custom text-xs font-semibold mb-1 uppercase tracking-wider" style={{
-          fontSize: '0.7rem'
+          fontSize: '13px'
         }}>{t("article.soLuotTrichDanCitations")}</div>
           <div className="d-flex align-items-center justify-content-center text-main gap-1.5 fs-3" style={{
           fontWeight: 700
@@ -71,7 +71,7 @@ export default function ArticleStatisticsCard({
             paddingLeft: '1rem'
           }}>
                 <div className="text-muted-custom text-xxs font-semibold uppercase" style={{
-              fontSize: '0.65rem'
+              fontSize: '13px'
             }}>
                   {metric.label}
                 </div>

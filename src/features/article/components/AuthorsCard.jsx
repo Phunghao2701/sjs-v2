@@ -56,13 +56,13 @@ export default function AuthorsCard({
                   {author.display_name}
                 </div>
                 {author.last_known_institution && <div className="text-muted-custom text-xs mt-1" style={{
-            fontSize: '0.75rem'
+            fontSize: '13px'
           }}>
                     <Icon icon="lucide:building" width="12" className="me-1 opacity-75" />
                     {author.last_known_institution}
                   </div>}
                 {author.works_count !== null && author.works_count !== undefined && <div className="text-muted-custom text-xs mt-1" style={{
-            fontSize: '0.72rem'
+            fontSize: '13px'
           }}>
                     <Icon icon="lucide:file-text" width="12" className="me-1 opacity-75" />
                     {Number(author.works_count).toLocaleString('vi-VN')}{t("article.congTrinh")}</div>}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import Card from '../../../shared/components/common/Card';
 import InlineErrorState from '../../../shared/components/common/InlineErrorState';
+import { Skeleton } from '../../../../shared/ui/skeleton';
 
 const DonutSegment = ({ percentage, offset, colorClass, isMounted }) => {
   const radius = 86;
@@ -86,9 +87,13 @@ const QuartileDistributionCard = ({ data: rawData, loading, error, onRetry }) =>
       className="qdc-card"
     >
       {loading ? (
-        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-neutral-500)', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-          <div className="update-icon spin" style={{ width: '24px', height: '24px', border: '3px solid var(--color-primary-orange)', borderTopColor: 'transparent', borderRadius: '50%', margin: '0 auto 10px' }}></div>
-          {t('common.loading', 'Loading quartile data...')}
+        <div className="p-6 flex flex-col items-center justify-center space-y-4 min-h-[220px]">
+          <Skeleton className="h-32 w-32 rounded-full" />
+          <div className="flex gap-3">
+            <Skeleton className="h-4 w-12" />
+            <Skeleton className="h-4 w-12" />
+            <Skeleton className="h-4 w-12" />
+          </div>
         </div>
       ) : error ? (
         <InlineErrorState 

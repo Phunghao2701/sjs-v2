@@ -36,14 +36,14 @@ export default function PendingRequestCard({ request, onApprove, onDecline }) {
             height: '40px',
             backgroundColor: '#e0f2fe',
             color: '#0369a1',
-            fontSize: '0.9rem'
+            fontSize: '14px'
           }}
         >
           {initials}
         </div>
         <div className="overflow-hidden">
-          <div className="fw-bold text-main text-truncate" style={{ fontSize: '0.88rem' }}>{name}</div>
-          <div className="text-muted-custom text-truncate" style={{ fontSize: '0.72rem', letterSpacing: '0.02em' }}>{institution}</div>
+          <div className="fw-bold text-main text-truncate" style={{ fontSize: '14px' }}>{name}</div>
+          <div className="text-muted-custom text-truncate" style={{ fontSize: '13px', letterSpacing: '0.02em' }}>{institution}</div>
         </div>
       </div>
 
@@ -57,7 +57,7 @@ export default function PendingRequestCard({ request, onApprove, onDecline }) {
         <PrimaryButton
           onClick={() => onApprove(id)}
           className="flex-grow-1 py-1.5 text-xs"
-          style={{ fontSize: '0.8rem' }}
+          style={{ fontSize: '13px' }}
         >
           Approve
         </PrimaryButton>
@@ -65,7 +65,7 @@ export default function PendingRequestCard({ request, onApprove, onDecline }) {
           onClick={() => onDecline(id)}
           variant="outline"
           className="flex-grow-1 py-1.5 text-xs"
-          style={{ fontSize: '0.8rem' }}
+          style={{ fontSize: '13px' }}
         >
           Decline
         </PrimaryButton>

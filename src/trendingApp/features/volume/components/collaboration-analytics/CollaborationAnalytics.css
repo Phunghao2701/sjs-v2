@@ -12,14 +12,14 @@
 }
 
 .ca-title-group h1 {
-  font-size: 1.5rem;
+  font-size: 16px;
   font-weight: 700;
   margin: 0 0 8px 0;
   color: var(--color-neutral-800);
 }
 
 .ca-title-group p {
-  font-size: 0.875rem;
+  font-size: 14px;
   color: var(--color-neutral-500);
   margin: 0;
   max-width: 600px;
@@ -40,7 +40,7 @@
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .ca-btn-orange {
@@ -52,7 +52,7 @@
   font-weight: 600;
   cursor: pointer;
   text-transform: uppercase;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .ca-layout {
@@ -103,18 +103,18 @@
 }
 
 .ca-card-title {
-  font-size: 1.125rem;
+  font-size: 16px;
   font-weight: 700;
   margin: 0;
 }
 
 .ca-card-dark .ca-card-title {
   color: #0071BC;
-  font-size: 2.75rem;
+  font-size: 16px;
 }
 
 .ca-card-action {
-  font-size: 0.75rem;
+  font-size: 13px;
   font-weight: 700;
   color: #0071BC;
   text-transform: uppercase;
@@ -135,25 +135,25 @@
 }
 
 .ca-list-rank {
-  font-size: 0.875rem;
+  font-size: 14px;
   color: var(--color-neutral-400);
   font-weight: 600;
 }
 
 .ca-list-name {
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 14px;
 }
 
 .ca-list-score {
   font-weight: 700;
   color: #0071BC;
-  font-size: 0.875rem;
+  font-size: 14px;
   text-align: right;
 }
 
 .ca-list-label {
-  font-size: 0.75rem;
+  font-size: 13px;
   color: #0071BC;
   font-weight: 600;
 }
@@ -172,7 +172,7 @@
 }
 
 .ca-insights-desc {
-  font-size: 0.95rem;
+  font-size: 15px;
   color: rgba(255,255,255,0.7);
   margin-bottom: 32px;
   line-height: 1.5;
@@ -183,21 +183,21 @@
 }
 
 .ca-insight-value {
-  font-size: 2.75rem;
+  font-size: 16px;
   font-weight: 700;
   color: #0071BC;
   margin-bottom: 4px;
 }
 
 .ca-insight-value-white {
-  font-size: 2.75rem;
+  font-size: 16px;
   font-weight: 700;
   color: white;
   margin-bottom: 4px;
 }
 
 .ca-insight-label {
-  font-size: 0.85rem;
+  font-size: 14px;
   font-weight: 600;
   color: rgba(255,255,255,0.7);
   text-transform: uppercase;
@@ -220,7 +220,7 @@
   left: 0;
   width: 100%;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 13px;
   color: var(--color-neutral-500);
   font-weight: 600;
   text-transform: uppercase;
@@ -232,7 +232,7 @@
   left: -24px;
   transform-origin: 0 0;
   transform: rotate(-90deg) translateX(-50%);
-  font-size: 0.75rem;
+  font-size: 13px;
   color: var(--color-neutral-500);
   font-weight: 600;
   text-transform: uppercase;
@@ -252,7 +252,7 @@
   display: flex;
   gap: 16px;
   margin-top: auto;
-  font-size: 0.75rem;
+  font-size: 13px;
   color: var(--color-neutral-600);
 }
 
@@ -282,7 +282,7 @@
 }
 
 .ca-intensity-col {
-  font-size: 0.62rem;
+  font-size: 13px;
   font-weight: 700;
   text-align: center;
   color: var(--color-neutral-500);
@@ -299,7 +299,7 @@
 }
 
 .ca-intensity-row-label {
-  font-size: 0.75rem;
+  font-size: 13px;
   font-weight: 600;
   color: var(--color-neutral-800);
 }
@@ -314,7 +314,7 @@
   align-items: center;
   gap: 8px;
   margin-top: 16px;
-  font-size: 0.75rem;
+  font-size: 13px;
   color: var(--color-neutral-500);
 }
 

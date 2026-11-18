@@ -7,8 +7,11 @@ import { t } from "i18next";
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Button, Modal } from 'react-bootstrap';
+import { Modal } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
+import { Button } from '../../../shared/ui/button';
+import { PageContainer } from '../../../shared/ui/page-layout';
+import { Breadcrumbs } from '../../../shared/ui/breadcrumb';
 
 // Layout
 import Header from '../../landing/components/Header';
@@ -220,7 +223,7 @@ export default function ArticleDetailPage() {
   return <div className="article-detail-page grid-bg">
       <Header />
 
-      <Container fluid className="position-relative z-1 px-3 px-xl-5">
+      <PageContainer className="position-relative z-1">
         {isLoading ? <ArticleDetailSkeleton /> : error ? <ArticleDetailError errorMsg={error} onRetry={fetchArticleDetail} /> : !article ? <ArticleDetailEmpty articleId={id} /> : <main className="article-detail-container">
             <div className="article-detail-shell">
               <aside className="article-detail-sidebar d-none d-xl-block">
@@ -233,13 +236,13 @@ export default function ArticleDetailPage() {
                   <span><strong>Article:</strong> {article.article_id}</span>
                   <span>
                     <strong>Volume:</strong>{' '}
-                    <Button variant="link" disabled={!article.volume_id} onClick={() => article.volume_id && navigate(`/articles?volume_id=${article.volume_id}`)} className="article-detail-meta-link">
+                    <Button variant="link" size="sm" disabled={!article.volume_id} onClick={() => article.volume_id && navigate(`/articles?volume_id=${article.volume_id}`)} className="article-detail-meta-link h-auto p-0 text-sm">
                       {article.volume_number || '—'}
                     </Button>
                   </span>
                   <span>
                     <strong>Issue:</strong>{' '}
-                    <Button variant="link" disabled={!article.issue_id} onClick={() => article.issue_id && navigate(`/articles?issue_id=${article.issue_id}`)} className="article-detail-meta-link">
+                    <Button variant="link" size="sm" disabled={!article.issue_id} onClick={() => article.issue_id && navigate(`/articles?issue_id=${article.issue_id}`)} className="article-detail-meta-link h-auto p-0 text-sm">
                       {article.issue_number || '—'}
                     </Button>
                   </span>
@@ -256,50 +259,50 @@ export default function ArticleDetailPage() {
               </aside>
 
               <section className="article-detail-main">
-                <div className="article-detail-breadcrumb">
-                  <span role="button" onClick={() => navigate('/articles')} className="article-detail-breadcrumb-link">{t("articles")}</span>
-                  <Icon icon="lucide:chevron-right" width="12" />
-                  <span style={{
-                color: 'var(--text-main)'
-              }}>{t("article.chiTietBaiBao")}</span>
-                </div>
+                <Breadcrumbs
+                  items={[
+                    { label: t("home"), to: "/" },
+                    { label: t("articles"), to: "/articles" },
+                    { label: t("article.chiTietBaiBao") }
+                  ]}
+                  className="mb-3"
+                />
 
 
-                <h1 className="article-detail-title">
+                <h1 className="article-detail-title text-base font-semibold leading-snug">
                   <LatexText text={article.title} />
                 </h1>
 
                 <div className="article-detail-authors">
                   {visibleAuthors.length > 0 ? visibleAuthors.map((author, index) => {                const authorLabel = author.display_name || author.name || author.author_name || t("typeAuthor");
                 const authorId = author.author_id || author.id;
-                return <Button key={authorId || `${authorLabel}-${index}`} variant="link" disabled={!authorId} onClick={() => authorId && navigate(`/authors/${authorId}`)} className="article-detail-author-link" title={authorId ? `Xem chi tiết ${authorLabel}` : authorLabel}>
+                return <Button key={authorId || `${authorLabel}-${index}`} variant="link" size="sm" disabled={!authorId} onClick={() => authorId && navigate(`/authors/${authorId}`)} className="article-detail-author-link h-auto p-0 text-sm" title={authorId ? `Xem chi tiết ${authorLabel}` : authorLabel}>
                           {authorLabel}{index < visibleAuthors.length - 1 ? ',' : ''}
                         </Button>;
               }) : <span>{t("article.dangCapNhatTacGia")}</span>}
-                  {hiddenAuthorCount > 0 && !showAllAuthors && <Button variant="link" onClick={() => setShowAllAuthors(true)} className="article-detail-author-toggle">
+                  {hiddenAuthorCount > 0 && !showAllAuthors && <Button variant="link" size="sm" onClick={() => setShowAllAuthors(true)} className="article-detail-author-toggle h-auto p-0 text-sm">
                       Show more +{hiddenAuthorCount}
                     </Button>}
-                  {showAllAuthors && (article?.authors?.length || 0) > 3 && <Button variant="link" onClick={() => setShowAllAuthors(false)} className="article-detail-author-toggle">
+                  {showAllAuthors && (article?.authors?.length || 0) > 3 && <Button variant="link" size="sm" onClick={() => setShowAllAuthors(false)} className="article-detail-author-toggle h-auto p-0 text-sm">
                       Show less
                     </Button>}
                 </div>
 
 
                 <div className="article-detail-action-bar">
-                  <div className="article-detail-actions">
-                    <Button variant="link" onClick={() => setShowCitationsModal(true)} className="article-detail-action-btn">
-                      <Icon icon="lucide:quote" width="15" />
+                  <div className="article-detail-actions flex flex-wrap gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setShowCitationsModal(true)} className="gap-1.5 text-sm">
+                      <Icon icon="lucide:quote" width="14" />
                       {t("article.citations")}: {article.semantic_citation_count ?? article.citations ?? 0}
                     </Button>
-                    <Button variant="link" disabled={isBookmarkLoading} onClick={handleBookmarkToggle} className={`article-detail-action-btn ${isBookmarked ? 'is-active' : ''}`}>
-                      <Icon icon={isBookmarked ? 'lucide:bookmark-check' : 'lucide:bookmark-plus'} width="15" />
+                    <Button variant={isBookmarked ? "default" : "outline"} size="sm" disabled={isBookmarkLoading} onClick={handleBookmarkToggle} className="gap-1.5 text-sm">
+                      <Icon icon={isBookmarked ? 'lucide:bookmark-check' : 'lucide:bookmark-plus'} width="14" />
                       Add to Project
                     </Button>
-                    <Button variant="link" onClick={handleShareArticle} className="article-detail-action-btn">
-                      <Icon icon="lucide:share-2" width="15" />
+                    <Button variant="outline" size="sm" onClick={handleShareArticle} className="gap-1.5 text-sm">
+                      <Icon icon="lucide:share-2" width="14" />
                       {t("article.share")}
                     </Button>
-                    
                   </div>
                 </div>
 
@@ -314,23 +317,20 @@ export default function ArticleDetailPage() {
                   </span>
                 </div>
 
-                <div className="article-detail-tabs">
-                  <Button variant="link" onClick={() => setActiveTab('preview')} className={`article-detail-tab-btn ${activeTab === 'preview' ? 'is-active' : ''}`}>
+                <div className="article-detail-tabs flex flex-wrap gap-1 border-b border-border pb-2 mb-4">
+                  <Button variant={activeTab === 'preview' ? 'default' : 'ghost'} size="sm" onClick={() => setActiveTab('preview')} className="text-sm">
                     Article Preview
                   </Button>
-                  <Button variant="link" onClick={() => setActiveTab('keywords_topics')} className={`article-detail-tab-btn ${activeTab === 'keywords_topics' ? 'is-active' : ''}`}>
+                  <Button variant={activeTab === 'keywords_topics' ? 'default' : 'ghost'} size="sm" onClick={() => setActiveTab('keywords_topics')} className="text-sm">
                     Keywords & Topics
                   </Button>
-                  <Button variant="link" onClick={() => setActiveTab('references')} className={`article-detail-tab-btn ${activeTab === 'references' ? 'is-active' : ''}`}>
+                  <Button variant={activeTab === 'references' ? 'default' : 'ghost'} size="sm" onClick={() => setActiveTab('references')} className="text-sm">
                     References ({(article.references || []).length})
                   </Button>
-                  <Button variant="link" onClick={() => setActiveTab('recommended')} className={`article-detail-tab-btn ${activeTab === 'recommended' ? 'is-active' : ''}`}>
+                  <Button variant={activeTab === 'recommended' ? 'default' : 'ghost'} size="sm" onClick={() => setActiveTab('recommended')} className="text-sm">
                     Recommended Articles
                   </Button>
-                  <Button variant="link" onClick={() => navigate(`/articles/${id}/visual`)} className="article-detail-tab-btn" style={{
-                color: 'var(--primary)',
-                fontWeight: 'bold'
-              }}>
+                  <Button variant="ghost" size="sm" onClick={() => navigate(`/articles/${id}/visual`)} className="text-sm text-primary font-semibold">
                     <Icon icon="lucide:network" width="14" className="me-1" />
                     Interactive Graph
                   </Button>
@@ -340,51 +340,39 @@ export default function ArticleDetailPage() {
                     <article>
                       {/* TL;DR section */}
                       {article.semantic_tldr && <section id="tldr" className="article-section">
-                          <h2 className="article-section-title" style={{
-                    fontSize: '1.4rem'
-                  }}>TL;DR</h2>
-                          <div className="p-3 rounded" style={{
-                    backgroundColor: 'var(--primary-light)',
-                    borderLeft: '4px solid var(--primary)',
-                    color: 'var(--text-main)',
-                    fontSize: '0.95rem',
-                    lineHeight: '1.65'
-                  }}>
+                          <h2 className="article-section-title text-base font-semibold">TL;DR</h2>
+                          <div className="p-3 rounded border-l-4 border-primary bg-primary/10 text-text-main text-sm leading-relaxed">
                             <strong>Summary:</strong> {article.semantic_tldr}
                           </div>
                         </section>}
 
                       <section id="abstract" className="article-section">
-                        <h2 className="article-section-title" style={{
-                    fontSize: '1.65rem'
-                  }}>{t("article.abstract")}</h2>
+                        <h2 className="article-section-title text-base font-semibold">{t("article.abstract")}</h2>
                         {(article.abstract || 'No abstract is available for this article.').split('\n').filter(Boolean).map((paragraph, index) => (
-                             <LatexText key={index} text={paragraph} as="p" className="article-section-text" />
+                             <LatexText key={index} text={paragraph} as="p" className="article-section-text text-sm leading-relaxed" />
                         ))}
                       </section>
 
 
                       <section id="section-snippets" className="article-section">
-                        <h2 className="article-section-title">Section snippets</h2>
-                        <p className="article-section-text" style={{
-                    fontSize: '0.98rem'
-                  }}>{t("article.tomTatNhanhBaiBaoThuocChuDe")} <strong>{article.topic_name || 'Research'}</strong>{t("article.congBoTrong")} <strong>{article.journal_name || 'Scientific Journal'}</strong>
+                        <h2 className="article-section-title text-base font-semibold">Section snippets</h2>
+                        <p className="article-section-text text-sm leading-relaxed">{t("article.tomTatNhanhBaiBaoThuocChuDe")} <strong>{article.topic_name || 'Research'}</strong>{t("article.congBoTrong")} <strong>{article.journal_name || 'Scientific Journal'}</strong>
                           {article.publication_year ? ` năm ${article.publication_year}` : ''}.
                         </p>
                       </section>
                     </article>
 
                     <aside className="article-toc-aside d-none d-lg-block">
-                      <div className="article-toc-title">Article preview</div>
-                      <nav className="d-flex flex-column gap-2">
-                        {article.semantic_tldr && <Button variant="link" onClick={() => smoothScrollTo('tldr')} className="article-toc-link">TL;DR</Button>}
-                        <Button variant="link" onClick={() => smoothScrollTo('abstract')} className="article-toc-link is-active">Abstract</Button>
-                        <Button variant="link" onClick={() => smoothScrollTo('section-snippets')} className="article-toc-link">Section snippets</Button>
+                      <div className="article-toc-title text-sm font-semibold mb-2">Article preview</div>
+                      <nav className="d-flex flex-column gap-1">
+                        {article.semantic_tldr && <Button variant="ghost" size="sm" onClick={() => smoothScrollTo('tldr')} className="justify-start text-xs text-text-muted hover:text-text-main h-auto py-1">TL;DR</Button>}
+                        <Button variant="ghost" size="sm" onClick={() => smoothScrollTo('abstract')} className="justify-start text-xs text-text-muted hover:text-text-main h-auto py-1">Abstract</Button>
+                        <Button variant="ghost" size="sm" onClick={() => smoothScrollTo('section-snippets')} className="justify-start text-xs text-text-muted hover:text-text-main h-auto py-1">Section snippets</Button>
                       </nav>
                     </aside>
                   </div> : activeTab === 'keywords_topics' ? <div className="keywords-topics-tab-panel">
                     <section className="mb-5">
-                      <h2 className="article-section-title mb-4">{t("article.keywords")}</h2>
+                      <h2 className="article-section-title text-base font-semibold mb-4">{t("article.keywords")}</h2>
                       {(article.keywords || []).length > 0 ? <div className="row g-4">
                           {article.keywords.map((keyword, index) => {                    const label = keyword.display_name || keyword.name || keyword.keyword;
                     const keywordId = keyword.keyword_id || keyword.id;
@@ -392,14 +380,12 @@ export default function ArticleDetailPage() {
                                 <div className="keyword-card d-flex flex-column justify-content-between h-100">
                                   <div className="d-flex align-items-start justify-content-between gap-3 mb-3">
                                     <div>
-                                      <div className="keyword-card-label">Research keyword</div>
-                                      <h3 className="keyword-card-title">{label}</h3>
+                                      <div className="keyword-card-label text-xs">Research keyword</div>
+                                      <h3 className="keyword-card-title text-base font-semibold">{label}</h3>
                                     </div>
                                     <Icon icon="lucide:tags" width="18" className="keyword-card-icon" />
                                   </div>
-                                  <Button id={`keyword-view-${keywordId || label}`} type="button" onClick={() => handleKeywordClick(keyword)} className="keyword-card-action d-inline-flex align-items-center gap-2 mt-3" style={{
-                          width: 'fit-content'
-                        }}>
+                                  <Button id={`keyword-view-${keywordId || label}`} variant="outline" size="sm" onClick={() => handleKeywordClick(keyword)} className="keyword-card-action d-inline-flex align-items-center gap-2 mt-3 w-fit text-sm">
                                     <span>{t("article.xemBaiBaoLienQuan")}</span>
                                     <Icon icon="lucide:arrow-up-right" width="16" />
                                   </Button>
@@ -408,84 +394,73 @@ export default function ArticleDetailPage() {
                   })}
                         </div> : <div className="article-reference-card-empty text-center py-5">
                           <Icon icon="lucide:tags" width="48" className="text-muted mb-3" />
-                          <p className="mb-0">{keywordsText}</p>
+                          <p className="mb-0 text-sm">{keywordsText}</p>
                         </div>}
                     </section>
 
                     {article.topics?.length > 0 && <section className="mt-5">
-                        <h2 className="article-section-title mb-3">Topics</h2>
+                        <h2 className="article-section-title text-base font-semibold mb-3">Topics</h2>
                         <div className="d-flex gap-2 flex-wrap">
-                          {article.topics.map(topic => <Button key={topic.topic_id || topic.display_name} variant="light" onClick={() => handleTopicClick(topic)} className="article-topic-chip" style={topicKeywordChipStyle}>
+                          {article.topics.map(topic => <Button key={topic.topic_id || topic.display_name} variant="outline" size="sm" onClick={() => handleTopicClick(topic)} className="article-topic-chip rounded-full text-xs">
                               {topic.display_name}
                             </Button>)}
                         </div>
                       </section>}
                   </div> : activeTab === 'references' ? <div className="references-tab-panel">
-                    <h2 className="article-section-title mb-4">{t("article.references")}</h2>
-                    <p className="article-section-text mb-4" style={{
-                fontSize: '0.98rem'
-              }}>{t("article.baiBaoHienCo")}{" "}<strong>{(article.references || []).length}</strong>{" "}{t("article.taiLieuThamKhaoDuocDongBoTrong")}{" "}<strong>{article.semantic_citation_count ?? article.citations ?? 0}</strong>.
+                    <h2 className="article-section-title text-base font-semibold mb-4">{t("article.references")}</h2>
+                    <p className="article-section-text text-sm leading-relaxed mb-4">{t("article.baiBaoHienCo")}{" "}<strong>{(article.references || []).length}</strong>{" "}{t("article.taiLieuThamKhaoDuocDongBoTrong")}{" "}<strong>{article.semantic_citation_count ?? article.citations ?? 0}</strong>.
                     </p>
 
                     {(article.references || []).length > 0 ? <div className="d-grid gap-3">
                         {(article.references || []).map((referenceUrl, index) => {                  return <a key={`${referenceUrl}-${index}`} href={referenceUrl} target="_blank" rel="noreferrer" className="article-reference-card">
                               <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap">
                                 <div className="min-w-0">
-                                  <div className="article-reference-label">
+                                  <div className="article-reference-label text-xs">
                                     {t("article.referenceLabel")} {index + 1}
                                   </div>
-                                  <div className="article-reference-title">
+                                  <div className="article-reference-title text-sm font-medium">
                                     {formatReferenceLabel(referenceUrl, index)}
                                   </div>
-                                  <div className="article-reference-url">
+                                  <div className="article-reference-url text-xs">
                                     {referenceUrl}
                                   </div>
                                 </div>
-                                <span className="article-reference-action">
+                                <span className="article-reference-action text-sm">
                                   <Icon icon="lucide:external-link" width="16" />{t("article.moNguon")}</span>
                               </div>
                             </a>;
                 })}
-                      </div> : <div className="article-reference-card-empty text-center py-5">{t("article.chuaCoDanhSachReferenceChiTiet")}</div>}
+                      </div> : <div className="article-reference-card-empty text-center py-5 text-sm">{t("article.chuaCoDanhSachReferenceChiTiet")}</div>}
                   </div> : <ArticlesTabContent recentArticles={recommendedArticles} loading={isRecommendedLoading} onArticleClick={articleId => navigate(`/articles/${articleId}/visual`)} />}
               </section>
             </div>
 
           </main>}
-      </Container>
+      </PageContainer>
 
       <Modal show={showCitationsModal} onHide={() => setShowCitationsModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title className="font-display fw-bold">{t("article.citationsCitedBy")}</Modal.Title>
+          <Modal.Title className="font-display font-semibold text-base">{t("article.citationsCitedBy")}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <div className="article-modal-stat-box">
-            <div className="text-muted-custom text-xs fw-bold text-uppercase mb-1">{t("article.tongLuotTrichDan")}</div>
-            <div className="font-display fw-bold" style={{
-            fontSize: '2rem',
-            color: 'var(--text-main)'
-          }}>
+          <div className="article-modal-stat-box p-3 rounded-lg border border-border bg-surface-muted mb-3">
+            <div className="text-muted-custom text-xs font-semibold text-uppercase mb-1">{t("article.tongLuotTrichDan")}</div>
+            <div className="font-display font-bold text-base text-text-main">
               {(article?.citations ?? 0).toLocaleString('en-US')}
             </div>
           </div>
 
-          <p className="text-muted-custom mb-3" style={{
-          lineHeight: 1.7
-        }}>
-            <strong style={{
-            color: 'var(--text-main)'
-          }}>Citations</strong>{t("article.laSoLuongBaiBaoHoacCongTrinhKh")}</p>
+          <p className="text-muted-custom text-sm mb-3 leading-relaxed">
+            <strong className="text-text-main">Citations</strong>{t("article.laSoLuongBaiBaoHoacCongTrinhKh")}</p>
 
-          <div className="d-grid gap-2" style={{
-          fontSize: '0.94rem'
-        }}>
+          <div className="grid gap-2 text-sm">
             <div><strong>DOI:</strong>{t("article.maDinhDanhCoDinhCuaBaiBao")}</div>
             <div><strong>References:</strong>{t("article.danhSachTaiLieuMaBaiBaoNayTric")}</div>
             <div><strong>Citations / Cited by:</strong>{t("article.soCongTrinhKhacTrichDanLaiBaiB")}</div>
           </div>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="outline-secondary" onClick={() => setShowCitationsModal(false)}>{t("article.dong")}</Button>
+          <Button variant="outline" size="sm" onClick={() => setShowCitationsModal(false)}>{t("article.dong")}</Button>
         </Modal.Footer>
       </Modal>
 

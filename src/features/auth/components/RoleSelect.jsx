@@ -74,18 +74,13 @@ export default function RoleSelect({
                   <Icon icon={role.icon} width="22" />
                 </div>
                 <div>
-                  <div className="font-semibold title" style={{
-                fontSize: '13px',
-                color: isSelected ? 'var(--text-main)' : 'var(--text-main)',
+                  <div className="font-semibold title text-xs" style={{
+                color: 'var(--text-main)',
                 fontWeight: isSelected ? '700' : '600'
               }}>
                     {role.label}
                   </div>
-                  <div style={{
-                fontSize: '10px',
-                color: 'var(--text-muted)',
-                marginTop: '2px'
-              }}>
+                  <div className="text-xs text-text-muted mt-0.5">
                     {role.desc}
                   </div>
                 </div>

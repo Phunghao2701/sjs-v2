@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { t } from "i18next";
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ROUTES from '../../../app/routes/routePaths';
 import { useQueryClient } from '@tanstack/react-query';
@@ -14,22 +13,27 @@ import ProjectMembersList from '../components/ProjectMembersList';
 import InviteMemberModal from '../components/InviteMemberModal';
 import { Icon } from '@iconify/react';
 import { Modal } from 'react-bootstrap';
-import Header from '../../landing/components/Header';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../shared/ui/button';
+import { Badge } from '../../../shared/ui/badge';
+import { Alert } from '../../../shared/ui/alert';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/ui/card';
+import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
+import { Skeleton } from '../../../shared/ui/skeleton';
+import { StatePanel } from '../../../shared/ui/state-panel';
 import projectService from '../../project/services/projectService';
 import LatexText from '../../../shared/components/LatexText/LatexText';
 import useAuth from '../../auth/hooks/useAuth';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
+
 const ProjectDetailPage = () => {
-  const { t: _t, i18n } = useTranslation();
-  const {
-    id: projectId
-  } = useParams();
+  const { t, i18n } = useTranslation();
+  const { id: projectId } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
   const auth = useAuth();
   const currentUser = auth?.user;
+
   const {
     project,
     watchArticles,
@@ -44,10 +48,14 @@ const ProjectDetailPage = () => {
     removeKeywordWatch,
     fetchWatchArticles,
     fetchKeywordArticles,
-    refetch: refetchProjectDetails
   } = useKeywordTracking(projectId);
-  const [activeTab, setActiveTab] = useState(tabParam && ['overview', 'articles', 'keywords', 'members'].includes(tabParam) ? tabParam : 'articles');
-  
+
+  const [activeTab, setActiveTab] = useState(
+    tabParam && ['overview', 'articles', 'keywords', 'members'].includes(tabParam)
+      ? tabParam
+      : 'articles'
+  );
+
   useEffect(() => {
     if (tabParam && ['overview', 'articles', 'keywords', 'members'].includes(tabParam)) {
       setActiveTab(tabParam);
@@ -63,14 +71,19 @@ const ProjectDetailPage = () => {
   const [showManageModal, setShowManageModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ show: false, userId: null });
-  
+
   const queryClient = useQueryClient();
-  const { data: overviewData, isLoading: overviewLoading, error: overviewErrorRaw, refetch: fetchProjectOverview } = useProjectOverviewQuery(projectId);
+  const {
+    data: overviewData,
+    isLoading: overviewLoading,
+    error: overviewErrorRaw,
+    refetch: fetchProjectOverview,
+  } = useProjectOverviewQuery(projectId);
   const overviewError = overviewErrorRaw ? t("project.khongTheTaiDuLieuTongQuanVuiLo") : null;
 
   const { data: membersData, isLoading: membersLoading } = useProjectMembersQuery(projectId);
   const members = membersData || [];
-  
+
   const [membersActionLoading, setMembersActionLoading] = useState(false);
 
   const chartColors = ['#0071BC', '#3393CB', '#66B1D9', '#334155', '#64748b', '#94a3b8'];
@@ -109,9 +122,10 @@ const ProjectDetailPage = () => {
   const confirmRemoveMember = async () => {
     if (!confirmModal.userId) return;
     setMembersActionLoading(true);
+    const targetUserId = confirmModal.userId;
     setConfirmModal({ show: false, userId: null });
     try {
-      await projectService.removeProjectMember(projectId, confirmModal.userId);
+      await projectService.removeProjectMember(projectId, targetUserId);
       queryClient.invalidateQueries({ queryKey: ['project', projectId, 'members'] });
     } catch (err) {
       console.error('Error removing member', err);
@@ -120,38 +134,44 @@ const ProjectDetailPage = () => {
       setMembersActionLoading(false);
     }
   };
-  const formatNumber = value => Number(value || 0).toLocaleString('vi-VN');
-  const formatDate = value => {
+
+  const formatNumber = (value) => Number(value || 0).toLocaleString('vi-VN');
+  const formatDate = (value) => {
     if (!value) return t("author.chuaCapNhat");
     return new Date(value).toLocaleDateString('vi-VN');
   };
-  const mapChartData = chart => {
+
+  const mapChartData = (chart) => {
     const labels = chart?.labels || [];
     const values = chart?.datasets?.[0]?.data || [];
     return labels.map((label, index) => ({
       name: label,
-      value: values[index] || 0
+      value: values[index] || 0,
     }));
   };
-  const hasChartData = chart => mapChartData(chart).some(item => item.value > 0);
+
+  const hasChartData = (chart) => mapChartData(chart).some((item) => item.value > 0);
+
   const chartTooltipStyle = {
-    backgroundColor: 'var(--bg-card)',
-    border: '1px solid var(--border)',
-    borderRadius: '12px',
-    boxShadow: '0 12px 30px rgba(15, 23, 42, 0.08)',
-    color: 'var(--text-main)',
-    fontFamily: 'var(--font-display)',
-    fontSize: '12px'
+    backgroundColor: 'var(--ds-surface, #ffffff)',
+    border: '1px solid var(--ds-border, #E4E7EC)',
+    borderRadius: '8px',
+    boxShadow: 'var(--ds-shadow-card)',
+    color: 'var(--ds-foreground, #0D1B1C)',
+    fontSize: '13px',
   };
-  const renderEmptyChart = (message = t("project.chuaCoDuLieuBieuDo")) => <div className="d-flex flex-column align-items-center justify-content-center h-100 text-muted-custom py-5">
-      <Icon icon="lucide:chart-no-axes-column" width="42" className="mb-2 opacity-50" />
-      <span className="small">{message}</span>
-    </div>;
+
+  const renderEmptyChart = (message = t("project.chuaCoDuLieuBieuDo")) => (
+    <div className="flex h-52 flex-col items-center justify-center text-muted-foreground py-6">
+      <Icon icon="lucide:chart-no-axes-column" width="36" className="mb-2 opacity-40" />
+      <span className="text-xs">{message}</span>
+    </div>
+  );
+
   const renderDonutChart = (chart, centerLabel) => {
     let data = mapChartData(chart);
     if (!hasChartData(chart)) return renderEmptyChart();
 
-    // Group items beyond top 5 into "Lĩnh vực khác" / "Nguồn khác"
     if (data.length > 5) {
       const sorted = [...data].sort((a, b) => b.value - a.value);
       const top5 = sorted.slice(0, 5);
@@ -160,180 +180,210 @@ const ProjectDetailPage = () => {
         const otherLabel = centerLabel === 'Subject Areas' ? t("project.linhVucKhac") : t("project.nguonKhac");
         top5.push({
           name: otherLabel,
-          value: remainingSum
+          value: remainingSum,
         });
       }
       data = top5;
     }
     const total = data.reduce((sum, item) => sum + item.value, 0);
-    return <div className="row align-items-center g-3">
-        <div className="col-12 col-sm-6 d-flex justify-content-center position-relative">
-          <div style={{
-          width: '100%',
-          height: '220px'
-        }}>
+
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-4">
+        <div className="relative flex justify-center">
+          <div className="w-full h-52">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={data} cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={3} dataKey="value" nameKey="name">
-                  {data.map((_, index) => <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />)}
+                <Pie
+                  data={data}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={70}
+                  paddingAngle={3}
+                  dataKey="value"
+                  nameKey="name"
+                >
+                  {data.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                  ))}
                 </Pie>
-                <Tooltip contentStyle={chartTooltipStyle} formatter={value => [formatNumber(value), centerLabel]} />
+                <Tooltip contentStyle={chartTooltipStyle} formatter={(val) => [formatNumber(val), centerLabel]} />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="position-absolute d-flex flex-column align-items-center justify-content-center" style={{
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          pointerEvents: 'none'
-        }}>
-            <span className="fw-bold text-main" style={{
-            fontSize: '1.25rem'
-          }}>{formatNumber(total)}</span>
-            <span className="text-muted-custom" style={{
-            fontSize: '0.65rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            fontWeight: 600
-          }}>{t("project.tongSo")}</span>
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span className="text-base font-bold text-foreground">{formatNumber(total)}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {t("project.tongSo")}
+            </span>
           </div>
         </div>
-        <div className="col-12 col-sm-6">
-          <div className="d-flex flex-column gap-2 pe-2 custom-scrollbar" style={{
-          maxHeight: '200px',
-          overflowY: 'auto'
-        }}>
-            {data.map((item, index) => {
-            const percentage = total > 0 ? (item.value / total * 100).toFixed(1) : 0;
-            return <div key={index} className="d-flex align-items-center justify-content-between py-1 border-bottom border-light-subtle">
-                  <div className="d-flex align-items-center gap-2 text-truncate" style={{
-                maxWidth: '70%'
-              }}>
-                    <span className="rounded-circle flex-shrink-0" style={{
-                  width: 8,
-                  height: 8,
-                  backgroundColor: chartColors[index % chartColors.length]
-                }} />
-                    <span className="small text-main text-truncate fw-medium" title={item.name}>{item.name}</span>
-                  </div>
-                  <div className="small text-muted-custom text-nowrap">
-                    <span className="fw-semibold text-main me-1">{formatNumber(item.value)}</span>
-                    <span style={{
-                  fontSize: '0.85em'
-                }}>({percentage}%)</span>
-                  </div>
-                </div>;
+        <div className="max-h-52 overflow-y-auto space-y-1.5 pr-2">
+          {data.map((item, index) => {
+            const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : 0;
+            return (
+              <div
+                key={index}
+                className="flex items-center justify-between py-1 border-b border-border text-xs"
+              >
+                <div className="flex items-center gap-2 truncate max-w-[70%]">
+                  <span
+                    className="size-2 rounded-full shrink-0"
+                    style={{ backgroundColor: chartColors[index % chartColors.length] }}
+                  />
+                  <span className="truncate font-medium text-foreground" title={item.name}>
+                    {item.name}
+                  </span>
+                </div>
+                <div className="text-muted-foreground whitespace-nowrap">
+                  <span className="font-semibold text-foreground mr-1">{formatNumber(item.value)}</span>
+                  <span>({percentage}%)</span>
+                </div>
+              </div>
+            );
           })}
-          </div>
         </div>
-      </div>;
+      </div>
+    );
   };
-  const renderLineChart = chart => {
+
+  const renderLineChart = (chart) => {
     const data = mapChartData(chart);
     if (!hasChartData(chart)) return renderEmptyChart();
-    return <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data} margin={{
-        top: 12,
-        right: 18,
-        left: -10,
-        bottom: 8
-      }}>
-          <CartesianGrid stroke="var(--border)" strokeDasharray="4 4" vertical={false} />
-          <XAxis dataKey="name" tick={{
-          fill: 'var(--text-muted)',
-          fontSize: 12,
-          fontFamily: 'var(--font-display)'
-        }} axisLine={false} tickLine={false} />
-          <YAxis allowDecimals={false} tick={{
-          fill: 'var(--text-muted)',
-          fontSize: 12,
-          fontFamily: 'var(--font-display)'
-        }} axisLine={false} tickLine={false} />
-          <Tooltip contentStyle={chartTooltipStyle} formatter={value => [formatNumber(value), chart?.datasets?.[0]?.label || 'Publications']} />
-          <Line type="monotone" dataKey="value" stroke="var(--primary)" strokeWidth={3} dot={{
-          r: 4,
-          strokeWidth: 2,
-          fill: 'var(--bg-card)',
-          stroke: 'var(--primary)'
-        }} activeDot={{
-          r: 6,
-          fill: 'var(--primary)'
-        }} />
+    return (
+      <ResponsiveContainer width="100%" height={260}>
+        <LineChart data={data} margin={{ top: 12, right: 18, left: -10, bottom: 8 }}>
+          <CartesianGrid stroke="var(--ds-border, #E4E7EC)" strokeDasharray="4 4" vertical={false} />
+          <XAxis
+            dataKey="name"
+            tick={{ fill: 'var(--ds-muted-foreground, #475467)', fontSize: 13 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            allowDecimals={false}
+            tick={{ fill: 'var(--ds-muted-foreground, #475467)', fontSize: 13 }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip
+            contentStyle={chartTooltipStyle}
+            formatter={(value) => [formatNumber(value), chart?.datasets?.[0]?.label || 'Publications']}
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke="var(--ds-primary, #0071BC)"
+            strokeWidth={2.5}
+            dot={{ r: 4, strokeWidth: 2, fill: 'var(--ds-surface, #ffffff)', stroke: 'var(--ds-primary, #0071BC)' }}
+            activeDot={{ r: 6, fill: 'var(--ds-primary, #0071BC)' }}
+          />
         </LineChart>
-      </ResponsiveContainer>;
+      </ResponsiveContainer>
+    );
   };
+
   const renderOverviewTab = () => {
     const summary = overviewData?.summary || {};
     const charts = overviewData?.charts || {};
+
     if (overviewLoading) {
-      return <div className="glass-card rounded-3 border-0 p-5 text-center text-muted-custom">
-          <Icon icon="lucide:loader-circle" width="32" className="animate-spin-slow mb-3" style={{ color: 'var(--primary)' }} />
-          <p className="small mb-0 mt-3">{t("project.dangTaiDuLieuTongQuan")}</p>
-        </div>;
+      return (
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <Card key={i} className="p-4 space-y-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-7 w-16" />
+              </Card>
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="p-6 space-y-4">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-[240px] w-full rounded" />
+            </Card>
+            <Card className="p-6 space-y-4">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-[240px] w-full rounded" />
+            </Card>
+          </div>
+        </div>
+      );
     }
+
     if (overviewError) {
-      return <div className="glass-card rounded-3 border-0 p-4 text-center">
-          <Icon icon="lucide:circle-alert" width="42" className="text-danger mb-3" />
-          <h6 className="fw-bold text-main">{t("article.khongTheTaiBieuDo")}</h6>
-          <p className="text-muted-custom small">{overviewError}</p>
-          <PrimaryButton className="px-3 py-2" onClick={fetchProjectOverview}>{t("article.thuLai")}</PrimaryButton>
-        </div>;
+      return (
+        <Alert variant="destructive" className="items-center">
+          <Icon icon="lucide:circle-alert" width="24" className="shrink-0" />
+          <div className="flex-1">
+            <h4 className="font-semibold text-base mb-1">{t("article.khongTheTaiBieuDo")}</h4>
+            <p className="text-xs m-0">{overviewError}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={fetchProjectOverview}>
+            {t("article.thuLai")}
+          </Button>
+        </Alert>
+      );
     }
-    return <div className="d-flex flex-column gap-3">
-        <div className="po-metrics mb-4" style={{ borderTop: 0, paddingTop: 0, marginTop: 0 }}>
-          <div className="po-metric">
-            <div className="po-metric__label">{t("project.tongSoBaiBao")}</div>
-            <div className="po-metric__value">{formatNumber(summary.totalArticles)}</div>
+
+    return (
+      <div className="space-y-6">
+        {/* Metric summary grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 rounded-card border border-border bg-surface">
+            <div className="text-xs font-medium text-muted-foreground">{t("project.tongSoBaiBao")}</div>
+            <div className="mt-1 text-base font-bold text-foreground">{formatNumber(summary.totalArticles)}</div>
           </div>
-          <div className="po-metric">
-            <div className="po-metric__label">{t("project.keywordTheoDoi")}</div>
-            <div className="po-metric__value">{formatNumber(summary.totalKeywords)}</div>
+          <div className="p-4 rounded-card border border-border bg-surface">
+            <div className="text-xs font-medium text-muted-foreground">{t("project.keywordTheoDoi")}</div>
+            <div className="mt-1 text-base font-bold text-foreground">{formatNumber(summary.totalKeywords)}</div>
           </div>
-          <div className="po-metric">
-            <div className="po-metric__label">{t("project.tongSoTapChi")}</div>
-            <div className="po-metric__value">{formatNumber(summary.totalJournals)}</div>
+          <div className="p-4 rounded-card border border-border bg-surface">
+            <div className="text-xs font-medium text-muted-foreground">{t("project.tongSoTapChi")}</div>
+            <div className="mt-1 text-base font-bold text-foreground">{formatNumber(summary.totalJournals)}</div>
           </div>
-          <div className="po-metric">
-            <div className="po-metric__label">{t("project.capNhatGanNhat")}</div>
-            <div className="po-metric__value" style={{ fontSize: '1.125rem' }}>{formatDate(summary.lastUpdatedAt)}</div>
+          <div className="p-4 rounded-card border border-border bg-surface">
+            <div className="text-xs font-medium text-muted-foreground">{t("project.capNhatGanNhat")}</div>
+            <div className="mt-1 text-base font-semibold text-foreground">{formatDate(summary.lastUpdatedAt)}</div>
           </div>
         </div>
 
-        <div className="glass-card glass-card--flat rounded-3 p-4">
-          <div className="mb-3">
-            <h6 className="fw-semibold text-main mb-1" style={{ letterSpacing: '-0.005em' }}>{t("project.xuHuongXuatBan")}</h6>
-            <p className="text-muted-custom small mb-0">{t("project.soLuongBaiBaoLienQuanTheoTungN")}</p>
-          </div>
-          {renderLineChart(charts.publicationTrend)}
-        </div>
+        {/* Publication trend */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base font-semibold">{t("project.xuHuongXuatBan")}</CardTitle>
+            <p className="text-xs text-muted-foreground m-0">{t("project.soLuongBaiBaoLienQuanTheoTungN")}</p>
+          </CardHeader>
+          <CardContent>{renderLineChart(charts.publicationTrend)}</CardContent>
+        </Card>
 
-        <div className="row g-3">
-          <div className="col-12 col-lg-6">
-            <div className="glass-card glass-card--flat rounded-3 p-4 h-100">
-              <h6 className="fw-semibold text-main mb-1" style={{ letterSpacing: '-0.005em' }}>{t("project.phanBoLinhVuc")}</h6>
-              <p className="text-muted-custom small mb-3">{t("project.tyTrongBaiBaoTheoSubjectArea")}</p>
-              {renderDonutChart(charts.subjectAreaDistribution, 'Subject Areas')}
-            </div>
-          </div>
-          <div className="col-12 col-lg-6">
-            <div className="glass-card glass-card--flat rounded-3 p-4 h-100">
-              <h6 className="fw-semibold text-main mb-1" style={{ letterSpacing: '-0.005em' }}>{t("project.loaiNguonXuatBan")}</h6>
-              <p className="text-muted-custom small mb-3">{t("project.phanBoTheoJournalConferenceBoo")}</p>
-              {renderDonutChart(charts.publicationTypeDistribution, 'Publication Types')}
-            </div>
-          </div>
+        {/* Donut distributions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-semibold">{t("project.phanBoLinhVuc")}</CardTitle>
+              <p className="text-xs text-muted-foreground m-0">{t("project.tyTrongBaiBaoTheoSubjectArea")}</p>
+            </CardHeader>
+            <CardContent>{renderDonutChart(charts.subjectAreaDistribution, 'Subject Areas')}</CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base font-semibold">{t("project.loaiNguonXuatBan")}</CardTitle>
+              <p className="text-xs text-muted-foreground m-0">{t("project.phanBoTheoJournalConferenceBoo")}</p>
+            </CardHeader>
+            <CardContent>{renderDonutChart(charts.publicationTypeDistribution, 'Publication Types')}</CardContent>
+          </Card>
         </div>
-      </div>;
+      </div>
+    );
   };
-  const renderPagination = type => {
+
+  const renderPagination = (type) => {
     const pagination = type === 'keywords' ? keywordArticlesPagination : watchArticlesPagination;
     const fetchFn = type === 'keywords' ? fetchKeywordArticles : fetchWatchArticles;
     if (!pagination || pagination.totalPages <= 1) return null;
-    const {
-      page,
-      totalPages
-    } = pagination;
+    const { page, totalPages } = pagination;
     const pages = [];
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
@@ -346,317 +396,462 @@ const ProjectDetailPage = () => {
         pages.push(1, '...', page - 1, page, page + 1, '...', totalPages);
       }
     }
-    return <div className="d-flex justify-content-center mt-4">
-        <ul className="pagination shadow-sm">
-          <li className={`page-item ${page <= 1 ? 'disabled' : ''}`}>
-            <button className="page-link text-dark" onClick={() => fetchFn(page - 1)} style={{
-            cursor: page <= 1 ? 'not-allowed' : 'pointer'
-          }}>
-              <Icon icon="lucide:chevron-left" />
-            </button>
-          </li>
-          {pages.map((p, idx) => <li key={idx} className={`page-item ${p === page ? 'active' : ''} ${p === '...' ? 'disabled' : ''}`}>
-              <button className={`page-link ${p === page ? '' : 'text-dark'}`} style={p === page ? {
-            backgroundColor: '#fd7e14',
-            borderColor: '#fd7e14',
-            color: '#fff',
-            cursor: 'default'
-          } : {
-            cursor: p === '...' ? 'default' : 'pointer'
-          }} onClick={() => p !== '...' && p !== page && fetchFn(p)}>
-                {p}
-              </button>
-            </li>)}
-          <li className={`page-item ${page >= totalPages ? 'disabled' : ''}`}>
-            <button className="page-link text-dark" onClick={() => fetchFn(page + 1)} style={{
-            cursor: page >= totalPages ? 'not-allowed' : 'pointer'
-          }}>
-              <Icon icon="lucide:chevron-right" />
-            </button>
-          </li>
-        </ul>
-      </div>;
+
+    return (
+      <div className="flex items-center justify-center gap-1.5 mt-6 pt-4 border-t border-border">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page <= 1}
+          onClick={() => fetchFn(page - 1)}
+          aria-label="Previous page"
+        >
+          <Icon icon="lucide:chevron-left" width="16" />
+        </Button>
+        {pages.map((p, idx) =>
+          p === '...' ? (
+            <span key={idx} className="px-2 text-xs text-muted-foreground">
+              ...
+            </span>
+          ) : (
+            <Button
+              key={idx}
+              variant={p === page ? 'default' : 'outline'}
+              size="sm"
+              className="size-8 p-0"
+              onClick={() => p !== page && fetchFn(p)}
+            >
+              {p}
+            </Button>
+          )
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={page >= totalPages}
+          onClick={() => fetchFn(page + 1)}
+          aria-label="Next page"
+        >
+          <Icon icon="lucide:chevron-right" width="16" />
+        </Button>
+      </div>
+    );
   };
+
   if (loading) {
-    return <div className="container-fluid py-4 grid-bg min-vh-100 d-flex justify-content-center align-items-center">
-        <div className="spinner-border text-primary" role="status"></div>
-      </div>;
-  }
-  if (error || !project) {
-    return <div className="container-fluid py-4 grid-bg min-vh-100">
-        <div className="container mx-auto" style={{
-        maxWidth: '1000px',
-        marginTop: '20px'
-      }}>
-          <div className="alert alert-danger border-0 rounded-4 shadow-sm p-4 d-flex align-items-center gap-3">
-            <Icon icon="lucide:alert-triangle" width="24" className="text-danger flex-shrink-0" />
-            <div>
-              <h6 className="fw-bold mb-1">{t("project.khongTheTaiDuAn")}</h6>
-              <p className="mb-0 small">{error || t("project.duAnKhongTonTaiHoacDaBiXoa")}</p>
-            </div>
-            <button className="btn btn-outline-danger btn-sm ms-auto" onClick={() => navigate(ROUTES.PROJECTS)}>{t("auth.quayLai")}</button>
+    return (
+      <PageContainer className="py-6 space-y-6">
+        <Skeleton className="h-6 w-48" />
+        <div className="flex justify-between items-start">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-8 w-64" />
           </div>
+          <Skeleton className="h-10 w-36 rounded" />
         </div>
-      </div>;
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <Card key={i} className="p-4 space-y-2">
+              <Skeleton className="h-3 w-20" />
+              <Skeleton className="h-6 w-16" />
+            </Card>
+          ))}
+        </div>
+        <div className="flex gap-4 border-b border-border pb-2">
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-8 w-24" />
+          <Skeleton className="h-8 w-24" />
+        </div>
+      </PageContainer>
+    );
   }
+
+  if (error || !project) {
+    return (
+      <PageContainer className="py-8">
+        <StatePanel
+          variant="error"
+          title={t("project.khongTheTaiDuAn")}
+          description={error || t("project.duAnKhongTonTaiHoacDaBiXoa")}
+          action={{
+            label: t("auth.quayLai"),
+            onClick: () => navigate(ROUTES.PROJECTS),
+          }}
+        />
+      </PageContainer>
+    );
+  }
+
   const title = project.title || 'Untitled Project';
-  const areaName = project.subject_area?.display_name || project.subject_area?.name || (typeof project.subject_area === 'string' ? project.subject_area : t("project.chuaXacDinhLinhVuc"));
+  const areaName =
+    project.subject_area?.display_name ||
+    project.subject_area?.name ||
+    (typeof project.subject_area === 'string' ? project.subject_area : t("project.chuaXacDinhLinhVuc"));
   const createdAt = project.created_at ? new Date(project.created_at).toLocaleDateString('vi-VN') : 'N/A';
   const keywordCount = watchedKeywords?.length || 0;
   const articleCount = watchArticlesPagination?.total || 0;
   const growthRate = Number(overviewData?.summary?.growthRate ?? project?.alerts_24h?.growthRate ?? 0);
   const growthYear = overviewData?.summary?.growthYear;
-  return <div className="container-fluid pb-4 grid-bg min-vh-100 position-relative overflow-hidden" style={{
-    paddingTop: '80px'
-  }}>
-      <div className="position-absolute w-100 h-100 radial-fade pe-none" style={{
-      top: 0,
-      left: 0,
-      zIndex: 0
-    }} />
-      <Header />
-      <div className="container mx-auto position-relative z-1" style={{
-      maxWidth: '1200px',
-      marginTop: '40px'
-    }}>
-        {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="po-breadcrumb mb-2">
-          <ol className="breadcrumb mb-0">
-            <li className="breadcrumb-item"><Link to={ROUTES.DASHBOARD} className="text-decoration-none">{t("author.tongQuan")}</Link></li>
-            <li className="breadcrumb-item"><Link to={ROUTES.PROJECTS} className="text-decoration-none">{t("project.duAnTheoDoi")}</Link></li>
-            <li className="breadcrumb-item active" aria-current="page">{title}</li>
-          </ol>
-        </nav>
 
-        {/* Header section (Mockup 3) */}
-        <div className="po-header mb-3">
-          <div className="d-flex flex-wrap justify-content-between align-items-start gap-3">
+  return (
+    <PageContainer className="py-6 space-y-6">
+      <PageHeader
+        breadcrumbs={[
+          { label: t("author.tongQuan"), to: ROUTES.DASHBOARD },
+          { label: t("project.duAnTheoDoi"), to: ROUTES.PROJECTS },
+          { label: title }
+        ]}
+        title={
+          <div className="flex items-center gap-3 flex-wrap">
+            <span>{title}</span>
+            <Badge variant="success" className="text-xs">
+              {t("project.dangHoatDong")}
+            </Badge>
+          </div>
+        }
+        description={
+          <span className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+            <Badge variant="secondary" className="text-xs font-medium">
+              {areaName}
+            </Badge>
+            <span>•</span>
+            <span>{t("project.capNhatLuc")} {createdAt}</span>
+          </span>
+        }
+        actions={
+          <Button
+            onClick={() => {
+              const lang = i18n.language ? i18n.language.split('-')[0] : 'vi';
+              navigate(`/${lang}/project/${projectId}/dashboard`);
+            }}
+            className="flex items-center gap-1.5"
+          >
+            <Icon icon="lucide:sparkles" width="16" aria-hidden="true" />
+            <span>{t("project.phanTichChuyenSau")}</span>
+          </Button>
+        }
+      />
 
-            {/* LEFT: meta + title + status */}
-            <div className="min-w-0" style={{ flex: '1 1 320px' }}>
-              <div className="po-meta">
-                <span>{areaName}</span>
-                <span className="po-meta__sep">·</span>
-                <span>{t("project.capNhatLuc")}{createdAt}</span>
-              </div>
-              <div className="d-flex align-items-center gap-3 flex-wrap">
-                <h1 className="font-display text-main mb-0" style={{ fontSize: 'clamp(2rem, 1.625rem + 1.5vw, 2.625rem)', fontWeight: 700, letterSpacing: '-0.03em', lineHeight: 1.05 }}>{title}</h1>
-                <span className="po-status is-active">
-                  <span className="po-status__dot" aria-hidden="true" />
-                  {t("project.dangHoatDong")}
-                </span>
-              </div>
-            </div>
-
-            {/* RIGHT: action buttons */}
-            <div className="d-flex align-items-center gap-2 flex-shrink-0">
-              <PrimaryButton
-                className="px-3"
-                variant="primary"
-                style={{ minHeight: 36, padding: '0.4rem 0.85rem', fontSize: '0.85rem' }}
-                onClick={() => {
-                  const lang = i18n.language ? i18n.language.split('-')[0] : 'vi';
-                  navigate(`/${lang}/project/${projectId}/dashboard`);
-                }}
-              >
-                <Icon icon="lucide:sparkles" width="14" />
-                {t("project.phanTichChuyenSau")}
-              </PrimaryButton>
+      {/* Header section */}
+      <div className="space-y-4">
+        {/* Key Metrics Row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-card border border-border bg-surface">
+          <div>
+            <div className="text-xs text-muted-foreground">{t("keywords.baiBaoLienQuan")}</div>
+            <div className="mt-1 text-base font-bold text-foreground">
+              {articleCount.toLocaleString('vi-VN')}
             </div>
           </div>
-
-          {/* Single information-dense metrics row, no individual cards.
-              Reading order (left → right): hero → strong → default → muted.
-              Tier classes control size + weight for selective hierarchy. */}
-          <div className="po-metrics">
-            <div className="po-metric">
-              <div className="po-metric__label">{t("keywords.baiBaoLienQuan")}</div>
-              <div className="po-metric__value po-metric__value--hero">{articleCount.toLocaleString('vi-VN')}</div>
+          <div>
+            <div
+              className="text-xs text-muted-foreground"
+              title={growthYear ? `${growthYear} vs ${growthYear - 1}` : undefined}
+            >
+              {t("project.mucDoTangTruong")}
             </div>
-            <div className="po-metric">
-              <div className="po-metric__label" title={growthYear ? `${growthYear} vs ${growthYear - 1}` : undefined}>{t("project.mucDoTangTruong")}</div>
-              <div className={`po-metric__value po-metric__value--strong ${
-                growthRate > 0 ? 'is-positive'
-                : growthRate < 0 ? 'is-negative'
-                : ''
-              }`}>
-                <Icon
-                  icon={growthRate > 0 ? "lucide:trending-up"
-                    : growthRate < 0 ? "lucide:trending-down"
-                    : "lucide:minus"}
-                  width="14"
-                />
-                {growthRate > 0 ? '+' : ''}{growthRate}%
-              </div>
-            </div>
-            <div className="po-metric">
-              <div className="po-metric__label">{t("project.tuKhoaTheoDoi1")}</div>
-              <div className="po-metric__value po-metric__value--muted">{keywordCount.toLocaleString('vi-VN')}</div>
-            </div>
-            <div className="po-metric">
-              <div className="po-metric__label">{t("project.canhBaoMoi24h")}</div>
-              <div className="po-metric__value po-metric__value--muted">{project?.alerts_24h?.todayCount || 0}</div>
+            <div
+              className={`mt-1 flex items-center gap-1 text-base font-bold ${
+                growthRate > 0
+                  ? 'text-success'
+                  : growthRate < 0
+                  ? 'text-danger'
+                  : 'text-muted-foreground'
+              }`}
+            >
+              <Icon
+                icon={
+                  growthRate > 0
+                    ? "lucide:trending-up"
+                    : growthRate < 0
+                    ? "lucide:trending-down"
+                    : "lucide:minus"
+                }
+                width="16"
+              />
+              <span>
+                {growthRate > 0 ? '+' : ''}
+                {growthRate}%
+              </span>
             </div>
           </div>
-        </div>
-
-        <nav className="po-tabs" role="tablist" aria-label="Project sections">
-          <button role="tab" aria-selected={activeTab === 'overview'}
-            className={`po-tab ${activeTab === 'overview' ? 'is-active' : ''}`}
-            onClick={() => handleTabChange('overview')}>
-            <Icon icon="lucide:bar-chart-2" width="15" />
-            {t("project.tongQuanBieuDo", "Overview & Charts")}
-          </button>
-          <button role="tab" aria-selected={activeTab === 'articles'}
-            className={`po-tab ${activeTab === 'articles' ? 'is-active' : ''}`}
-            onClick={() => handleTabChange('articles')}>
-            <Icon icon="lucide:file-text" width="15" />
-            {t("project.luongBaiBao", "News Feed")}
-            <span className="po-tab__count">({articleCount.toLocaleString()})</span>
-          </button>
-          <button role="tab" aria-selected={activeTab === 'keywords'}
-            className={`po-tab ${activeTab === 'keywords' ? 'is-active' : ''}`}
-            onClick={() => handleTabChange('keywords')}>
-            <Icon icon="lucide:key" width="15" />
-            {t("project.keywordsGiamSat", "Keywords & Monitoring")}
-            <span className="po-tab__count">({keywordCount.toLocaleString()})</span>
-          </button>
-          <button role="tab" aria-selected={activeTab === 'members'}
-            className={`po-tab ${activeTab === 'members' ? 'is-active' : ''}`}
-            onClick={() => handleTabChange('members')}>
-            <Icon icon="lucide:users" width="15" />
-            {t("project.thanhVien", "Members")}
-            <span className="po-tab__count">({members.length})</span>
-          </button>
-        </nav>
-
-        {/* Tab Content */}
-        <div className="mb-5">
-          {activeTab === 'overview' && renderOverviewTab()}
-
-          {activeTab === 'articles' && <div className="glass-card rounded-4 shadow-sm border p-4">
-              <div className="mb-4">
-                <h5 className="fw-bold text-main mb-1">{t("project.luongBaiVietCapNhat")}</h5>
-                <p className="text-muted-custom small mb-0">{t("project.danhSachCacBaiBaoKhoaHocXuatBa")}</p>
-              </div>
-
-              {watchArticles.length === 0 ? <div className="text-center py-5 text-muted-custom">
-                  <Icon icon="lucide:file-x" width="48" className="mb-3 opacity-50" />
-                  <p className="mb-0">{t("project.chuaCoBaiBaoNaoKhopVoiTuKhoaCu")}</p>
-                </div> : <div className="list-group list-group-flush border-top pt-2">
-                  {watchArticles.map((article, index) => <div key={index} className="list-group-item bg-transparent px-0 py-3 border-bottom">
-                      <div className="d-flex justify-content-between align-items-start mb-2">
-                        <span className="text-muted-custom small">{article.journal_name || article.journal?.title || t("author.tapChiKhoaHoc")}</span>
-                        <span className="text-muted-custom small">{article.publication_year || new Date(article.publication_date).getFullYear()}</span>
-                      </div>
-                      <Link to={`/articles/${article.article_id || article.id}/visual`} className="text-decoration-none">
-                        <h6 className="fw-bold text-main mb-2 hover-primary lh-base">
-                          <LatexText text={article.title} />
-                        </h6>
-                      </Link>
-                      <div className="d-flex justify-content-between align-items-center mt-2">
-                        <div className="text-muted-custom small text-truncate pe-3">
-                          {article.doi && <>
-                              DOI: <a href={article.doi.startsWith('http') ? article.doi : `https://doi.org/${article.doi}`} target="_blank" rel="noopener noreferrer" className="text-muted-custom text-decoration-none hover-primary">{article.doi}</a>
-                            </>}
-                        </div>
-                        <div className="d-flex gap-2 flex-wrap justify-content-end">
-                          {article.matched_areas?.map((area, aIdx) => <span key={`area-${aIdx}`} className="badge fw-medium text-nowrap" style={{
-                    fontSize: '0.7rem',
-                    backgroundColor: 'var(--primary-light)',
-                    color: 'var(--primary)',
-                    border: 'none',
-                    boxShadow: 'none'
-                  }}>
-                              <Icon icon="lucide:book-open" className="me-1" width="12" />
-                              {area}
-                            </span>)}
-                          {article.matched_keywords?.map((kw, kwIdx) => <span key={`kw-${kwIdx}`} className="badge fw-medium text-nowrap" style={{
-                    fontSize: '0.7rem',
-                    backgroundColor: 'var(--primary-light)',
-                    color: 'var(--primary)',
-                    border: 'none',
-                    boxShadow: 'none'
-                  }}>
-                              <Icon icon="lucide:sparkles" className="me-1" width="12" />
-                              {kw}
-                            </span>)}
-                          {!article.matched_keywords?.length && !article.matched_areas?.length && <span className="badge fw-medium text-nowrap" style={{
-                    fontSize: '0.7rem',
-                    backgroundColor: 'var(--primary-light)',
-                    color: 'var(--primary)',
-                    border: 'none',
-                    boxShadow: 'none'
-                  }}>{t("project.doTrungKhopCao")}</span>}
-                        </div>
-                      </div>
-                    </div>)}
-                </div>}
-              
-              {renderPagination('articles')}
-            </div>}
-
-          {activeTab === 'keywords' && <div className="glass-card rounded-4 shadow-sm border p-4">
-              <div className="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                  <h5 className="fw-bold text-main mb-1">{t("project.quanLyWatchlistTuKhoa")}</h5>
-                  <p className="text-muted-custom small mb-0">{t("project.heThongSeLienTucQuetBaiBaoMoiV")}</p>
-                </div>
-                <PrimaryButton variant="outline" className="px-3 py-2" onClick={() => navigate(`/projects/${projectId}/edit`)}>
-                  <Icon icon="lucide:edit-2" width="16" />{t("project.chinhSuaDanhSach")}</PrimaryButton>
-              </div>
-
-              <KeywordWatchList watchedKeywords={watchedKeywords} articles={keywordArticles} loading={loading} onManageClick={() => setShowManageModal(true)} />
-              
-              {renderPagination('keywords')}
-            </div>}
-            
-          {activeTab === 'members' && (
-            <ProjectMembersList 
-              project={project}
-              members={members} 
-              loading={membersLoading} 
-              onInviteClick={() => setShowInviteModal(true)}
-              onChangeRole={handleChangeRole}
-              onRemoveMember={handleRemoveMember}
-              actionLoading={membersActionLoading}
-              currentUser={currentUser}
-            />
-          )}
+          <div>
+            <div className="text-xs text-muted-foreground">{t("project.tuKhoaTheoDoi1")}</div>
+            <div className="mt-1 text-base font-bold text-foreground">
+              {keywordCount.toLocaleString('vi-VN')}
+            </div>
+          </div>
+          <div>
+            <div className="text-xs text-muted-foreground">{t("project.canhBaoMoi24h")}</div>
+            <div className="mt-1 text-base font-bold text-foreground">
+              {project?.alerts_24h?.todayCount || 0}
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* Tabs navigation */}
+      <nav
+        className="flex items-center gap-1 border-b border-border mb-6 overflow-x-auto"
+        role="tablist"
+        aria-label="Project sections"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'overview'}
+          className={`flex items-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'overview'
+              ? 'border-primary text-primary font-semibold'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+          onClick={() => handleTabChange('overview')}
+        >
+          <Icon icon="lucide:bar-chart-2" width="16" />
+          <span>{t("project.tongQuanBieuDo", "Overview & Charts")}</span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'articles'}
+          className={`flex items-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'articles'
+              ? 'border-primary text-primary font-semibold'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+          onClick={() => handleTabChange('articles')}
+        >
+          <Icon icon="lucide:file-text" width="16" />
+          <span>{t("project.luongBaiBao", "News Feed")}</span>
+          <span className="rounded-full bg-surface-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+            {articleCount.toLocaleString()}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'keywords'}
+          className={`flex items-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'keywords'
+              ? 'border-primary text-primary font-semibold'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+          onClick={() => handleTabChange('keywords')}
+        >
+          <Icon icon="lucide:key" width="16" />
+          <span>{t("project.keywordsGiamSat", "Keywords & Monitoring")}</span>
+          <span className="rounded-full bg-surface-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+            {keywordCount.toLocaleString()}
+          </span>
+        </button>
+
+        <button
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'members'}
+          className={`flex items-center gap-2 py-3 px-4 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            activeTab === 'members'
+              ? 'border-primary text-primary font-semibold'
+              : 'border-transparent text-muted-foreground hover:text-foreground'
+          }`}
+          onClick={() => handleTabChange('members')}
+        >
+          <Icon icon="lucide:users" width="16" />
+          <span>{t("project.thanhVien", "Members")}</span>
+          <span className="rounded-full bg-surface-muted px-1.5 py-0.5 text-xs text-muted-foreground">
+            {members.length}
+          </span>
+        </button>
+      </nav>
+
+      {/* Tab Content */}
+      <div className="mb-8">
+        {activeTab === 'overview' && renderOverviewTab()}
+
+        {activeTab === 'articles' && (
+          <div className="rounded-card border border-border bg-surface p-5 shadow-card">
+            <div className="mb-4">
+              <h3 className="m-0 text-base font-semibold text-foreground">
+                {t("project.luongBaiVietCapNhat")}
+              </h3>
+              <p className="mt-1 mb-0 text-xs text-muted-foreground">
+                {t("project.danhSachCacBaiBaoKhoaHocXuatBa")}
+              </p>
+            </div>
+
+            {watchArticles.length === 0 ? (
+              <div className="py-12 text-center text-muted-foreground">
+                <Icon icon="lucide:file-x" width="40" className="mx-auto mb-2 opacity-40" />
+                <p className="m-0 text-xs">{t("project.chuaCoBaiBaoNaoKhopVoiTuKhoaCu")}</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-border border-t border-border">
+                {watchArticles.map((article, index) => (
+                  <div key={index} className="py-3.5 space-y-2">
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="font-medium text-foreground">
+                        {article.journal_name || article.journal?.title || t("author.tapChiKhoaHoc")}
+                      </span>
+                      <span>
+                        {article.publication_year ||
+                          (article.publication_date && new Date(article.publication_date).getFullYear())}
+                      </span>
+                    </div>
+
+                    <Link
+                      to={`/articles/${article.article_id || article.id}/visual`}
+                      className="group block no-underline"
+                    >
+                      <h4 className="m-0 text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-relaxed">
+                        <LatexText text={article.title} />
+                      </h4>
+                    </Link>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                      <div className="text-xs text-muted-foreground truncate">
+                        {article.doi && (
+                          <>
+                            DOI:{' '}
+                            <a
+                              href={article.doi.startsWith('http') ? article.doi : `https://doi.org/${article.doi}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-muted-foreground hover:text-primary no-underline transition-colors"
+                            >
+                              {article.doi}
+                            </a>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {article.matched_areas?.map((area, aIdx) => (
+                          <Badge key={`area-${aIdx}`} variant="secondary" className="text-xs">
+                            <Icon icon="lucide:book-open" className="mr-1" width="12" />
+                            {area}
+                          </Badge>
+                        ))}
+                        {article.matched_keywords?.map((kw, kwIdx) => (
+                          <Badge key={`kw-${kwIdx}`} variant="secondary" className="text-xs">
+                            <Icon icon="lucide:sparkles" className="mr-1" width="12" />
+                            {kw}
+                          </Badge>
+                        ))}
+                        {!article.matched_keywords?.length && !article.matched_areas?.length && (
+                          <Badge variant="secondary" className="text-xs">
+                            {t("project.doTrungKhopCao")}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {renderPagination('articles')}
+          </div>
+        )}
+
+        {activeTab === 'keywords' && (
+          <div className="rounded-card border border-border bg-surface p-5 shadow-card">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+              <div>
+                <h3 className="m-0 text-base font-semibold text-foreground">
+                  {t("project.quanLyWatchlistTuKhoa")}
+                </h3>
+                <p className="mt-1 mb-0 text-xs text-muted-foreground">
+                  {t("project.heThongSeLienTucQuetBaiBaoMoiV")}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/projects/${projectId}/edit`)}
+              >
+                <Icon icon="lucide:edit-2" width="14" />
+                <span>{t("project.chinhSuaDanhSach")}</span>
+              </Button>
+            </div>
+
+            <KeywordWatchList
+              watchedKeywords={watchedKeywords}
+              articles={keywordArticles}
+              loading={loading}
+              onManageClick={() => setShowManageModal(true)}
+            />
+
+            {renderPagination('keywords')}
+          </div>
+        )}
+
+        {activeTab === 'members' && (
+          <ProjectMembersList
+            project={project}
+            members={members}
+            loading={membersLoading}
+            onInviteClick={() => setShowInviteModal(true)}
+            onChangeRole={handleChangeRole}
+            onRemoveMember={handleRemoveMember}
+            actionLoading={membersActionLoading}
+            currentUser={currentUser}
+          />
+        )}
+      </div>
+
       {/* Modals */}
-      <AddKeywordModal show={showAddModal} onHide={() => setShowAddModal(false)} onAdd={addKeywordWatch} actionLoading={actionLoading} />
-
-      <ManageKeywordsModal show={showManageModal} onHide={() => setShowManageModal(false)} watchedKeywords={watchedKeywords} onRemove={removeKeywordWatch} actionLoading={actionLoading} />
-
-      <InviteMemberModal 
-        show={showInviteModal} 
-        onHide={() => setShowInviteModal(false)} 
-        onInvite={handleInviteMember} 
-        actionLoading={membersActionLoading} 
+      <AddKeywordModal
+        show={showAddModal}
+        onHide={() => setShowAddModal(false)}
+        onAdd={addKeywordWatch}
+        actionLoading={actionLoading}
       />
 
-      <Modal show={confirmModal.show} onHide={() => setConfirmModal({ show: false, userId: null })} centered>
+      <ManageKeywordsModal
+        show={showManageModal}
+        onHide={() => setShowManageModal(false)}
+        watchedKeywords={watchedKeywords}
+        onRemove={removeKeywordWatch}
+        actionLoading={actionLoading}
+      />
+
+      <InviteMemberModal
+        show={showInviteModal}
+        onHide={() => setShowInviteModal(false)}
+        onInvite={handleInviteMember}
+        actionLoading={membersActionLoading}
+      />
+
+      <Modal
+        show={confirmModal.show}
+        onHide={() => setConfirmModal({ show: false, userId: null })}
+        centered
+      >
         <Modal.Header closeButton className="border-0 pb-0">
-          <Modal.Title className="fw-bold text-main">
+          <Modal.Title className="text-base font-semibold text-foreground">
             {t("project.xoaThanhVienTitle", "Xóa thành viên")}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <p className="text-muted-custom">{t("project.banCoChacMuonXoaThanhVien", "Bạn có chắc chắn muốn xóa thành viên này / hủy lời mời khỏi dự án không?")}</p>
+        <Modal.Body className="py-3">
+          <p className="text-sm text-muted-foreground m-0">
+            {t("project.banCoChacMuonXoaThanhVien", "Bạn có chắc chắn muốn xóa thành viên này / hủy lời mời khỏi dự án không?")}
+          </p>
         </Modal.Body>
-        <Modal.Footer className="border-0 pt-0">
-          <PrimaryButton variant="outline" className="px-4" onClick={() => setConfirmModal({ show: false, userId: null })}>
+        <Modal.Footer className="border-0 pt-0 gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setConfirmModal({ show: false, userId: null })}
+          >
             {t("admin.huy", "Hủy")}
-          </PrimaryButton>
-          <button className="btn btn-danger px-4" onClick={confirmRemoveMember} style={{ fontWeight: 600, borderRadius: '12px' }}>
+          </Button>
+          <Button variant="destructive" onClick={confirmRemoveMember}>
             {t("project.xoa", "Xóa")}
-          </button>
+          </Button>
         </Modal.Footer>
       </Modal>
-
-    </div>;
+    </PageContainer>
+  );
 };
+
 export default ProjectDetailPage;

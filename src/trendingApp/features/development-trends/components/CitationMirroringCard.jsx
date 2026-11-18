@@ -80,12 +80,12 @@ export default function CitationMirroringCard() {
                   dataKey="year" 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: 'var(--color-neutral-500)', fontSize: 10 }} 
+                  tick={{ fill: 'var(--color-neutral-500)', fontSize: 13 }} 
                 />
                 <YAxis 
                   axisLine={false} 
                   tickLine={false} 
-                  tick={{ fill: 'var(--color-neutral-500)', fontSize: 10 }} 
+                  tick={{ fill: 'var(--color-neutral-500)', fontSize: 13 }} 
                 />
                 <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--color-neutral-300)', strokeWidth: 1, strokeDasharray: '4 4' }} />
                 <Legend 
@@ -93,7 +93,7 @@ export default function CitationMirroringCard() {
                   align="right"
                   height={36}
                   iconType="circle"
-                  wrapperStyle={{ fontSize: '10px', color: 'var(--color-neutral-600)', top: '-40px' }}
+                  wrapperStyle={{ fontSize: '13px', color: 'var(--color-neutral-600)', top: '-40px' }}
                 />
                 <Line 
                   type="monotone" 

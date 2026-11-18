@@ -32,7 +32,7 @@ export default function Footer() {
           <div className="d-flex align-items-center gap-3">
             <div>
               <Logo size={40} fontSize="1.25rem" />
-              <div className="text-muted-custom" style={{ fontSize: '0.8rem', maxWidth: '300px' }}>
+              <div className="text-muted-custom" style={{ fontSize: '13px', maxWidth: '300px' }}>
                 {t('footerDesc')}
               </div>
             </div>
@@ -45,7 +45,7 @@ export default function Footer() {
                 key={link.labelKey}
                 href={link.href}
                 className="text-muted-custom text-decoration-none"
-                style={{ fontSize: '0.85rem', transition: 'color 0.2s ease' }}
+                style={{ fontSize: '14px', transition: 'color 0.2s ease' }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--primary)')}
                 onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-muted)')}
               >
@@ -58,7 +58,7 @@ export default function Footer() {
         {/* Copyright */}
         <div 
           className="text-center text-muted-custom mt-4 pt-4" 
-          style={{ borderTop: '1px solid var(--border)', fontSize: '0.75rem' }}
+          style={{ borderTop: '1px solid var(--border)', fontSize: '13px' }}
         >
           © {currentYear} Trending System. {t('footerRights')}
         </div>

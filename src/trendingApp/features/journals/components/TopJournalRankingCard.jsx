@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import Card from '../../../shared/components/common/Card';
 import InlineErrorState from '../../../shared/components/common/InlineErrorState';
+import { Skeleton } from '../../../../shared/ui/skeleton';
 
 const TopJournalRankingCard = ({ data, loading, error, onRetry }) => {
   const { t } = useTranslation();
@@ -23,9 +24,11 @@ const TopJournalRankingCard = ({ data, loading, error, onRetry }) => {
       className="tjr-card"
     >
       {loading ? (
-        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-neutral-500)' }}>
-          <div className="update-icon spin" style={{ width: '24px', height: '24px', border: '3px solid var(--color-primary-orange)', borderTopColor: 'transparent', borderRadius: '50%', margin: '0 auto 10px' }}></div>
-          {t('common.loading', 'Loading ranking data...')}
+        <div className="p-4 space-y-3">
+          <Skeleton className="h-8 w-full rounded" />
+          <Skeleton className="h-8 w-full rounded" />
+          <Skeleton className="h-8 w-full rounded" />
+          <Skeleton className="h-8 w-full rounded" />
         </div>
       ) : error ? (
         <InlineErrorState 

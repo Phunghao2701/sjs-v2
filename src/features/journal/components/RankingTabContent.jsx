@@ -5,7 +5,9 @@ import { useTranslation } from "react-i18next";
  * File: features\journal\components\RankingTabContent.jsx
  */
 import { Row, Col, Table } from 'react-bootstrap';
-import LoadingSkeleton from '../../../shared/components/LoadingSkeleton';
+import { Icon } from '@iconify/react';
+import { Skeleton } from '../../../shared/ui/skeleton';
+import { StatePanel } from '../../../shared/ui/state-panel';
 export default function RankingTabContent({
   rankingHistory = [],
   metricName = 'Impact Factor',
@@ -15,23 +17,32 @@ export default function RankingTabContent({
     t
   } = useTranslation();
   if (loading) {
-    return <Row className="gy-4">
+    return (
+      <Row className="gy-4">
         <Col lg={7}>
-          <section className="journal-surface p-4 h-100">
-            <LoadingSkeleton width="180px" height="24px" className="mb-4" />
-            <LoadingSkeleton width="100%" height="280px" />
+          <section className="journal-surface p-4 h-100 rounded-card border border-border bg-surface">
+            <Skeleton className="h-6 w-44 rounded mb-4" />
+            <Skeleton className="h-72 w-full rounded" />
           </section>
         </Col>
         <Col lg={5}>
-          <section className="journal-surface p-4 h-100">
-            <LoadingSkeleton width="150px" height="24px" className="mb-4" />
-            <LoadingSkeleton width="100%" height="280px" />
+          <section className="journal-surface p-4 h-100 rounded-card border border-border bg-surface">
+            <Skeleton className="h-6 w-36 rounded mb-4" />
+            <Skeleton className="h-72 w-full rounded" />
           </section>
         </Col>
-      </Row>;
+      </Row>
+    );
   }
   if (!rankingHistory || rankingHistory.length === 0) {
-    return <section className="journal-surface journal-empty-state">{t("journal.chuaCoDuLieuLichSuXepHangChoTa")}</section>;
+    return (
+      <StatePanel
+        variant="neutral"
+        icon={<Icon icon="lucide:line-chart" width="32" className="text-muted-foreground" />}
+        title={t("journal.chuaCoDuLieuLichSuXepHangChoTa")}
+        description={t("journal.duLieuXepHangSeHienThiODay", "Dữ liệu lịch sử xếp hạng sẽ hiển thị tại đây khi có thông tin.")}
+      />
+    );
   }
 
   // Sort chronological for chart (oldest to newest)

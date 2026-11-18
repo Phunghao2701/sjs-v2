@@ -148,7 +148,7 @@ export default function PdfDropzone({
               <div>
                 <div className="fw-bold text-main text-truncate" style={{
               maxWidth: '280px',
-              fontSize: '0.925rem'
+              fontSize: '15px'
             }}>
                   {selectedFile.name}
                 </div>

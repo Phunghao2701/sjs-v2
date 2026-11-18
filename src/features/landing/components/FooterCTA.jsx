@@ -66,7 +66,7 @@ export default function FooterCTA() {
             href="#search-sandbox"
             variant="outline-secondary"
             className="btn-view-trends w-100 w-sm-auto rounded-pill px-5 py-3 d-flex align-items-center justify-content-center gap-2"
-            style={{ fontSize: '0.875rem', fontWeight: 600 }}
+            style={{ fontSize: '14px', fontWeight: 600 }}
           >
             <Icon icon="lucide:search" className="btn-view-trends-icon fs-5" />
             <span>{t('ctaTryNowBtn')}</span>
@@ -76,7 +76,7 @@ export default function FooterCTA() {
           <Button
             onClick={handleCreateAccount}
             className="btn-primary-glow w-100 w-sm-auto rounded-pill px-5 py-3 d-flex align-items-center justify-content-center gap-2 border-0"
-            style={{ fontSize: '0.875rem', fontWeight: 700 }}
+            style={{ fontSize: '14px', fontWeight: 700 }}
           >
             <Icon icon="lucide:user-plus" className="fs-5" />
             <span>{t('ctaCreateAccountBtn')}</span>

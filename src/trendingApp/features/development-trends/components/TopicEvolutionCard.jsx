@@ -124,12 +124,12 @@ export default function TopicEvolutionCard() {
                 dataKey="year" 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: 'var(--color-neutral-500)', fontSize: 10 }} 
+                tick={{ fill: 'var(--color-neutral-500)', fontSize: 13 }} 
               />
               <YAxis 
                 axisLine={false} 
                 tickLine={false} 
-                tick={{ fill: 'var(--color-neutral-500)', fontSize: 10 }} 
+                tick={{ fill: 'var(--color-neutral-500)', fontSize: 13 }} 
               />
               <Tooltip content={<CustomTooltip meta={meta} />} cursor={{ stroke: 'var(--color-neutral-300)', strokeWidth: 1, strokeDasharray: '4 4' }} />
               {meta.map(m => (

@@ -42,13 +42,13 @@ function FeatureCard({ icon, title, description }) {
       {/* Card Content */}
       <Card.Title 
         className="font-display text-main mb-2" 
-        style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '0.01em' }}
+        style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '0.01em' }}
       >
         {title}
       </Card.Title>
       <Card.Text 
         className="text-muted-custom leading-relaxed mb-0" 
-        style={{ fontSize: '0.85rem', lineHeight: 1.6 }}
+        style={{ fontSize: '14px', lineHeight: 1.6 }}
       >
         {description}
       </Card.Text>
@@ -139,7 +139,7 @@ export default function Features() {
         
         {/* Section Header */}
         <div className="text-center mb-5 reveal-on-scroll">
-          <div className="d-inline-flex align-items-center gap-2 mb-2 text-xs font-bold tracking-wider text-uppercase" style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>
+          <div className="d-inline-flex align-items-center gap-2 mb-2 text-xs font-bold tracking-wider text-uppercase" style={{ fontSize: '13px', color: 'var(--primary)' }}>
             <span style={{ width: '24px', height: '1px', backgroundColor: 'var(--primary)' }} />
             <span>{t('featuresSubtitle')}</span>
           </div>

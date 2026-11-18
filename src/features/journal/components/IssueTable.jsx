@@ -20,7 +20,7 @@ export default function IssueTable({
   return <div className="table-responsive rounded-3 shadow-sm border overflow-hidden">
       <Table hover className="align-middle mb-0 text-start bg-card">
         <thead className="border-bottom" style={{
-        fontSize: '0.75rem',
+        fontSize: '13px',
         letterSpacing: '0.05em'
       }}>
           <tr>

@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import Card from '../../../shared/components/common/Card';
 import InlineErrorState from '../../../shared/components/common/InlineErrorState';
+import { Skeleton } from '../../../../shared/ui/skeleton';
 
 const CustomBubble = (props) => {
   const { cx, cy, payload } = props;
@@ -135,9 +136,8 @@ const ImpactMatrixCard = ({ data, loading, error, onRetry }) => {
       className="imc-card"
     >
       {loading ? (
-        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--color-neutral-500)', display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }}>
-          <div className="update-icon spin" style={{ width: '24px', height: '24px', border: '3px solid var(--color-primary-orange)', borderTopColor: 'transparent', borderRadius: '50%', margin: '0 auto 10px' }}></div>
-          {t('common.loading', 'Loading impact matrix data...')}
+        <div className="p-6 flex flex-col justify-center items-center h-full min-h-[300px] w-full">
+          <Skeleton className="h-[280px] w-full rounded-lg" />
         </div>
       ) : error ? (
         <InlineErrorState 
@@ -169,7 +169,7 @@ const ImpactMatrixCard = ({ data, loading, error, onRetry }) => {
                     value: t('journals.sjrCitationScoreUpper', 'SJR CITATION SCORE'), 
                     position: 'bottom', 
                     offset: 15, 
-                    fontSize: 10, 
+                    fontSize: 13, 
                     fontWeight: 600,
                     letterSpacing: '0.05em',
                     fill: 'var(--color-neutral-500)' 
@@ -189,7 +189,7 @@ const ImpactMatrixCard = ({ data, loading, error, onRetry }) => {
                     angle: -90, 
                     position: 'left', 
                     offset: 15,
-                    fontSize: 10, 
+                    fontSize: 13, 
                     fontWeight: 600,
                     letterSpacing: '0.05em',
                     fill: 'var(--color-neutral-500)' 

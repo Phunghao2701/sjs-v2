@@ -28,7 +28,7 @@ const SuccessState = ({
 
       {/* Mô tả */}
       <p className="text-center mb-4" style={{
-      fontSize: '0.93rem',
+      fontSize: '15px',
       color: 'var(--text-muted, #6B6B6B)',
       lineHeight: 1.6
     }}>{t("auth.taiKhoanCuaBanDaDuocKichHoatTh")}{' '}

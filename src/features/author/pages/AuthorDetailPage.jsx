@@ -1,6 +1,7 @@
 ﻿import { useNavigate } from "react-router-dom";
 import Header from "../../landing/components/Header";
 import Icon from "../../../shared/components/Icon";
+import { Breadcrumbs } from "../../../shared/ui/breadcrumb";
 
 // Sub-components
 import AuthorProfileHero from "../components/AuthorProfileHero";
@@ -72,23 +73,14 @@ export default function AuthorDetailPage() {
 
       <main className="ap-main-container">
         {/* 1. BREADCRUMB */}
-        <nav className="ap-breadcrumb" aria-label="breadcrumb">
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item">
-              <span className="ap-breadcrumb__link" onClick={() => navigate("/")}>
-                Trending System
-              </span>
-            </li>
-            <li className="breadcrumb-item">
-              <span className="ap-breadcrumb__link" onClick={() => navigate("/authors")}>
-                Tác giả
-              </span>
-            </li>
-            <li className="breadcrumb-item active" aria-current="page">
-              <span className="ap-breadcrumb__current">{author.full_name}</span>
-            </li>
-          </ol>
-        </nav>
+        <Breadcrumbs
+          items={[
+            { label: "Trending System", to: "/" },
+            { label: "Tác giả", to: "/authors" },
+            { label: author.full_name }
+          ]}
+          className="mb-4"
+        />
 
         {/* 2. RESEARCHER HERO */}
         <AuthorProfileHero author={author} metrics={metrics} />

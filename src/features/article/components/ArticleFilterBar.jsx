@@ -1,14 +1,10 @@
-import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\article\components\ArticleFilterBar.jsx
- */
 import { useState, useEffect } from 'react';
-import { Dropdown, Form } from 'react-bootstrap';
+import { useTranslation } from "react-i18next";
+import { Dropdown } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
-import { FilterSearch } from '../../../shared/components/Input';
-import { FilterCard } from '../../../shared/components/Card';
+import { Card } from '../../../shared/ui/card';
+import { Button } from '../../../shared/ui/button';
+import { Badge } from '../../../shared/ui/badge';
 import { getArticleFilterOptionsApi } from '../api/articleApi';
 import { searchJournalsApi, getJournalByIdApi } from '../../journal/api/journalApi';
 import { getTopicsApi, getTopicByIdApi } from '../../topic/api/topic.api';
@@ -21,18 +17,18 @@ export default function ArticleFilterBar({
   const { t } = useTranslation();
 
   const SORT_OPTIONS = [
-    { value: 'created_at-desc', label: t("article.moiNhat", "Mới nhất") },
-    { value: 'created_at-asc', label: t("article.cuNhat", "Cũ nhất") },
-    { value: 'title-asc', label: t("article.tieuDeAz", "Tiêu đề A-Z") },
-    { value: 'title-desc', label: t("article.tieuDeZa", "Tiêu đề Z-A") },
-    { value: 'publication_year-desc', label: t("article.namXuatBanGiam", "Năm xuất bản (Giảm)") },
-    { value: 'publication_year-asc', label: t("article.namXuatBanTang", "Năm xuất bản (Tăng)") }
+    { value: 'created_at-desc', label: t("article.moiNhat", "Newest first") },
+    { value: 'created_at-asc', label: t("article.cuNhat", "Oldest first") },
+    { value: 'title-asc', label: t("article.tieuDeAz", "Title (A-Z)") },
+    { value: 'title-desc', label: t("article.tieuDeZa", "Title (Z-A)") },
+    { value: 'publication_year-desc', label: t("article.namXuatBanGiam", "Publication Year (Desc)") },
+    { value: 'publication_year-asc', label: t("article.namXuatBanTang", "Publication Year (Asc)") }
   ];
 
   const ACCESS_OPTIONS = [
-    { value: 'all', label: t("article.tatCa", "Tất cả bài báo") },
-    { value: 'oa', label: t("article.chiHienThiOpenAccess", "Chỉ hiển thị Open Access") },
-    { value: 'closed', label: t("article.chiHienThiKhongOpenAccess", "Không Open Access (Closed)") }
+    { value: 'all', label: t("article.tatCa", "All Articles") },
+    { value: 'oa', label: t("article.chiHienThiOpenAccess", "Open Access Only") },
+    { value: 'closed', label: t("article.chiHienThiKhongOpenAccess", "Subscription / Closed Only") }
   ];
 
   // Options states
@@ -42,17 +38,25 @@ export default function ArticleFilterBar({
   const [baseTopicOptions, setBaseTopicOptions] = useState([]);
   const [topicOptions, setTopicOptions] = useState([]);
 
+  // Local search input state for smooth typing
+  const [searchInput, setSearchInput] = useState(filters.search || '');
+
+  // Keep search input in sync if parent filters change externally
+  useEffect(() => {
+    setSearchInput(filters.search || '');
+  }, [filters.search]);
+
   // Loading & search states
   const [loadingFilters, setLoadingFilters] = useState(true);
   const [searchingJournals, setSearchingJournals] = useState(false);
   const [searchingTopics, setSearchingTopics] = useState(false);
   const [menuSearch, setMenuSearch] = useState({ year: '', journal: '', topic: '' });
 
-  // Selected item custom labels (khi id từ URL không nằm trong top options ban đầu)
+  // Selected item custom labels
   const [selectedJournalName, setSelectedJournalName] = useState('');
   const [selectedTopicName, setSelectedTopicName] = useState('');
 
-  // 1. Fetch metadata bộ lọc ban đầu (năm thực tế, top journals, top topics)
+  // 1. Fetch metadata bộ lọc ban đầu
   useEffect(() => {
     let isMounted = true;
 
@@ -63,14 +67,12 @@ export default function ArticleFilterBar({
         if (isMounted && response?.data?.success && response?.data?.data) {
           const { years = [], journals = [], topics = [] } = response.data.data;
 
-          // Years
           const formattedYears = years.map((y) => ({
             value: String(y),
             label: String(y)
           }));
           setYearOptions(formattedYears);
 
-          // Top Journals
           const formattedJournals = journals.map((j) => ({
             value: String(j.journal_id),
             label: j.display_name,
@@ -79,7 +81,6 @@ export default function ArticleFilterBar({
           setBaseJournalOptions(formattedJournals);
           setJournalOptions(formattedJournals);
 
-          // Top Topics
           const formattedTopics = topics.map((tp) => ({
             value: String(tp.topic_id),
             label: tp.display_name,
@@ -102,7 +103,7 @@ export default function ArticleFilterBar({
     };
   }, []);
 
-  // 2. Resolve selected journal name nếu chưa có trong options
+  // 2. Resolve selected journal name
   useEffect(() => {
     const journalId = filters.selectedJournal;
     if (!journalId || journalId === 'all') {
@@ -138,7 +139,7 @@ export default function ArticleFilterBar({
     }
   }, [filters.selectedJournal, journalOptions, baseJournalOptions]);
 
-  // 3. Resolve selected topic name nếu chưa có trong options
+  // 3. Resolve selected topic name
   useEffect(() => {
     const topicId = filters.selectedTopic;
     if (!topicId || topicId === 'all') {
@@ -174,7 +175,7 @@ export default function ArticleFilterBar({
     }
   }, [filters.selectedTopic, topicOptions, baseTopicOptions]);
 
-  // 4. Server-side debounced search cho Tạp chí qua useEffect
+  // 4. Server-side debounced search cho Tạp chí
   useEffect(() => {
     const keyword = menuSearch.journal.trim();
     if (!keyword) {
@@ -203,7 +204,7 @@ export default function ArticleFilterBar({
     return () => clearTimeout(timer);
   }, [menuSearch.journal, baseJournalOptions]);
 
-  // 5. Server-side debounced search cho Topic qua useEffect
+  // 5. Server-side debounced search cho Topic
   useEffect(() => {
     const keyword = menuSearch.topic.trim();
     if (!keyword) {
@@ -233,8 +234,14 @@ export default function ArticleFilterBar({
     return () => clearTimeout(timer);
   }, [menuSearch.topic, baseTopicOptions]);
 
-  const handleSearchChange = (val) => {
-    updateFilters({ search: val });
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    updateFilters({ search: searchInput.trim() });
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    updateFilters({ search: '' });
   };
 
   const handleSelectChange = (key) => (val) => {
@@ -252,18 +259,18 @@ export default function ArticleFilterBar({
   const filterConfigs = [
     {
       id: 'year',
-      label: t("article.nam", "Năm"),
+      label: t("article.nam", "Publication Year"),
       options: yearOptions,
       selectedLabel: filters.selectedYear !== 'all' ? filters.selectedYear : '',
       onSelect: handleSelectChange('year'),
       onClear: () => handleSelectChange('year')('all'),
       searchable: true,
       onSearchChange: (keyword) => setMenuSearch((prev) => ({ ...prev, year: keyword })),
-      emptyLabel: t("article.khongCoLuaChonPhuHop", "Không có năm phù hợp")
+      emptyLabel: t("article.khongCoLuaChonPhuHop", "No years available")
     },
     {
       id: 'journal',
-      label: t("typeJournal", "Tạp chí"),
+      label: t("typeJournal", "Journal"),
       options: journalOptions,
       selectedLabel: filters.selectedJournal !== 'all' ? (selectedJournalName || filters.selectedJournal) : '',
       onSelect: handleSelectChange('journal'),
@@ -271,11 +278,11 @@ export default function ArticleFilterBar({
       searchable: true,
       searching: searchingJournals,
       onSearchChange: (keyword) => setMenuSearch((prev) => ({ ...prev, journal: keyword })),
-      emptyLabel: t("article.khongTimThayTapChi", "Không tìm thấy tạp chí")
+      emptyLabel: t("article.khongTimThayTapChi", "No journals found")
     },
     {
       id: 'topic',
-      label: t("article.chuDe", "Chủ đề"),
+      label: t("article.chuDe", "Topic / Field"),
       options: topicOptions,
       selectedLabel: filters.selectedTopic !== 'all' ? (selectedTopicName || filters.selectedTopic) : '',
       onSelect: handleSelectChange('topic'),
@@ -283,7 +290,7 @@ export default function ArticleFilterBar({
       searchable: true,
       searching: searchingTopics,
       onSearchChange: (keyword) => setMenuSearch((prev) => ({ ...prev, topic: keyword })),
-      emptyLabel: t("article.khongTimThayChuDe", "Không tìm thấy chủ đề")
+      emptyLabel: t("article.khongTimThayChuDe", "No topics found")
     }
   ];
 
@@ -293,8 +300,8 @@ export default function ArticleFilterBar({
   if (filters.selectedYear && filters.selectedYear !== 'all') {
     activeChips.push({
       id: 'year',
-      label: t("article.nam", "Năm"),
-      value: `${t("article.nam", "Năm")}: ${filters.selectedYear}`,
+      label: t("article.nam", "Year"),
+      value: filters.selectedYear,
       onClear: () => handleSelectChange('year')('all')
     });
   }
@@ -302,8 +309,8 @@ export default function ArticleFilterBar({
   if (filters.selectedJournal && filters.selectedJournal !== 'all') {
     activeChips.push({
       id: 'journal',
-      label: t("typeJournal", "Tạp chí"),
-      value: `${t("typeJournal", "Tạp chí")}: ${selectedJournalName || filters.selectedJournal}`,
+      label: t("typeJournal", "Journal"),
+      value: selectedJournalName || filters.selectedJournal,
       onClear: () => handleSelectChange('journal')('all')
     });
   }
@@ -311,8 +318,8 @@ export default function ArticleFilterBar({
   if (filters.selectedTopic && filters.selectedTopic !== 'all') {
     activeChips.push({
       id: 'topic',
-      label: t("article.chuDe", "Chủ đề"),
-      value: `${t("article.chuDe", "Chủ đề")}: ${selectedTopicName || filters.selectedTopic}`,
+      label: t("article.chuDe", "Topic"),
+      value: selectedTopicName || filters.selectedTopic,
       onClear: () => handleSelectChange('topic')('all')
     });
   }
@@ -328,7 +335,7 @@ export default function ArticleFilterBar({
     activeChips.push({
       id: 'access',
       label: 'Access',
-      value: t("article.chiHienThiKhongOpenAccess", "Không Open Access"),
+      value: t("article.chiHienThiKhongOpenAccess", "Subscription"),
       onClear: () => handleSelectChange('access')('all')
     });
   }
@@ -337,7 +344,7 @@ export default function ArticleFilterBar({
     activeChips.push({
       id: 'sort',
       label: 'Sort',
-      value: `${t("article.sapXep", "Sắp xếp")}: ${SORT_OPTIONS.find((o) => o.value === currentSortValue)?.label || currentSortValue}`,
+      value: SORT_OPTIONS.find((o) => o.value === currentSortValue)?.label || currentSortValue,
       onClear: () => handleSortChange('created_at-desc')
     });
   }
@@ -353,10 +360,10 @@ export default function ArticleFilterBar({
 
   const renderDropdown = (config) => {
     const filteredOptions = getFilteredOptions(config);
-    const activeValue = config.id === 'year' 
-      ? filters.selectedYear 
-      : config.id === 'journal' 
-        ? filters.selectedJournal 
+    const activeValue = config.id === 'year'
+      ? filters.selectedYear
+      : config.id === 'journal'
+        ? filters.selectedJournal
         : filters.selectedTopic;
 
     const buttonDisplayLabel = config.selectedLabel || config.label;
@@ -366,18 +373,17 @@ export default function ArticleFilterBar({
         <Dropdown.Toggle
           variant="light"
           id={`article-filter-${config.id}`}
-          className={`article-filter-button ${config.selectedLabel ? 'is-active' : ''}`}
+          className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors inline-flex items-center gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap ${
+            config.selectedLabel ? 'border-primary text-primary bg-primary-subtle font-semibold' : 'border-border'
+          }`}
           disabled={loadingFilters}
-          title={config.selectedLabel ? `${config.label}: ${config.selectedLabel}` : config.label}
         >
-          <span className="article-filter-button-label">
-            {buttonDisplayLabel}
-          </span>
-          <Icon icon="lucide:chevron-down" width="15" />
+          <span className="truncate max-w-[160px]">{buttonDisplayLabel}</span>
+          <Icon icon="lucide:chevron-down" width="14" className="shrink-0 text-muted-foreground" />
         </Dropdown.Toggle>
 
-        <Dropdown.Menu className="article-filter-menu">
-          <div className="article-filter-menu-header">
+        <Dropdown.Menu className="shadow-popover border border-border bg-surface p-2.5 rounded-card min-w-[260px] max-w-[340px]">
+          <div className="pb-2 mb-2 border-b border-border flex items-center justify-between text-xs font-semibold text-foreground">
             <span>{config.label}</span>
             {config.selectedLabel && (
               <button
@@ -386,7 +392,7 @@ export default function ArticleFilterBar({
                   config.onClear();
                   setMenuSearch((prev) => ({ ...prev, [config.id]: '' }));
                 }}
-                className="article-filter-reset-btn"
+                className="text-xs text-primary hover:underline font-medium border-0 bg-transparent p-0 cursor-pointer"
               >
                 Reset
               </button>
@@ -394,26 +400,27 @@ export default function ArticleFilterBar({
           </div>
 
           {config.searchable && (
-            <div className="article-menu-search">
+            <div className="relative mb-2">
               {config.searching ? (
-                <Icon icon="lucide:loader-2" className="spinner-border-sm animate-spin" width="15" />
+                <Icon icon="lucide:loader-2" className="absolute left-2.5 top-1/2 -translate-y-1/2 animate-spin text-muted-foreground" width="13" />
               ) : (
-                <Icon icon="lucide:search" width="15" />
+                <Icon icon="lucide:search" width="13" className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
               )}
               <input
                 type="search"
+                className="w-full h-8 pl-7 pr-2 text-xs rounded-control border border-border bg-surface text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
                 value={menuSearch[config.id] || ''}
                 onChange={(e) => {
                   if (config.onSearchChange) {
                     config.onSearchChange(e.target.value);
                   }
                 }}
-                placeholder={t("article.searchValues", "Tìm kiếm giá trị...")}
+                placeholder={t("article.searchValues", "Filter options...")}
               />
             </div>
           )}
 
-          <div className="article-filter-options">
+          <div className="max-h-56 overflow-y-auto space-y-0.5">
             {filteredOptions.length > 0 ? (
               filteredOptions.map((option) => {
                 const isSelected = String(activeValue || '') === String(option.value);
@@ -422,7 +429,11 @@ export default function ArticleFilterBar({
                     key={option.value}
                     type="button"
                     title={option.label}
-                    className={`article-filter-option ${isSelected ? 'is-selected' : ''}`}
+                    className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-control text-xs text-left transition-colors cursor-pointer border-0 ${
+                      isSelected
+                        ? 'bg-primary-subtle text-primary font-bold'
+                        : 'text-foreground hover:bg-surface-muted bg-transparent'
+                    }`}
                     onClick={() => {
                       if (isSelected) {
                         config.onClear();
@@ -431,16 +442,18 @@ export default function ArticleFilterBar({
                       config.onSelect(option.value);
                     }}
                   >
-                    <span className="article-option-check" aria-hidden="true">
-                      {isSelected && <Icon icon="lucide:check" width="13" />}
+                    <span className={`size-4 rounded border flex items-center justify-center shrink-0 ${
+                      isSelected ? 'border-primary bg-primary text-white' : 'border-border'
+                    }`}>
+                      {isSelected && <Icon icon="lucide:check" width="11" />}
                     </span>
-                    <span className="text-truncate">{option.label}</span>
+                    <span className="truncate flex-1">{option.label}</span>
                   </button>
                 );
               })
             ) : (
-              <div className="article-filter-empty">
-                {config.emptyLabel || t("article.khongCoLuaChonPhuHop", "Không có lựa chọn phù hợp")}
+              <div className="text-center py-4 text-xs text-muted-foreground">
+                {config.emptyLabel || t("article.khongCoLuaChonPhuHop", "No options available")}
               </div>
             )}
           </div>
@@ -452,146 +465,204 @@ export default function ArticleFilterBar({
   const isMoreFiltersActive = filters.selectedAccess && filters.selectedAccess !== 'all';
 
   return (
-    <FilterCard className="article-filter-card text-start mb-4">
-      <div className="article-filter-layout">
-        <div className="article-filter-toolbar" aria-label="Article filters">
-          {filterConfigs.map(renderDropdown)}
-
-          {/* Sắp xếp */}
-          <Dropdown className="article-filter-dropdown" autoClose="outside">
-            <Dropdown.Toggle
-              variant="light"
-              id="article-sort-filters"
-              className={`article-filter-button ${currentSortValue !== 'created_at-desc' ? 'is-active' : ''}`}
-            >
-              <span className="article-filter-button-label">
-                {currentSortValue !== 'created_at-desc'
-                  ? SORT_OPTIONS.find((o) => o.value === currentSortValue)?.label
-                  : t("article.sapXep", "Sắp xếp")}
-              </span>
-              <Icon icon="lucide:arrow-up-down" width="15" />
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="article-filter-menu">
-              <div className="article-filter-menu-header">
-                <span>{t("article.sapXepBaiBao", "Sắp xếp bài báo")}</span>
-                {currentSortValue !== 'created_at-desc' && (
-                  <button
-                    type="button"
-                    onClick={() => handleSortChange('created_at-desc')}
-                    className="article-filter-reset-btn"
-                  >
-                    Reset
-                  </button>
-                )}
-              </div>
-              <div className="article-filter-options">
-                {SORT_OPTIONS.map((option) => {
-                  const isSelected = option.value === currentSortValue;
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      className={`article-filter-option ${isSelected ? 'is-selected' : ''}`}
-                      onClick={() => handleSortChange(option.value)}
-                    >
-                      <span className="article-option-check" aria-hidden="true">
-                        {isSelected && <Icon icon="lucide:check" width="13" />}
-                      </span>
-                      <span>{option.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </Dropdown.Menu>
-          </Dropdown>
-
-          {/* More filters (Open Access hoặc không) */}
-          <Dropdown className="article-filter-dropdown" autoClose="outside">
-            <Dropdown.Toggle
-              variant="light"
-              id="article-more-filters"
-              className={`article-filter-button article-more-filter-button ${isMoreFiltersActive ? 'is-active' : ''}`}
-            >
-              <Icon icon="lucide:sliders-horizontal" width="16" />
-              <span>
-                {isMoreFiltersActive
-                  ? ACCESS_OPTIONS.find((o) => o.value === filters.selectedAccess)?.label || "More filters"
-                  : "More filters"}
-              </span>
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="article-filter-menu article-more-filter-menu" style={{ minWidth: '240px' }}>
-              <div className="article-filter-menu-header">
-                <span>{t("article.trangThaiTruyCap", "Trạng thái truy cập")}</span>
-                {isMoreFiltersActive && (
-                  <button
-                    type="button"
-                    onClick={() => handleSelectChange('access')('all')}
-                    className="article-filter-reset-btn"
-                  >
-                    Reset
-                  </button>
-                )}
-              </div>
-
-              <div className="article-filter-options">
-                {ACCESS_OPTIONS.map((opt) => {
-                  const isSelected = (filters.selectedAccess || 'all') === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      className={`article-filter-option ${isSelected ? 'is-selected' : ''}`}
-                      onClick={() => handleSelectChange('access')(opt.value)}
-                    >
-                      <span className="article-option-check" aria-hidden="true">
-                        {isSelected && <Icon icon="lucide:check" width="13" />}
-                      </span>
-                      <span>{opt.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
-
-        {/* Form tìm kiếm từ khóa bài báo */}
-        <div className="article-table-search-form">
-          <FilterSearch
-            initialValue={filters.search}
-            onSearchChange={handleSearchChange}
-            placeholder={t("article.timBaiBaoDoiTuKhoa", "Tìm bài báo, DOI, từ khóa...")}
-            className="article-table-search"
-            actionButton={null}
+    <Card className="p-4 border-border bg-surface shadow-xs space-y-3.5">
+      {/* 1. Main Search Bar Row */}
+      <form onSubmit={handleSearchSubmit} className="flex items-center gap-2.5">
+        <div className="relative flex-1">
+          <Icon
+            icon="lucide:search"
+            width="17"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            aria-hidden="true"
           />
-        </div>
-      </div>
-
-      {/* Active chips row */}
-      {activeChips.length > 0 && (
-        <div className="article-selected-filters" aria-label="Selected article filters">
-          {activeChips.map((chip) => (
+          <input
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t("article.timBaiBaoDoiTuKhoa", "Search papers by title, abstract, DOI, topic, or keywords...")}
+            className="w-full h-11 pl-10 pr-9 rounded-control border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 transition-colors shadow-2xs"
+          />
+          {searchInput && (
             <button
-              key={chip.id}
               type="button"
-              className="article-selected-filter-chip"
-              onClick={chip.onClear}
-              title={`Xóa lọc: ${chip.value}`}
+              onClick={handleClearSearch}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 rounded border-0 bg-transparent cursor-pointer"
+              aria-label="Clear search"
             >
-              <span>{chip.value}</span>
-              <Icon icon="lucide:x" width="13" />
+              <Icon icon="lucide:x" width="15" />
             </button>
-          ))}
+          )}
+        </div>
+        <Button
+          type="submit"
+          className="h-11 px-5 rounded-control shadow-xs flex items-center gap-2 shrink-0"
+        >
+          <Icon icon="lucide:search" width="15" />
+          <span>Search</span>
+        </Button>
+      </form>
 
+      {/* 2. Dropdown Filters Toolbar */}
+      <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/60">
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mr-1 flex items-center gap-1">
+          <Icon icon="lucide:filter" width="13" /> Filters:
+        </span>
+
+        {/* Dynamic dropdowns: Year, Journal, Topic */}
+        {filterConfigs.map(renderDropdown)}
+
+        {/* Access Type Dropdown */}
+        <Dropdown className="article-filter-dropdown" autoClose="outside">
+          <Dropdown.Toggle
+            variant="light"
+            id="article-access-filters"
+            className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors inline-flex items-center gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap ${
+              isMoreFiltersActive ? 'border-primary text-primary bg-primary-subtle font-semibold' : 'border-border'
+            }`}
+          >
+            <Icon icon="lucide:unlock" width="13" className="shrink-0" />
+            <span>
+              {isMoreFiltersActive
+                ? ACCESS_OPTIONS.find((o) => o.value === filters.selectedAccess)?.label || "Access"
+                : "Access Type"}
+            </span>
+            <Icon icon="lucide:chevron-down" width="14" className="shrink-0 text-muted-foreground" />
+          </Dropdown.Toggle>
+          <Dropdown.Menu className="shadow-popover border border-border bg-surface p-2.5 rounded-card min-w-[220px]">
+            <div className="pb-2 mb-2 border-b border-border flex items-center justify-between text-xs font-semibold text-foreground">
+              <span>{t("article.trangThaiTruyCap", "Access Type")}</span>
+              {isMoreFiltersActive && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectChange('access')('all')}
+                  className="text-xs text-primary hover:underline font-medium border-0 bg-transparent p-0 cursor-pointer"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+            <div className="space-y-0.5">
+              {ACCESS_OPTIONS.map((opt) => {
+                const isSelected = (filters.selectedAccess || 'all') === opt.value;
+                return (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-control text-xs text-left transition-colors cursor-pointer border-0 ${
+                      isSelected
+                        ? 'bg-primary-subtle text-primary font-bold'
+                        : 'text-foreground hover:bg-surface-muted bg-transparent'
+                    }`}
+                    onClick={() => handleSelectChange('access')(opt.value)}
+                  >
+                    <span className={`size-4 rounded border flex items-center justify-center shrink-0 ${
+                      isSelected ? 'border-primary bg-primary text-white' : 'border-border'
+                    }`}>
+                      {isSelected && <Icon icon="lucide:check" width="11" />}
+                    </span>
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </Dropdown.Menu>
+        </Dropdown>
+
+        {/* Sort By Dropdown */}
+        <Dropdown className="article-filter-dropdown" autoClose="outside">
+          <Dropdown.Toggle
+            variant="light"
+            id="article-sort-filters"
+            className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors inline-flex items-center gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap ${
+              currentSortValue !== 'created_at-desc' ? 'border-primary text-primary bg-primary-subtle font-semibold' : 'border-border'
+            }`}
+          >
+            <Icon icon="lucide:arrow-up-down" width="13" className="shrink-0" />
+            <span>
+              {currentSortValue !== 'created_at-desc'
+                ? SORT_OPTIONS.find((o) => o.value === currentSortValue)?.label
+                : t("article.sapXep", "Sort By")}
+            </span>
+            <Icon icon="lucide:chevron-down" width="14" className="shrink-0 text-muted-foreground" />
+          </Dropdown.Toggle>
+          <Dropdown.Menu className="shadow-popover border border-border bg-surface p-2.5 rounded-card min-w-[220px]">
+            <div className="pb-2 mb-2 border-b border-border flex items-center justify-between text-xs font-semibold text-foreground">
+              <span>{t("article.sapXepBaiBao", "Sort Articles")}</span>
+              {currentSortValue !== 'created_at-desc' && (
+                <button
+                  type="button"
+                  onClick={() => handleSortChange('created_at-desc')}
+                  className="text-xs text-primary hover:underline font-medium border-0 bg-transparent p-0 cursor-pointer"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+            <div className="space-y-0.5">
+              {SORT_OPTIONS.map((option) => {
+                const isSelected = option.value === currentSortValue;
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-control text-xs text-left transition-colors cursor-pointer border-0 ${
+                      isSelected
+                        ? 'bg-primary-subtle text-primary font-bold'
+                        : 'text-foreground hover:bg-surface-muted bg-transparent'
+                    }`}
+                    onClick={() => handleSortChange(option.value)}
+                  >
+                    <span className={`size-4 rounded border flex items-center justify-center shrink-0 ${
+                      isSelected ? 'border-primary bg-primary text-white' : 'border-border'
+                    }`}>
+                      {isSelected && <Icon icon="lucide:check" width="11" />}
+                    </span>
+                    <span>{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </Dropdown.Menu>
+        </Dropdown>
+
+        {/* Reset All Inline Action */}
+        {activeChips.length > 0 && (
           <button
             type="button"
             onClick={clearFilters}
-            className="article-clear-btn article-clear-inline"
+            className="text-xs font-semibold text-danger hover:underline ml-auto flex items-center gap-1 border-0 bg-transparent p-1 cursor-pointer"
           >
-            Clear filters
+            <Icon icon="lucide:rotate-ccw" width="12" />
+            <span>Reset all filters</span>
           </button>
+        )}
+      </div>
+
+      {/* 3. Active Chips Row */}
+      {activeChips.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 pt-2">
+          <span className="text-[11px] font-medium text-muted-foreground">Active filters:</span>
+          {activeChips.map((chip) => (
+            <Badge
+              key={chip.id}
+              variant="info"
+              className="gap-1 px-2.5 py-0.5 text-xs font-medium"
+            >
+              <span>{chip.label}:</span>
+              <strong className="font-semibold">{chip.value}</strong>
+              <button
+                type="button"
+                onClick={chip.onClear}
+                className="hover:bg-primary/20 rounded-full p-0.5 border-0 bg-transparent text-primary cursor-pointer ml-0.5 inline-flex items-center"
+                title={`Remove ${chip.label}`}
+                aria-label={`Remove ${chip.label}`}
+              >
+                <Icon icon="lucide:x" width="12" />
+              </button>
+            </Badge>
+          ))}
         </div>
       )}
-    </FilterCard>
+    </Card>
   );
 }

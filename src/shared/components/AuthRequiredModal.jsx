@@ -31,7 +31,7 @@ export default function AuthRequiredModal({
       backgroundColor: 'var(--bg-card)'
     }}>
         <Modal.Title className="font-display fw-bold text-main d-flex align-items-center gap-2" style={{
-        fontSize: '1.25rem'
+        fontSize: '16px'
       }}>
           <Icon icon="lucide:shield-alert" className="text-warning" width="22" />{t("common.yeuCauDangNhap")}</Modal.Title>
       </Modal.Header>
@@ -41,7 +41,7 @@ export default function AuthRequiredModal({
       color: 'var(--text-main)'
     }}>
         <p className="mb-0" style={{
-        fontSize: '1rem',
+        fontSize: '16px',
         lineHeight: '1.5'
       }}>{t("common.banCanDangNhapDeSuDungTinhNang")}</p>
       </Modal.Body>

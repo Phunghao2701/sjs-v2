@@ -111,15 +111,15 @@ const AuthorImpactMatrix = ({ data }) => {
               </div>
               {/* Rows */}
               <div style={{ padding: '8px 14px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                   <span style={{ color: '#64748b' }}>{t('volume.type', 'Type')}</span>
                   <span style={{ fontWeight: 700, color: '#1e293b' }}>{t('volume.authorLabel', 'Author')}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                   <span style={{ color: '#64748b' }}>{t('volume.hIndex', 'H-Index')}</span>
                   <span style={{ fontWeight: 700, color: '#1e293b' }}>{point.hIndex}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                   <span style={{ color: '#64748b' }}>{t('volume.articleOutputYearly', 'Article Output (Yearly)')}</span>
                   <span style={{ fontWeight: 700, color: '#0071BC' }}>{point.yearlyOutput}</span>
                 </div>

@@ -236,12 +236,7 @@ export default function MyWalletPage() {
             marginBottom: 8
           }}>
               <Icon icon="lucide:shield-check" width={18} />{t("wallet.baoMatDaLop")}</div>
-            <p style={{
-            fontSize: 12,
-            color: 'var(--text-muted)',
-            lineHeight: 1.5,
-            margin: 0
-          }}>{t("wallet.researchpulseMaHoaMoiThongTinV")}</p>
+            <p className="text-xs text-text-muted leading-relaxed m-0">{t("wallet.researchpulseMaHoaMoiThongTinV")}</p>
           </div>
         </div>
       </div>

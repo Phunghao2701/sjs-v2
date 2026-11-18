@@ -35,7 +35,7 @@ export default function Hero() {
             backgroundColor: 'rgba(255, 255, 255, 0.08)',
             border: '1px solid rgba(0, 0, 0, 0.2)',
             color: '#000000',
-            fontSize: '0.75rem',
+            fontSize: '13px',
             fontWeight: 600,
             letterSpacing: '0.05em'
           }}
@@ -79,7 +79,7 @@ export default function Hero() {
           <Button
             href="#search-sandbox"
             className="btn-primary-glow rounded-pill px-5 py-3 d-flex align-items-center justify-content-center gap-2"
-            style={{ fontSize: '0.875rem', letterSpacing: '0.03em' }}
+            style={{ fontSize: '14px', letterSpacing: '0.03em' }}
           >
             <Icon icon="lucide:rocket" className="fs-5" />
             <span>{t('ctaSearch')}</span>
@@ -128,7 +128,7 @@ export default function Hero() {
                   <span 
                     className="text-muted-custom font-weight-bold"
                     style={{
-                      fontSize: '0.65rem',
+                      fontSize: '13px',
                       letterSpacing: '0.15em',
                       textTransform: 'uppercase'
                     }}

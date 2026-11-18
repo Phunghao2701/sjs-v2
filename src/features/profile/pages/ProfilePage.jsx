@@ -1,13 +1,20 @@
 import { useTranslation } from "react-i18next";
-import { t } from "i18next";
-import "../styles/ProfilePage.css";
-import Header from "../../landing/components/Header";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { Modal } from "react-bootstrap";
+import { Icon } from "@iconify/react";
+import Header from "../../landing/components/Header";
 import useAuth from "../../auth/hooks/useAuth";
 import { isAuthenticated as isAuthenticatedUtil } from "../../../shared/utils/auth";
+import { PageContainer, PageHeader } from "../../../shared/ui/page-layout";
+import { Card } from "../../../shared/ui/card";
+import { Button } from "../../../shared/ui/button";
+import { Badge } from "../../../shared/ui/badge";
+import { StatePanel } from "../../../shared/ui/state-panel";
+import { Skeleton } from "../../../shared/ui/skeleton";
+
 export default function ProfilePage() {
-  const { t: _t } = useTranslation();
+  const { t } = useTranslation();
   const {
     user,
     isAuthenticated,
@@ -15,14 +22,13 @@ export default function ProfilePage() {
     updateProfile,
     deleteAccount,
     isLoading,
-    error
+    error,
   } = useAuth();
   const navigate = useNavigate();
 
-  // Modal xác nhận xóa tài khoản
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Dữ liệu form
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -30,28 +36,24 @@ export default function ProfilePage() {
     role: "",
     gender: true,
     date_of_birth: "",
-    url_image: ""
+    url_image: "",
   });
+
   const computedIsAuthenticated = useMemo(() => {
     if (user) return true;
     if (isAuthenticated) return true;
-    // Nếu Zustand chưa hydrate kịp nhưng util kiểm tra cookie vẫn hợp lệ
-    // thì cũng xem như đã đăng nhập để tránh render sai.
     return false;
   }, [isAuthenticated, user]);
 
-  // Gọi API profile nếu đã auth.
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
-      // nếu store chưa hydrate nhưng cookie vẫn tồn tại thì thử kiểm tra util
       const shouldFetch = computedIsAuthenticated || (await isAuthenticatedUtil());
       if (!cancelled && shouldFetch) {
         try {
           await fetchProfile();
         } catch (e) {
-          // nếu BE trả lỗi nhưng cookie vẫn có (hoặc endpoint không khớp payload),
-          // tránh hard-crash và để UI hiển thị error state từ hook.
+          // Keep UI stable if request fails
         }
       }
     };
@@ -61,7 +63,6 @@ export default function ProfilePage() {
     };
   }, [computedIsAuthenticated, fetchProfile]);
 
-  // Đổ dữ liệu user vào form
   useEffect(() => {
     if (user) {
       setFormData({
@@ -73,39 +74,37 @@ export default function ProfilePage() {
         date_of_birth: (() => {
           const v = user.date_of_birth;
           if (!v) return "";
-          // input[type=date] cần yyyy-MM-dd
-          if (typeof v === 'string') {
-            // nếu backend trả ISO: 2005-02-27T17:00:00.000Z
-            if (v.includes('T')) return v.slice(0, 10);
+          if (typeof v === "string") {
+            if (v.includes("T")) return v.slice(0, 10);
             return v;
           }
-          // nếu backend trả Date object
           if (v instanceof Date) return v.toISOString().slice(0, 10);
           return String(v);
         })(),
-        url_image: user.url_image || ""
+        url_image: user.url_image || "",
       });
     }
   }, [user]);
 
-  // Cập nhật thông tin - Đã lọc sạch Payload chuẩn hóa theo đúng yêu cầu task
   const handleSave = async () => {
+    setIsSaving(true);
     try {
       await updateProfile({
         first_name: formData.first_name,
         last_name: formData.last_name,
         gender: formData.gender,
         date_of_birth: formData.date_of_birth,
-        url_image: formData.url_image
+        url_image: formData.url_image,
       });
       alert(t("profile.capNhatThanhCong"));
     } catch (err) {
       console.error(err);
       alert(t("profile.capNhatThatBai"));
+    } finally {
+      setIsSaving(false);
     }
   };
 
-  // Logic xóa tài khoản thực tế sử dụng điều hướng navigate
   const handleDelete = async () => {
     if (deleteAccount) {
       try {
@@ -122,214 +121,313 @@ export default function ProfilePage() {
     setShowDeleteModal(false);
   };
 
-  // Sửa lỗi Loading State lặp (Chỉ hiển thị loading khi chưa có dữ liệu user)
   if (isLoading && !user) {
-    return <>
+    return (
+      <div className="min-vh-100 flex flex-col text-foreground">
         <Header />
-        <div className="loading-state">
-          <div className="spinner"></div>
-          <p>{t("journal.dangTaiDuLieu")}</p>
-        </div>
-      </>;
+        <PageContainer className="flex-1 max-w-5xl py-6 space-y-6">
+          <Skeleton className="h-8 w-48" />
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <Card className="md:col-span-4 p-5 flex flex-col items-center space-y-4">
+              <Skeleton className="size-20 rounded-full" />
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-20" />
+            </Card>
+            <Card className="md:col-span-8 p-6 space-y-4">
+              <Skeleton className="h-6 w-48" />
+              <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            </Card>
+          </div>
+        </PageContainer>
+      </div>
+    );
   }
 
-  // Error State - Hiển thị lỗi tường minh
-  if (error) {
-    return <>
+  if (error && !user) {
+    return (
+      <div className="min-vh-100 flex flex-col grid-bg text-foreground">
         <Header />
-        <div className="error-state">
-          <div className="error-box">
-            <h3>{t("profile.daXayRaLoi")}</h3>
-            <p>{error}</p>
-            <button onClick={() => fetchProfile()} className="retry-btn">{t("article.thuLai")}</button>
-          </div>
+        <div className="flex-1 flex items-center justify-center p-6 max-w-lg mx-auto w-full">
+          <StatePanel
+            variant="error"
+            icon={<Icon icon="lucide:alert-circle" width="32" className="text-danger" />}
+            title={t("profile.daXayRaLoi")}
+            description={error}
+            className="w-full"
+            actions={
+              <Button onClick={() => fetchProfile()}>
+                {t("article.thuLai")}
+              </Button>
+            }
+          />
         </div>
-      </>;
+      </div>
+    );
   }
-  return <>
+
+  return (
+    <div className="min-vh-100 flex flex-col text-foreground">
       <Header />
 
-      {!computedIsAuthenticated ? <div className="profile-page">
-          <div className="profile-container">
-            <div className="page-header">
-              <h1>{t("profile.hoSo")}</h1>
-              <p>{t("profile.quanLyThongTinCaNhanVaThietLap")}</p>
-            </div>
+      <PageContainer className="flex-1 max-w-5xl py-6 space-y-6">
+        <PageHeader
+          breadcrumbs={[
+            { label: t("author.tongQuan"), to: "/" },
+            { label: t("profile.hoSoCaNhan") }
+          ]}
+          title={t("profile.hoSo")}
+          description={t("profile.quanLyThongTinCaNhanVaThietLap")}
+        />
 
-            <div style={{
-          background: "white",
-          borderRadius: "20px",
-          padding: "60px 40px",
-          textAlign: "center",
-          marginTop: "40px",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.06)"
-        }}>
-              <h2 style={{
-            marginBottom: "16px"
-          }}>{t("profile.vuiLongDangNhap")}</h2>
-              <p style={{
-            color: "#666",
-            marginBottom: "32px",
-            fontSize: "16px"
-          }}>{t("profile.banCanDangNhapDeXemVaQuanLyHoS")}</p>
-              <button onClick={() => navigate("/login")} style={{
-            background: "#0071BC",
-            color: "white",
-            border: "none",
-            padding: "12px 32px",
-            borderRadius: "10px",
-            fontSize: "16px",
-            fontWeight: "600",
-            cursor: "pointer",
-            marginRight: "12px"
-          }}>{t("signIn")}</button>
-              <button onClick={() => navigate("/register")} style={{
-            background: "transparent",
-            color: "#0071BC",
-            border: "2px solid #0071BC",
-            padding: "10px 30px",
-            borderRadius: "10px",
-            fontSize: "16px",
-            fontWeight: "600",
-            cursor: "pointer"
-          }}>{t("profile.dangKi")}</button>
-            </div>
-          </div>
-        </div> : <div className="profile-page">
-          <div className="profile-container">
-            <div className="page-header">
-              <h1>{t("profile.hoSo")}</h1>
-              <p>{t("profile.quanLyThongTinCaNhanVaThietLap")}</p>
-            </div>
+        {!computedIsAuthenticated ? (
+          <StatePanel
+            variant="neutral"
+            icon={<Icon icon="lucide:user-check" width="36" className="text-muted-foreground" />}
+            title={t("profile.vuiLongDangNhap")}
+            description={t("profile.banCanDangNhapDeXemVaQuanLyHoS")}
+            actions={
+              <div className="flex items-center gap-3">
+                <Button onClick={() => navigate("/login")}>
+                  {t("signIn")}
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/register")}>
+                  {t("profile.dangKi")}
+                </Button>
+              </div>
+            }
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            {/* Sidebar info */}
+            <Card className="md:col-span-4 p-5 flex flex-col items-center text-center">
+              <div className="relative mb-3">
+                {formData.url_image ? (
+                  <img
+                    src={formData.url_image}
+                    alt="avatar"
+                    className="size-20 rounded-full object-cover ring-2 ring-primary/20"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      if (e.target.nextElementSibling) {
+                        e.target.nextElementSibling.style.display = "flex";
+                      }
+                    }}
+                  />
+                ) : null}
+                <span
+                  className={`size-20 rounded-full bg-primary-subtle text-primary text-xl font-bold items-center justify-center ring-2 ring-primary/20 ${
+                    formData.url_image ? "hidden" : "flex"
+                  }`}
+                >
+                  {formData.first_name
+                    ? formData.first_name.charAt(0).toUpperCase()
+                    : formData.last_name
+                    ? formData.last_name.charAt(0).toUpperCase()
+                    : "U"}
+                </span>
+              </div>
 
-            <div className="breadcrumb">{t("author.tongQuan")}<span>&gt;</span>{t("profile.hoSoCaNhan")}</div>
+              <h2 className="m-0 text-base font-semibold text-foreground">
+                {formData.last_name} {formData.first_name}
+              </h2>
 
-            <div className="profile-content">
-              <div className="profile-sidebar">
-                <div className="avatar">
-                  {formData.url_image ? <img src={formData.url_image} alt="avatar" className="avatar-image" onError={e => {
-                e.target.style.display = "none";
-                if (e.target.nextElementSibling) {
-                  e.target.nextElementSibling.style.display = "flex";
-                }
-              }} /> : <span className="avatar-initials" style={{
-                display: formData.url_image ? "none" : "flex",
-                alignItems: "center",
-                justifyContent: "center"
-              }}>
-                    {formData.first_name ? formData.first_name.charAt(0).toUpperCase() : formData.last_name ? formData.last_name.charAt(0).toUpperCase() : "U"}
-                  </span>}
-                  
-                </div>
-
-                <h2>
-                  {formData.last_name} {formData.first_name}
-                </h2>
-
-                <div className="role-badge">
+              <div className="mt-2 flex items-center gap-2 flex-wrap justify-center">
+                <Badge variant="secondary" className="text-xs">
                   {formData.role || t("auth.nhaNghienCuu")}
-                </div>
-
-                <div className={`status-badge ${user?.is_active ?? true ? "active" : "inactive"}`}>
+                </Badge>
+                <Badge
+                  variant={user?.is_active ?? true ? "success" : "secondary"}
+                  className="text-xs"
+                >
                   {user?.is_active ?? true ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+
+              <div className="w-full my-4 border-t border-border" />
+
+              <div className="w-full text-left space-y-2.5">
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {t("admin.hoatDong")}
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{t("profile.duAnDangTheoDoi")}</span>
+                  <span className="font-bold text-foreground">
+                    {user?.followed_projects_count || 0}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">{t("profile.tuKhoaDaLuu")}</span>
+                  <span className="font-bold text-foreground">
+                    {user?.saved_keywords_count || 0}
+                  </span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Profile Edit Card */}
+            <Card className="md:col-span-8 p-6 space-y-6">
+              <div>
+                <h3 className="m-0 text-base font-semibold text-foreground">
+                  {t("profile.thongTinTaiKhoan")}
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Cập nhật thông tin định danh và tài khoản nghiên cứu của bạn.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    {t("profile.ho")}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.last_name}
+                    maxLength={40}
+                    onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                    className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
+                  />
                 </div>
 
-                <hr />
-
-                <div className="activity-title">{t("admin.hoatDong")}</div>
-
-                <div className="stat-row">
-                  <span>{t("profile.duAnDangTheoDoi")}</span>
-                  <strong>{user?.followed_projects_count || 0}</strong>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    {t("profile.ten")}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.first_name}
+                    maxLength={25}
+                    onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                    className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
+                  />
                 </div>
 
-                <div className="stat-row">
-                  <span>{t("profile.tuKhoaDaLuu")}</span>
-                  <strong>{user?.saved_keywords_count || 0}</strong>
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    {t("auth.diaChiEmail")}
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    readOnly
+                    className="flex h-10 w-full rounded-control border border-border bg-surface-muted px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    {t("profile.vaiTroChucDanh")}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.role || t("auth.nhaNghienCuu")}
+                    readOnly
+                    className="flex h-10 w-full rounded-control border border-border bg-surface-muted px-3 py-2 text-sm text-muted-foreground cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    {t("profile.gioiTinh")}
+                  </label>
+                  <select
+                    value={formData.gender ? "male" : "female"}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value === "male" })}
+                    className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
+                  >
+                    <option value="male">Nam</option>
+                    <option value="female">{t("auth.nu")}</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-muted-foreground">
+                    {t("profile.ngaySinh")}
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.date_of_birth}
+                    onChange={(e) => setFormData({ ...formData, date_of_birth: e.target.value })}
+                    className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
+                  />
                 </div>
               </div>
 
-              <div className="profile-card">
-                <h2>{t("profile.thongTinTaiKhoan")}</h2>
+              <div className="space-y-1.5">
+                <label className="block text-xs font-medium text-muted-foreground">
+                  AVATAR URL
+                </label>
+                <input
+                  type="text"
+                  value={formData.url_image}
+                  onChange={(e) => setFormData({ ...formData, url_image: e.target.value })}
+                  placeholder={t("profile.httpsexamplecomavatarpng")}
+                  className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary"
+                />
+              </div>
 
-                <div className="form-grid">
-                  <div className="form-group">
-                    <label>{t("profile.ho")}</label>
-                    <input type="text" value={formData.last_name} maxLength={40} onChange={e => setFormData({
-                  ...formData,
-                  last_name: e.target.value
-                })} />
+              <div className="flex justify-end pt-2">
+                <Button onClick={handleSave} isLoading={isSaving} loadingText="Đang lưu...">
+                  <Icon icon="lucide:save" width="16" aria-hidden="true" />
+                  <span>{t("admin.luuThayDoi")}</span>
+                </Button>
+              </div>
+
+              {/* Danger Zone */}
+              <div className="pt-6 border-t border-border">
+                <div className="rounded-card border border-danger/25 bg-danger-subtle/30 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="m-0 text-sm font-semibold text-danger">Danger Zone</h4>
+                    <p className="mt-1 mb-0 text-xs text-muted-foreground">
+                      {t("profile.hanhDongNaySeXoaTaiKhoanVinhVi")}
+                    </p>
                   </div>
-
-                  <div className="form-group">
-                    <label>{t("profile.ten")}</label>
-                    <input type="text" value={formData.first_name} maxLength={25} onChange={e => setFormData({
-                  ...formData,
-                  first_name: e.target.value
-                })} />
-                  </div>
-
-                  <div className="form-group">
-                    <label>{t("auth.diaChiEmail")}</label>
-                    <input type="email" value={formData.email} readOnly className="readonly-input" />
-                  </div>
-
-                  <div className="form-group">
-                    <label>{t("profile.vaiTroChucDanh")}</label>
-                    <input type="text" value={formData.role || t("auth.nhaNghienCuu")} readOnly className="readonly-input" />
-                  </div>
-
-                  <div className="form-group">
-                    <label>{t("profile.gioiTinh")}</label>
-                    <select value={formData.gender ? "male" : "female"} onChange={e => setFormData({
-                  ...formData,
-                  gender: e.target.value === "male"
-                })}>
-                      <option value="male">Nam</option>
-                      <option value="female">{t("auth.nu")}</option>
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>{t("profile.ngaySinh")}</label>
-                    <input type="date" value={formData.date_of_birth} onChange={e => setFormData({
-                  ...formData,
-                  date_of_birth: e.target.value
-                })} />
-                  </div>
-                </div>
-
-                <div className="form-group full-width">
-                  <label>AVATAR URL</label>
-                  <input type="text" value={formData.url_image} onChange={e => setFormData({
-                ...formData,
-                url_image: e.target.value
-              })} placeholder={t("profile.httpsexamplecomavatarpng")} />
-                </div>
-
-                <div className="button-area">
-                  <button className="save-btn" onClick={handleSave}>{t("admin.luuThayDoi")}</button>
-                </div>
-
-                <div className="danger-zone">
-                  <h3>Danger Zone</h3>
-                  <p>{t("profile.hanhDongNaySeXoaTaiKhoanVinhVi")}</p>
-                  <button className="delete-btn" onClick={() => setShowDeleteModal(true)}>{t("profile.xoaTaiKhoan")}</button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowDeleteModal(true)}
+                    className="self-start sm:self-auto shrink-0"
+                  >
+                    <Icon icon="lucide:trash-2" width="14" aria-hidden="true" />
+                    <span>{t("profile.xoaTaiKhoan")}</span>
+                  </Button>
                 </div>
               </div>
-            </div>
+            </Card>
           </div>
-        </div>}
+        )}
+      </PageContainer>
 
-      {showDeleteModal && isAuthenticated && <div className="modal-overlay">
-          <div className="modal-content">
-            <h3>{t("profile.xacNhanXoaTaiKhoan")}</h3>
-            <p>{t("profile.banCoChacMuonXoaTaiKhoanNayKho")}</p>
-            <div className="modal-actions">
-              <button className="cancel-btn" onClick={() => setShowDeleteModal(false)}>{t("admin.huy")}</button>
-              <button className="delete-confirm-btn" onClick={handleDelete}>{t("profile.xoaTaiKhoan")}</button>
-            </div>
-          </div>
-        </div>}
-    </>;
+      {/* Confirmation Modal */}
+      <Modal
+        show={showDeleteModal && isAuthenticated}
+        onHide={() => setShowDeleteModal(false)}
+        centered
+      >
+        <Modal.Header closeButton className="border-0 pb-0">
+          <Modal.Title className="text-base font-semibold text-danger">
+            {t("profile.xacNhanXoaTaiKhoan")}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="py-3">
+          <p className="text-sm text-muted-foreground m-0">
+            {t("profile.banCoChacMuonXoaTaiKhoanNayKho")}
+          </p>
+        </Modal.Body>
+        <Modal.Footer className="border-0 pt-0 gap-2">
+          <Button variant="outline" onClick={() => setShowDeleteModal(false)}>
+            {t("admin.huy")}
+          </Button>
+          <Button variant="destructive" onClick={handleDelete}>
+            {t("profile.xoaTaiKhoan")}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </div>
+  );
 }

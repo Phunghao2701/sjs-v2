@@ -33,13 +33,13 @@
 }
 
 .modern-error-icon {
-  font-size: 32px;
+  font-size: 16px;
   color: #ef4444;
 }
 
 .modern-error-title {
   margin: 0 0 10px 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-neutral-900, #111827);
   letter-spacing: -0.01em;
@@ -47,7 +47,7 @@
 
 .modern-error-message {
   margin: 0 0 24px 0;
-  font-size: 14.5px;
+  font-size: 15px;
   color: var(--color-neutral-500, #6b7280);
   line-height: 1.5;
 }

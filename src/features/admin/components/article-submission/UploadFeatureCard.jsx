@@ -32,8 +32,8 @@ export default function UploadFeatureCard({ title, description, icon }) {
 
         {/* Feature title & description details */}
         <div>
-          <h6 className="fw-bold text-main mb-1" style={{ fontSize: '0.88rem' }}>{title}</h6>
-          <p className="text-muted-custom small mb-0 lh-sm" style={{ fontSize: '0.78rem' }}>
+          <h6 className="fw-bold text-main mb-1" style={{ fontSize: '14px' }}>{title}</h6>
+          <p className="text-muted-custom small mb-0 lh-sm" style={{ fontSize: '13px' }}>
             {description}
           </p>
         </div>

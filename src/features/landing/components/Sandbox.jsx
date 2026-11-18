@@ -132,7 +132,7 @@ export default function Sandbox() {
             {/* Header label */}
             <div
               className="d-inline-flex align-items-center gap-2 mb-4 text-xs font-bold tracking-wider text-uppercase"
-              style={{ fontSize: "0.75rem", color: "var(--primary)" }}
+              style={{ fontSize: "13px", color: "var(--primary)" }}
             >
               <Icon
                 icon="lucide:sparkle"
@@ -176,7 +176,7 @@ export default function Sandbox() {
                   type="submit"
                   disabled={isLoading}
                   className="btn-primary-glow rounded-pill px-4 py-2 text-xs font-bold border-0 d-flex align-items-center gap-2 me-1"
-                  style={{ fontSize: "0.8rem" }}
+                  style={{ fontSize: "13px" }}
                 >
                   {isLoading ? (
                     <>
@@ -205,9 +205,9 @@ export default function Sandbox() {
             >
               <span
                 className="text-muted-custom font-bold tracking-wider text-uppercase d-flex align-items-center gap-1"
-                style={{ fontSize: "0.7rem" }}
+                style={{ fontSize: "13px" }}
               >
-                <Icon icon="lucide:sliders" style={{ fontSize: "0.65rem" }} />
+                <Icon icon="lucide:sliders" style={{ fontSize: "13px" }} />
                 <span>{t("tryNowLabel")}</span>
               </span>
               <div className="d-flex flex-wrap justify-content-center gap-2">
@@ -218,7 +218,7 @@ export default function Sandbox() {
                     onClick={() => handleTagClick(tag)}
                     className="px-3 py-1.5 rounded-pill sandbox-tag text-xs font-semibold btn btn-sm"
                     style={{
-                      fontSize: "0.75rem",
+                      fontSize: "13px",
                       transition: "all 0.2s ease",
                     }}
                   >
@@ -235,7 +235,7 @@ export default function Sandbox() {
                 style={{
                   maxWidth: "600px",
                   backgroundColor: "var(--bg-chip)",
-                  fontSize: "0.85rem",
+                  fontSize: "14px",
                 }}
               >
                 <Icon
@@ -263,7 +263,7 @@ export default function Sandbox() {
                     </h5>
                     <p
                       className="text-muted-custom mt-1 mb-0"
-                      style={{ fontSize: "0.75rem" }}
+                      style={{ fontSize: "13px" }}
                     >
                       {error}
                     </p>
@@ -299,7 +299,7 @@ export default function Sandbox() {
                     <span
                       className="font-bold tracking-wider text-uppercase"
                       style={{
-                        fontSize: "0.65rem",
+                        fontSize: "13px",
                         color: searchResult.isRealData ? "#198754" : "#ffc107",
                       }}
                     >
@@ -310,7 +310,7 @@ export default function Sandbox() {
                   </div>
                   <span
                     className="text-muted-custom"
-                    style={{ fontSize: "0.7rem" }}
+                    style={{ fontSize: "13px" }}
                   >
                     {searchResult.isRealData
                       ? t("sourceLiveApi")
@@ -320,7 +320,7 @@ export default function Sandbox() {
 
                 <h4
                   className="font-display font-bold text-main mb-3"
-                  style={{ fontSize: "1.05rem" }}
+                  style={{ fontSize: "16px" }}
                 >
                   {t("resultsFor")} "
                   <span style={{ color: "var(--primary)" }}>
@@ -378,7 +378,7 @@ export default function Sandbox() {
                               <span
                                 className="font-medium text-main text-sm text-truncate"
                                 style={{
-                                  fontSize: "0.875rem",
+                                  fontSize: "14px",
                                   maxWidth: "380px",
                                 }}
                               >
@@ -387,7 +387,7 @@ export default function Sandbox() {
                               {(item.authors?.length > 0 || item.journal?.name) && (
                                 <span
                                   className="text-muted-custom text-truncate"
-                                  style={{ fontSize: "0.725rem", maxWidth: "380px" }}
+                                  style={{ fontSize: "13px", maxWidth: "380px" }}
                                 >
                                   {item.authors?.length > 0 && (
                                     <span>
@@ -406,7 +406,7 @@ export default function Sandbox() {
                               backgroundColor: cfg.bgColor,
                               color: "#000000",
                               border: "none",
-                              fontSize: "0.65rem",
+                              fontSize: "13px",
                               fontWeight: 700,
                               textTransform: "uppercase",
                               letterSpacing: "0.05em",
@@ -429,7 +429,7 @@ export default function Sandbox() {
                       icon="lucide:search-x"
                       className="fs-1 text-muted-custom mb-2"
                     />
-                    <p className="text-sm m-0" style={{ fontSize: "0.85rem" }}>
+                    <p className="text-sm m-0" style={{ fontSize: "14px" }}>
                       {t("noResults")}
                     </p>
                   </div>

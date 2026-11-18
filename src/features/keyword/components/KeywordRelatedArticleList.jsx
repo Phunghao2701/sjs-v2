@@ -35,7 +35,7 @@ const KeywordRelatedArticleList = ({
           <div className="d-flex justify-content-between align-items-start mb-2">
             <div className="d-flex gap-2 flex-wrap">
               {article.matched_keywords?.map((kw, kwIdx) => <span key={kwIdx} className="badge fw-medium text-nowrap mb-2 d-inline-flex align-items-center" style={{
-            fontSize: '0.7rem',
+            fontSize: '13px',
             backgroundColor: 'var(--primary-light)',
             color: 'var(--primary)'
           }}>

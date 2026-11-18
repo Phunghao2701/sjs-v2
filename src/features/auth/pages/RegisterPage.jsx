@@ -12,6 +12,8 @@ import AuthLayout from '../../../app/layouts/AuthLayout';
 import AuthBanner from '../components/AuthBanner';
 import RegisterForm from '../components/RegisterForm';
 import Icon from '../../../shared/components/Icon';
+import { Button } from '../../../shared/ui/button';
+import { StatePanel } from '../../../shared/ui/state-panel';
 export default function RegisterPage() {
   const { t: _t } = useTranslation();
   const navigate = useNavigate();
@@ -51,70 +53,40 @@ export default function RegisterPage() {
   const handleGoogleAuth = () => {
     alert(t("auth.dangNhapdangKyBangGoogleOauthD"));
   };
-  return <AuthLayout banner={<AuthBanner />}>
-      {isSuccess ? <div className="text-center py-4 animate-fade-in">
-          <div className="d-inline-flex align-items-center justify-content-center mb-4" style={{
-        width: '80px',
-        height: '80px',
-        borderRadius: '50%',
-        background: 'rgba(16, 185, 129, 0.08)',
-        border: '2px solid #10b981',
-        boxShadow: '0 0 20px rgba(16, 185, 129, 0.1)'
-      }}>
-            <Icon icon="lucide:check-circle" className="text-success" style={{
-          fontSize: '40px'
-        }} />
-          </div>
-
-          <h2 className="font-display fw-bold mb-3" style={{
-        fontSize: '1.75rem',
-        color: 'var(--text-main)'
-      }}>{t("auth.dangKyThanhCong")}</h2>
-
-          <p className="text-muted-custom mb-4" style={{
-        color: 'var(--text-muted) !important',
-        lineHeight: '1.6',
-        fontSize: '14px'
-      }}>{t("auth.motEmailXacThucDaDuocGuiToiDia")}{' '}<strong style={{
-          color: 'var(--text-main)',
-          margin: '0 4px'
-        }}>{registeredEmail}</strong>{' '}{t("auth.vuiLongKiemTraHopThuHoacThuRac")}</p>
-
-          <button onClick={() => navigate('/login')} className="w-100 py-2.5 rounded-3 border-0 text-sm font-semibold transition-all" style={{
-        background: 'var(--btn-dark)',
-        color: '#ffffff',
-        boxShadow: 'none'
-      }} onMouseEnter={e => {
-        e.currentTarget.style.background = 'var(--primary)';
-      }} onMouseLeave={e => {
-        e.currentTarget.style.background = 'var(--btn-dark)';
-      }}>{t("auth.diDenDangNhap")}</button>
-        </div> : <>
-          <div className="mb-4">
-            <h2 className="font-display fw-bold mb-1" style={{
-          fontSize: '1.85rem',
-          color: 'var(--text-main)'
-        }}>{t("auth.taoTaiKhoan")}</h2>
-            <p className="text-muted-custom text-sm mb-0" style={{
-          color: 'var(--text-muted) !important'
-        }}>{t("auth.dangKyMienPhiKhongCanTheTinDun")}</p>
-          </div>
-
-          {/* Đường phân cách giữa phần tiêu đề và form đăng ký. */}
-          <div className="d-flex align-items-center justify-content-center mb-4 text-xs font-semibold select-none text-muted-custom" style={{
-        color: 'var(--text-muted) !important'
-      }}>
-            <div className="w-100" style={{
-          height: '1px',
-          background: 'var(--border)'
-        }} />
-            <div className="w-100" style={{
-          height: '1px',
-          background: 'var(--border)'
-        }} />
+  return (
+    <AuthLayout banner={<AuthBanner />}>
+      {isSuccess ? (
+        <StatePanel
+          variant="neutral"
+          icon={
+            <span className="flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+              <Icon icon="lucide:check-circle" width="32" height="32" />
+            </span>
+          }
+          title={t("auth.dangKyThanhCong")}
+          description={
+            <span>
+              {t("auth.motEmailXacThucDaDuocGuiToiDia")}{' '}
+              <strong className="text-foreground">{registeredEmail}</strong>.{' '}
+              {t("auth.vuiLongKiemTraHopThuHoacThuRac")}
+            </span>
+          }
+          actions={
+            <Button onClick={() => navigate('/login')} className="w-full">
+              {t("auth.diDenDangNhap")}
+            </Button>
+          }
+        />
+      ) : (
+        <>
+          <div className="mb-6 space-y-1">
+            <h2 className="font-display font-semibold text-base text-foreground m-0">{t("auth.taoTaiKhoan")}</h2>
+            <p className="text-sm text-muted-foreground m-0">{t("auth.dangKyMienPhiKhongCanTheTinDun")}</p>
           </div>
 
           <RegisterForm onSubmit={handleRegisterSubmit} isLoading={isLoading} apiError={error} onGoogleAuth={handleGoogleAuth} />
-        </>}
-    </AuthLayout>;
+        </>
+      )}
+    </AuthLayout>
+  );
 }

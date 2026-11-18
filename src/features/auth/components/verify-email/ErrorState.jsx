@@ -26,7 +26,7 @@ const ErrorState = ({
 
       {/* Message lỗi — từ BE hoặc default */}
       <p className="text-center mb-4" style={{
-      fontSize: '0.93rem',
+      fontSize: '15px',
       color: 'var(--text-muted, #6B6B6B)',
       lineHeight: 1.6
     }}>

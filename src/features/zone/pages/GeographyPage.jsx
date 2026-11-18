@@ -1,71 +1,64 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Container, Row, Col, Form } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { Icon } from '@iconify/react';
 import useZoneStats from '../hooks/useZoneStats';
 import { getCountryArticlesApi } from '../api/zone.api';
 import GeographyTerritoryChart from '../components/GeographyTerritoryChart';
 import GeographyRankingTable from '../components/GeographyRankingTable';
 import GeographyArticleList from '../components/GeographyArticleList';
-import Header from '../../landing/components/Header';
 import AuthRequiredModal from '../../../shared/components/AuthRequiredModal';
 import { useAuthStore } from '../../../app/store/authStore';
 import { isAuthenticated as checkAuthSession } from '../../../shared/utils/auth';
+import { Alert } from '../../../shared/ui/alert';
+import { Button } from '../../../shared/ui/button';
+import { Badge } from '../../../shared/ui/badge';
+import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
 import './GeographyPage.css';
-export default function GeographyPage() {
-  const {
-    t
-  } = useTranslation();
-  const navigate = useNavigate();
-  const isAuthenticatedState = useAuthStore(state => state.isAuthenticated);
 
-  // Khôi phục phiên đăng nhập từ cookie khi mount component ở route công khai
+export default function GeographyPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const isAuthenticatedState = useAuthStore((state) => state.isAuthenticated);
+
   useEffect(() => {
     checkAuthSession();
   }, []);
+
   const {
     countryStats,
     loadingCountries,
     errorCountries,
-    fetchCountryStats
+    fetchCountryStats,
   } = useZoneStats();
 
-  // Selected country state
   const [selectedCountry, setSelectedCountry] = useState(null);
-
-  // State lưu trữ năm xuất bản được chọn để lọc (Mặc định: 'All' - hiển thị tất cả các năm)
   const [selectedYear, setSelectedYear] = useState('All');
 
-  // Articles listing states
   const [articles, setArticles] = useState([]);
   const [loadingArticles, setLoadingArticles] = useState(false);
   const [articlesPage, setArticlesPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalArticles, setTotalArticles] = useState(0);
 
-  // Auth Modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
-
-  // Ref to scroll to articles list
   const articlesRef = useRef(null);
 
-  // Hook tự động gọi lại API để tải thống kê theo quốc gia bất cứ khi nào năm lọc (selectedYear) thay đổi
   useEffect(() => {
     fetchCountryStats({
       limit: 1000,
-      year: selectedYear === 'All' ? undefined : selectedYear
+      year: selectedYear === 'All' ? undefined : selectedYear,
     });
   }, [selectedYear, fetchCountryStats]);
 
-  // Hàm phụ trợ dùng để lấy danh sách bài viết thuộc quốc gia đang chọn (có hỗ trợ lọc theo năm)
   const fetchArticles = useCallback(async (countryId, pageNum, yearFilter) => {
     setLoadingArticles(true);
     try {
       const params = {
         page: pageNum,
-        limit: 10
+        limit: 10,
       };
-      // Nếu có bộ lọc năm hoạt động, ta sẽ gửi kèm tham số publication_year lên API bài báo
       if (yearFilter && yearFilter !== 'All') {
         params.publication_year = Number(yearFilter);
       }
@@ -86,9 +79,8 @@ export default function GeographyPage() {
     } finally {
       setLoadingArticles(false);
     }
-  }, []);
+  }, [t]);
 
-  // Hook tự động kích hoạt tải lại danh sách bài báo khi thay đổi quốc gia được chọn, trang phân trang, hoặc năm được chọn lọc
   useEffect(() => {
     if (selectedCountry) {
       fetchArticles(selectedCountry.zone_id, articlesPage, selectedYear);
@@ -99,106 +91,133 @@ export default function GeographyPage() {
     }
   }, [selectedCountry, articlesPage, selectedYear, fetchArticles]);
 
-  // Handle country row or bar chart click
-  const handleSelectCountry = country => {
+  const handleSelectCountry = (country) => {
     if (selectedCountry?.zone_id === country.zone_id) {
-      // Toggle off
       setSelectedCountry(null);
       setArticlesPage(1);
     } else {
       setSelectedCountry(country);
       setArticlesPage(1);
-      // Scroll to articles listing
       setTimeout(() => {
         articlesRef.current?.scrollIntoView({
           behavior: 'smooth',
-          block: 'start'
+          block: 'start',
         });
       }, 100);
     }
   };
 
-  // Bắt sự kiện click vào bài báo: yêu cầu đăng nhập nếu chưa có phiên hợp lệ
-  const handleDetailClick = id => {
+  const handleDetailClick = (id) => {
     if (!isAuthenticatedState) {
       setShowAuthModal(true);
     } else {
       navigate(`/articles/${id}/visual`);
     }
   };
-  return <div className="geography-page-wrapper grid-bg">
-      <div className="radial-fade position-absolute inset-0" style={{
-      pointerEvents: 'none',
-      zIndex: 0
-    }} />
-      <Header />
-      <Container fluid className="px-4 py-4 position-relative" style={{
-      zIndex: 1
-    }}>
-        {/* Breadcrumb */}
-        <div className="geography-breadcrumb mb-2">
-          <span>{t("author.tongQuan")}<span className="mx-1">&rsaquo;</span> <span className="geography-breadcrumb-active">{t("zone.phanBoDiaLy")}</span>
-          </span>
-        </div>
 
-        {/* Header */}
-        <div className="mb-4 pb-2 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-          <div>
-            <h1 className="geography-title">{t("zone.phanBoTapChiTheoQuocGia")}</h1>
-            <p className="geography-subtitle">{t("zone.xemThongKeSoLuongAnPhamKhoaHoc")}</p>
+  return (
+    <PageContainer>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Workspace", to: "/dashboard" },
+          { label: t("zone.phanBoDiaLy", "Geography") }
+        ]}
+        badge={
+          <Badge variant="info" className="gap-1.5 py-1 px-2.5 text-xs font-semibold">
+            <Icon icon="lucide:globe" width="14" />
+            <span>Worldwide Output</span>
+          </Badge>
+        }
+        title={t("zone.phanBoTapChiTheoQuocGia", "Geographic Distribution of Publications")}
+        description={t("zone.xemThongKeSoLuongAnPhamKhoaHoc", "Explore worldwide scientific publication volume, top-producing nations, and country rankings.")}
+        actions={
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
+              {t("article.namXuatBan", "Publication Year")}
+            </span>
+            <select
+              value={selectedYear}
+              onChange={(e) => {
+                setSelectedYear(e.target.value);
+                setArticlesPage(1);
+              }}
+              className="h-9 rounded-control border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors focus:border-primary focus:outline-none"
+            >
+              <option value="All">{t("zone.tatCaCacNam", "All Years")}</option>
+              {['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'].map((yr) => (
+                <option key={yr} value={yr}>
+                  {yr}
+                </option>
+              ))}
+            </select>
           </div>
-
-          {/* Year Filter Dropdown */}
-          <div className="d-flex align-items-center gap-2" style={{
-          minWidth: '220px'
-        }}>
-            <span className="text-muted-custom fw-semibold text-nowrap" style={{
-            fontSize: '0.82rem'
-          }}>{t("article.namXuatBan")}</span>
-            <Form.Select value={selectedYear} onChange={e => {
-            setSelectedYear(e.target.value);
-            setArticlesPage(1);
-          }} className="geography-select shadow-sm">
-              <option value="All">{t("zone.tatCaCacNam")}</option>
-              {['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'].map(yr => <option key={yr} value={yr}>{yr}</option>)}
-            </Form.Select>
-          </div>
-        </div>
+        }
+      />
 
         {/* Error handling for countries */}
-        {errorCountries && <div className="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
-            <div>
-              <strong>{t("zone.loiTaiDuLieu")}</strong>
-              {errorCountries}
+        {errorCountries && (
+          <Alert variant="destructive" className="mb-6 items-center">
+            <div className="flex-1">
+              <strong className="block text-sm font-semibold">{t("zone.loiTaiDuLieu")}</strong>
+              <span className="text-xs">{errorCountries}</span>
             </div>
-            <button className="btn btn-sm btn-outline-danger ms-auto" onClick={() => fetchCountryStats({
-          limit: 1000,
-          year: selectedYear === 'All' ? undefined : selectedYear
-        })}>{t("article.thuLai")}</button>
-          </div>}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                fetchCountryStats({
+                  limit: 1000,
+                  year: selectedYear === 'All' ? undefined : selectedYear,
+                })
+              }
+            >
+              {t("article.thuLai")}
+            </Button>
+          </Alert>
+        )}
 
         {/* Main Content Layout */}
-        <Row className="g-4">
-          {/* Left Column: Chart Area */}
+        <Row className="g-3 sm:g-3.5">
           <Col xs={12} lg={7} xl={8}>
-            <GeographyTerritoryChart data={countryStats} loading={loadingCountries} selectedCountry={selectedCountry} onSelectCountry={handleSelectCountry} selectedYear={selectedYear} />
+            <GeographyTerritoryChart
+              data={countryStats}
+              loading={loadingCountries}
+              selectedCountry={selectedCountry}
+              onSelectCountry={handleSelectCountry}
+              selectedYear={selectedYear}
+            />
           </Col>
 
-          {/* Right Column: Ranking Table */}
           <Col xs={12} lg={5} xl={4}>
-            <GeographyRankingTable data={countryStats} loading={loadingCountries} selectedCountry={selectedCountry} onSelectCountry={handleSelectCountry} />
+            <GeographyRankingTable
+              data={countryStats}
+              loading={loadingCountries}
+              selectedCountry={selectedCountry}
+              onSelectCountry={handleSelectCountry}
+            />
           </Col>
         </Row>
 
         {/* Selected Country Articles List */}
-        {selectedCountry && <Row className="mt-4" ref={articlesRef}>
+        {selectedCountry && (
+          <Row className="mt-6" ref={articlesRef}>
             <Col xs={12}>
-              <GeographyArticleList articles={articles} loading={loadingArticles} total={totalArticles} page={articlesPage} totalPages={totalPages} onPageChange={setArticlesPage} onDetailClick={handleDetailClick} countryName={selectedCountry.name} />
+              <GeographyArticleList
+                articles={articles}
+                loading={loadingArticles}
+                total={totalArticles}
+                page={articlesPage}
+                totalPages={totalPages}
+                onPageChange={setArticlesPage}
+                onDetailClick={handleDetailClick}
+                countryName={selectedCountry.name}
+              />
             </Col>
-          </Row>}
-      </Container>
+          </Row>
+        )}
 
-      {/* Login guard modal */}
-      <AuthRequiredModal show={showAuthModal} onHide={() => setShowAuthModal(false)} />
-    </div>;
-}
+        {/* Login guard modal */}
+        <AuthRequiredModal show={showAuthModal} onHide={() => setShowAuthModal(false)} />
+      </PageContainer>
+    );
+  }

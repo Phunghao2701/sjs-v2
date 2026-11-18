@@ -1,16 +1,17 @@
 .catalog-search-page {
-  background: var(--bg-main);
-  padding-top: 100px;
-  padding-bottom: 80px;
+  background: transparent;
+  padding-top: 0;
+  padding-bottom: 2rem;
 }
 
 .catalog-shell {
-  max-width: 1180px;
+  width: 100%;
+  max-width: none;
 }
 
 .catalog-breadcrumb {
   margin-bottom: 1.4rem;
-  font-size: 0.9rem;
+  font-size: 14px;
 }
 
 .catalog-breadcrumb a,
@@ -32,11 +33,11 @@
 .catalog-title {
   color: var(--text-main);
   font-family: var(--font-display);
-  font-size: clamp(2rem, 3vw, 3rem);
-  font-weight: 600;
-  letter-spacing: -0.035em;
-  line-height: 1.05;
-  margin-bottom: 0.65rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
   text-wrap: balance;
 }
 
@@ -70,11 +71,10 @@
   flex: 1 1 auto;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.5rem;
   min-width: 0;
-  justify-content: center;
-  border: 1px solid var(--border) !important;
-  border-radius: 999px !important;
+  border: none !important;
+  border-radius: 0 !important;
 }
 
 .catalog-filter-dropdown .dropdown-toggle::after,
@@ -83,33 +83,36 @@
 }
 
 .catalog-filter-button {
-  min-height: 42px;
-  max-width: 230px;
-  border: none !important;
+  min-height: 38px;
+  max-width: 240px;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--ds-radius-control, 8px) !important;
   background: var(--bg-card) !important;
   color: var(--text-main) !important;
   display: inline-flex !important;
   align-items: center;
   justify-content: space-between;
-  gap: 0.55rem;
+  gap: 0.5rem;
   font-family: var(--font-display) !important;
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
-  padding: 0.52rem 0.8rem !important;
-  box-shadow: none !important;
-}
-
-.catalog-filter-button-label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  padding: 0.45rem 0.75rem !important;
+  box-shadow: 0 1px 2px rgb(16 24 40 / 4%) !important;
+  transition: all 0.15s ease-in-out !important;
 }
 
 .catalog-filter-button:hover,
 .catalog-filter-button:focus,
-.catalog-filter-button.show,
-.catalog-filter-button.is-active {
+.catalog-filter-button.show {
+  border-color: var(--primary) !important;
+  background: var(--ds-surface-muted, #f8fafc) !important;
+}
 
+.catalog-filter-button.is-active {
+  border-color: var(--primary) !important;
+  background: var(--primary-light, #e0f2fe) !important;
+  color: var(--primary) !important;
+  font-weight: 600 !important;
 }
 
 .catalog-filter-button:disabled {
@@ -143,7 +146,7 @@
   justify-content: space-between;
   gap: 0.75rem;
   color: var(--text-main);
-  font-size: 0.84rem;
+  font-size: 14px;
   font-weight: 600;
   padding: 0.2rem 0.15rem 0.55rem;
 }
@@ -153,7 +156,7 @@
   background: transparent;
   color: var(--text-muted);
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 13px;
   font-weight: 600;
   padding: 0;
 }
@@ -184,7 +187,7 @@
   background: transparent;
   color: var(--text-main);
   font-family: var(--font-display);
-  font-size: 0.86rem;
+  font-size: 14px;
 }
 
 .catalog-menu-search input::placeholder {
@@ -210,7 +213,7 @@
   padding: 0.45rem 0.5rem;
   text-align: left;
   font-family: var(--font-display);
-  font-size: 0.88rem;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -242,7 +245,7 @@
 
 .catalog-filter-empty {
   color: var(--text-muted);
-  font-size: 0.86rem;
+  font-size: 14px;
   padding: 0.8rem 0.5rem;
 }
 
@@ -273,7 +276,7 @@
   gap: 0.45rem;
   padding: 0.25rem 0.55rem;
   font-family: var(--font-display);
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -316,7 +319,7 @@
   gap: 0.75rem;
   padding: 0.55rem 0.5rem;
   font-family: var(--font-display);
-  font-size: 0.88rem;
+  font-size: 14px;
   font-weight: 500;
   text-align: left;
 }
@@ -385,7 +388,7 @@
   background: transparent !important;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.9rem !important;
+  font-size: 14px !important;
 }
 
 .catalog-dropdown-menu {
@@ -398,7 +401,7 @@
 .catalog-dropdown-menu .dropdown-item {
   border-radius: 8px;
   color: var(--text-main);
-  font-size: 0.9rem;
+  font-size: 14px;
   padding: 0.55rem 0.7rem;
 }
 
@@ -421,7 +424,7 @@
   background: var(--bg-chip) !important;
   border-bottom: 1px solid var(--border) !important;
   color: var(--text-muted) !important;
-  font-size: 0.72rem;
+  font-size: 13px;
   font-weight: 600 !important;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -430,7 +433,7 @@
 
 .catalog-table tbody td {
   border-color: var(--border) !important;
-  font-size: 0.92rem;
+  font-size: 15px;
   vertical-align: middle;
 }
 
@@ -455,7 +458,7 @@
   align-items: center;
   justify-content: center;
 
-  font-size: 0.73rem;
+  font-size: 13px;
   font-weight: 600;
   min-height: 25px;
   padding: 0.18rem 0.55rem;
@@ -468,25 +471,37 @@
 }
 
 .catalog-follow-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-main);
+  background: var(--primary-light, #e0f2fe);
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
+  border-radius: var(--ds-radius-control, 8px);
+  color: var(--primary);
   display: inline-flex;
   align-items: center;
   gap: 0.38rem;
-  font-size: 0.8rem;
+  font-size: 12px;
   font-weight: 600;
-  padding: 0.34rem 0.8rem;
+  padding: 0.32rem 0.75rem;
   white-space: nowrap;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
 }
 
 .catalog-follow-btn:hover {
-
-  transform: none;
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
 }
 
 .catalog-follow-btn.is-followed {
+  background: var(--ds-surface-muted, #f1f5f9);
+  border-color: var(--border);
   color: var(--text-muted);
+}
+
+.catalog-follow-btn.is-followed:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
 }
 
 .catalog-state-card {
@@ -503,7 +518,7 @@
 .catalog-state-title {
   color: var(--text-main);
   font-family: var(--font-display);
-  font-size: 1.35rem;
+  font-size: 16px;
   font-weight: 600;
   margin-bottom: 0.45rem;
 }

@@ -46,7 +46,7 @@ export default function LoginRequiredModal({
         
         {/* Modal Content */}
         <p className="text-muted-custom text-sm mb-4 leading-relaxed" style={{
-        fontSize: '0.9rem'
+        fontSize: '14px'
       }}>{t("article.banCanDangNhapTaiKhoanResearch")}</p>
 
         {/* Buttons Grid */}

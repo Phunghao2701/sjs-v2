@@ -120,10 +120,10 @@ const ConceptualProximityCard = ({ data }) => {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
-        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-neutral-600)' }}>{t('volume.nodeDensity', 'Node Density')}</div>
-        <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{nodeDensity}</div>
+        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-neutral-600)' }}>{t('volume.nodeDensity', 'Node Density')}</div>
+        <div style={{ fontSize: '16px', fontWeight: 700 }}>{nodeDensity}</div>
       </div>
-      <p className="kn-stat-desc" style={{ fontSize: '0.75rem' }}>
+      <p className="kn-stat-desc" style={{ fontSize: '13px' }}>
         {description}
       </p>
     </div>

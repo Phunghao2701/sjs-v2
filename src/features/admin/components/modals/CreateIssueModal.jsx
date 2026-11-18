@@ -3,7 +3,7 @@ import { t } from "i18next";
 import { useState } from 'react';
 import { Modal, Form, Row, Col } from 'react-bootstrap';
 import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
-import PrimaryButton from '../../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../../shared/ui/button';
 
 /**
  * Component CreateIssueModal - Cửa sổ Modal bật lên để Admin thêm Số phát hành (Issue) mới vào Volume đang chọn.
@@ -122,8 +122,8 @@ export default function CreateIssueModal({
 
         </Modal.Body>
         <Modal.Footer className="border-top-0 pt-0">
-          <PrimaryButton variant="outline" onClick={handleClose} className="px-3">{t("admin.huy")}</PrimaryButton>
-          <PrimaryButton type="submit" className="px-3">{t("admin.taoIssue")}</PrimaryButton>
+          <Button variant="outline" size="sm" onClick={handleClose} className="px-3">{t("admin.huy")}</Button>
+          <Button type="submit" size="sm" className="px-3">{t("admin.taoIssue")}</Button>
         </Modal.Footer>
       </Form>
     </Modal>;

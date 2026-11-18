@@ -8,7 +8,8 @@ import { useState } from 'react';
 import { Spinner, Button } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
-import LoadingSkeleton from '../../../shared/components/LoadingSkeleton';
+import { Skeleton } from '../../../shared/ui/skeleton';
+import { StatePanel } from '../../../shared/ui/state-panel';
 import AdminPagination from '../../../shared/components/Pagination';
 export default function VolumesTabContent({
   volumes = [],
@@ -61,24 +62,34 @@ export default function VolumesTabContent({
     return <AdminPagination totalItems={totalItems} currentPage={currentPage} limit={limit} onPageChange={onPageChange} entityName={entityName} />;
   };
   if (loading) {
-    return <section className="journal-surface p-4">
-        {[1, 2, 3].map(i => <div key={i} className="mb-3 p-3 border-bottom">
-            <LoadingSkeleton width="200px" height="24px" className="mb-2" />
-            <LoadingSkeleton width="120px" height="16px" />
-          </div>)}
-      </section>;
+    return (
+      <section className="journal-surface p-4 rounded-card border border-border bg-surface space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="p-3 border-b border-border space-y-2">
+            <Skeleton className="h-6 w-48 rounded" />
+            <Skeleton className="h-4 w-28 rounded" />
+          </div>
+        ))}
+      </section>
+    );
   }
   if (error) {
-    return <section className="journal-surface journal-empty-state">
-        <Icon icon="lucide:alert-triangle" width="36" className="text-danger" />
-        <p className="mb-0">{t("journal.khongTheTaiDanhSachVolumesVuiL")}</p>
-      </section>;
+    return (
+      <StatePanel
+        variant="error"
+        icon={<Icon icon="lucide:alert-triangle" width="32" className="text-danger" />}
+        title={t("journal.khongTheTaiDanhSachVolumesVuiL")}
+      />
+    );
   }
   if (!volumes || volumes.length === 0) {
-    return <section className="journal-surface journal-empty-state">
-        <Icon icon="lucide:folder-x" width="36" />
-        <p className="mb-0">{t("journal.journalNayChuaCoDuLieuVolume")}</p>
-      </section>;
+    return (
+      <StatePanel
+        variant="neutral"
+        icon={<Icon icon="lucide:folder-x" width="32" className="text-muted-foreground" />}
+        title={t("journal.journalNayChuaCoDuLieuVolume")}
+      />
+    );
   }
   return <div className="journal-volume-list">
       {volumes.map(vol => {

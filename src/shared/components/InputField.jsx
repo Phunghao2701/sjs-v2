@@ -6,6 +6,7 @@
 import { Form, InputGroup } from 'react-bootstrap';
 import Icon from './Icon';
 import { useState } from 'react';
+import { FormField } from '../ui/form-field';
 
 export default function InputField({
   label,
@@ -23,30 +24,19 @@ export default function InputField({
 }) {
   const [isFocused, setIsFocused] = useState(false);
 
+  const inputId = props.id || `auth-field-${name}`;
   return (
     <Form.Group className="mb-3">
-      {label && (
-        <Form.Label 
-          className="text-xs font-bold mb-1.5 d-flex align-items-center gap-1"
-          style={{ 
-            letterSpacing: '0.05em', 
-            color: 'var(--text-main)',
-            textTransform: 'uppercase'
-          }}
-        >
-          {label}
-          {required && <span className="text-danger">*</span>}
-        </Form.Label>
-      )}
+      <FormField id={inputId} label={label} required={required} error={error} associateChild={false} labelClassName="text-xs fw-bold text-uppercase" className="gap-1.5">
       
       <InputGroup 
         className="rounded-3 overflow-hidden border"
         style={{
-          borderColor: error ? '#ef4444' : (isFocused ? 'var(--primary)' : 'var(--border)'),
+          borderColor: error ? 'var(--ds-danger)' : (isFocused ? 'var(--primary)' : 'var(--border)'),
           background: '#ffffff',
           transition: 'all 0.2s ease-in-out',
           boxShadow: error 
-            ? '0 0 0 3px rgba(239, 68, 68, 0.12)' 
+          ? '0 0 0 3px color-mix(in srgb, var(--ds-danger) 14%, transparent)'
             : (isFocused ? '0 0 0 3px rgba(0, 113, 188, 0.15)' : '0 1px 2px rgba(0, 0, 0, 0.02)')
         }}
       >
@@ -60,6 +50,7 @@ export default function InputField({
         )}
         
         <Form.Control
+          id={inputId}
           type={type}
           name={name}
           value={value}
@@ -74,6 +65,8 @@ export default function InputField({
           }}
           placeholder={placeholder}
           disabled={disabled}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${inputId}-error` : undefined}
           className="bg-transparent border-0 text-main text-sm py-2.5 ps-2"
           style={{
             boxShadow: 'none',
@@ -83,16 +76,7 @@ export default function InputField({
           {...props}
         />
       </InputGroup>
-      
-      {error && (
-        <div 
-          className="text-danger text-xs mt-1.5 d-flex align-items-center gap-1 animate-fade-in"
-          style={{ fontWeight: 500 }}
-        >
-          <Icon icon="lucide:alert-circle" width="12" />
-          <span>{error}</span>
-        </div>
-      )}
+      </FormField>
     </Form.Group>
   );
 }

@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState } from 'react';
-import { Card, Button, Row, Col, Modal, Form } from 'react-bootstrap';
+import { Card, Row, Col, Modal, Form } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import Icon from '../../../../shared/components/Icon';
 import SubmissionTabs from '../../components/article-submission/SubmissionTabs';
@@ -9,7 +9,8 @@ import ManualArticleForm from '../../components/article-submission/ManualArticle
 import PdfDropzone from '../../components/article-submission/PdfDropzone';
 import UploadFeatureCard from '../../components/article-submission/UploadFeatureCard';
 import { useAdminStore } from '../../../../app/store/adminStore';
-import PrimaryButton from '../../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../../shared/ui/button';
+import { PageHeader } from '../../../../shared/ui/page-layout';
 
 /**
  * SubmitArticlePage Component
@@ -154,30 +155,26 @@ export default function SubmitArticlePage() {
     setSelectedFile(null);
     setShowSuccessModal(false);
   };
-  return <div className="container-fluid py-2">
-      {/* Page Breadcrumbs */}
-      <nav aria-label="breadcrumb" className="mb-3">
-        <ol className="breadcrumb text-muted-custom small mb-0">
-          <li className="breadcrumb-item"><Link to="/dashboard" className="text-decoration-none text-muted-custom hover-primary">Articles</Link></li>
-          <li className="breadcrumb-item active" aria-current="page">New Submission</li>
-        </ol>
-      </nav>
-
-      {/* Main Header banner with Save Draft */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h1 className="font-display fw-bold text-main mb-1" style={{
-          fontSize: '1.8rem'
-        }}>Submit Article</h1>
-        </div>
-        
-        {/* Top Aligned Save Draft Button */}
-        <Button variant="light" onClick={handleSaveDraft} className="border rounded-3 py-2 px-3 fw-semibold text-main hover-primary-light" style={{
-        fontSize: '0.85rem'
-      }}>
-          Save Draft
-        </Button>
-      </div>
+  return (
+    <div className="container-fluid py-2 space-y-6">
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Articles', to: '/admin/articles' },
+          { label: 'New Submission' }
+        ]}
+        title="Submit Article"
+        description="Provide manuscript details or upload PDF files to register research publications in the repository."
+        actions={
+          <Button
+            variant="outline"
+            onClick={handleSaveDraft}
+            className="flex items-center gap-1.5"
+          >
+            <Icon icon="lucide:save" width="14" />
+            <span>Save Draft</span>
+          </Button>
+        }
+      />
 
       <div className="mx-auto" style={{
       maxWidth: '850px'
@@ -214,14 +211,14 @@ export default function SubmitArticlePage() {
 
             {/* Bottom-right alignment Submit Action Button */}
             <div className="d-flex justify-content-end pt-3 border-top">
-              <PrimaryButton type="submit" disabled={isSubmitting} className="px-4.5 py-2" style={{
+              <Button type="submit" disabled={isSubmitting} className="px-4 py-2" style={{
               minWidth: '150px'
             }}>
                 {isSubmitting ? <>
                     <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                     Submitting...
                   </> : 'Submit Article'}
-              </PrimaryButton>
+              </Button>
             </div>
           </Form>
         </Card>
@@ -247,7 +244,7 @@ export default function SubmitArticlePage() {
 
           {successInfo && <div className="p-3.5 rounded-3 border mb-4 text-start" style={{
           backgroundColor: '#f8fafc',
-          fontSize: '0.85rem'
+          fontSize: '14px'
         }}>
               <div className="mb-2">
                 <span className="text-muted-custom">Mode: </span>
@@ -264,17 +261,18 @@ export default function SubmitArticlePage() {
             </div>}
 
           <div className="d-flex flex-column gap-2">
-            <PrimaryButton className="py-2.5" onClick={() => {
+            <Button className="py-2.5" onClick={() => {
             setShowSuccessModal(false);
             navigate('/dashboard');
           }}>
               Go to Dashboard
-            </PrimaryButton>
-            <PrimaryButton variant="outline" className="py-2" onClick={resetSubmissionForm}>
+            </Button>
+            <Button variant="outline" className="py-2" onClick={resetSubmissionForm}>
               Submit Another Article
-            </PrimaryButton>
+            </Button>
           </div>
         </Modal.Body>
       </Modal>
-    </div>;
+    </div>
+  );
 }

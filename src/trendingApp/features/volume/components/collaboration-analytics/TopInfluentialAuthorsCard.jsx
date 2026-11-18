@@ -140,18 +140,18 @@ const TopInfluentialAuthorsCard = ({ data }) => {
                   dataKey="name"
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  tick={{ fontSize: 13, fill: '#64748b' }}
                   tickFormatter={(val) => val.length > 10 ? val.substring(0, 10) + '...' : val}
                   dy={5}
                 >
-                  <Label value={t('volume.author', 'AUTHOR')} position="insideBottom" offset={-30} style={{ textAnchor: 'middle', fontSize: 10, fill: '#94a3b8', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }} />
+                  <Label value={t('volume.author', 'AUTHOR')} position="insideBottom" offset={-30} style={{ textAnchor: 'middle', fontSize: 13, fill: '#94a3b8', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }} />
                 </XAxis>
                 <YAxis
                   axisLine={false}
                   tickLine={false}
-                  tick={{ fontSize: 11, fill: '#64748b' }}
+                  tick={{ fontSize: 13, fill: '#64748b' }}
                 >
-                  <Label value={t('volume.impactScoreUpper', 'IMPACT SCORE')} angle={-90} position="insideLeft" offset={-20} style={{ textAnchor: 'middle', fontSize: 10, fill: '#94a3b8', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }} />
+                  <Label value={t('volume.impactScoreUpper', 'IMPACT SCORE')} angle={-90} position="insideLeft" offset={-20} style={{ textAnchor: 'middle', fontSize: 13, fill: '#94a3b8', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }} />
                 </YAxis>
                 <Tooltip content={<CustomTooltip />} cursor={{ fill: '#E6F3FA' }} />
                 <Bar dataKey="score" radius={[4, 4, 0, 0]} barSize={38}>

@@ -14,7 +14,7 @@ const KeywordTrendVectorsChart = ({ data }) => {
           </div>
 
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 250, color: 'var(--color-neutral-400)', fontSize: '0.875rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 250, color: 'var(--color-neutral-400)', fontSize: '14px' }}>
           {t('volume.noTrendVectorData', 'No trend vector data available for the selected timeframe.')}
         </div>
       </div>
@@ -38,7 +38,7 @@ const KeywordTrendVectorsChart = ({ data }) => {
       <div style={{ width: '100%', height: 250, marginTop: '24px' }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
-            <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--color-neutral-500)' }} axisLine={false} tickLine={false} />
+            <XAxis dataKey="name" tick={{ fontSize: 13, fill: 'var(--color-neutral-500)' }} axisLine={false} tickLine={false} />
             <Tooltip cursor={{ fill: 'var(--color-neutral-100)' }} contentStyle={{ borderRadius: '4px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
             <Bar dataKey="value" fill="var(--color-primary-orange)" background={{ fill: '#EADDD7' }} radius={[0, 0, 0, 0]} />
           </BarChart>

@@ -3,6 +3,8 @@
  * LoadingSkeleton Component
  * Renders an animated placeholder shimmer block.
  */
+import { Skeleton } from '../ui/skeleton';
+
 export default function LoadingSkeleton({ 
   width = '100%', 
   height = '1rem', 
@@ -10,8 +12,8 @@ export default function LoadingSkeleton({
   className = '' 
 }) {
   return (
-    <div 
-      className={`skeleton-shimmer ${className}`} 
+    <Skeleton
+      className={`skeleton-shimmer ${className}`}
       style={{ 
         width, 
         height, 

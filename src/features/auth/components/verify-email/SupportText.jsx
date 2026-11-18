@@ -4,7 +4,7 @@ const SupportText = () => {
     t
   } = useTranslation();
   return <p className="text-center mt-4" style={{
-    fontSize: '0.85rem',
+    fontSize: '14px',
     color: 'var(--text-muted, #6B6B6B)'
   }}>
       <span>{t("auth.canHoTro")}</span>{' '}

@@ -6,8 +6,9 @@
 import { StrictMode } from 'react'
 import './shared/i18n/i18n'
 import { createRoot } from 'react-dom/client'
-import 'bootstrap/dist/css/bootstrap.min.css'
+import './shared/styles/bootstrap-isolated.css'
 import './index.css'
+import './shared/ui/ui.css'
 import App from './App.jsx'
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'

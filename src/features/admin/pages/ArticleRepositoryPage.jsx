@@ -9,7 +9,10 @@ import {
 import Pagination from '../../../shared/components/Pagination';
 import useAdminArticleRepository from '../hooks/useAdminArticleRepository';
 import ROUTES from '../../../app/routes/routePaths';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../shared/ui/button';
+import { Alert } from '../../../shared/ui/alert';
+import { PageHeader } from '../../../shared/ui/page-layout';
+import { Skeleton } from '../../../shared/ui/skeleton';
 
 export default function ArticleRepositoryPage() {
   const navigate = useNavigate();
@@ -35,32 +38,27 @@ export default function ArticleRepositoryPage() {
   } = useAdminArticleRepository();
 
   return (
-    <>
-      {/* Breadcrumb */}
-      <p className="admin-breadcrumb">
-        Management / <span className="admin-breadcrumb__current">Manuscripts</span>
-      </p>
+    <div className="space-y-6">
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Management' },
+          { label: 'Manuscripts' }
+        ]}
+        title="Article Repository"
+        description="Review submitted articles, filter editorial status, and open manuscript records for operational updates."
+        actions={
+          <Button
+            type="button"
+            className="flex items-center gap-1.5"
+            onClick={() => navigate(ROUTES.ADMIN_ARTICLE_CREATE)}
+          >
+            <Icon icon="lucide:plus" width="16" aria-hidden="true" />
+            <span>Submit New Article</span>
+          </Button>
+        }
+      />
 
-      {/* Header: title + nút "Submit New Article" */}
-      <div className="admin-page-header">
-        <div className="admin-page-header__copy">
-          <p className="admin-page-kicker">Manuscript Management</p>
-          <h1 className="admin-page-title">Article Repository</h1>
-          <p className="admin-page-lede">
-            Review submitted articles, filter editorial status, and open manuscript records for operational updates.
-          </p>
-        </div>
-        <PrimaryButton
-          type="button"
-          className="admin-btn-consistent"
-          onClick={() => navigate(ROUTES.ADMIN_ARTICLE_CREATE)}
-        >
-          <Icon icon="lucide:plus" width="16" />
-          <span>Submit New Article</span>
-        </PrimaryButton>
-      </div>
-
-      {/* Filter bar - filter theo dữ liệu API đang tải */}
+      {/* Filter bar */}
       <ArticleFilterBar
         journal={journalFilter}
         status={statusFilter}
@@ -73,9 +71,24 @@ export default function ArticleRepositoryPage() {
       />
 
       {loading ? (
-        <div className="admin-card text-center py-5 text-muted-custom">Loading articles from API...</div>
+        <div className="admin-card p-4 space-y-3 bg-white">
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
+              <div className="space-y-1.5 flex-1 max-w-md">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+              </div>
+              <Skeleton className="h-6 w-24 rounded-full" />
+              <Skeleton className="h-6 w-20 rounded-full" />
+              <Skeleton className="h-8 w-16 rounded" />
+            </div>
+          ))}
+        </div>
       ) : error ? (
-        <div className="alert alert-danger border-0 rounded-3 small mb-4">{error}</div>
+        <Alert variant="destructive" className="mb-4 items-center">
+          <Icon icon="lucide:alert-circle" width="18" className="shrink-0" />
+          <div className="flex-1 text-xs">{error}</div>
+        </Alert>
       ) : (
         <>
           <ArticleTable
@@ -95,11 +108,11 @@ export default function ArticleRepositoryPage() {
         </>
       )}
 
-      {/* Bottom row: Editor's Insights (trái) + Peer-Matching promo (phải) */}
+      {/* Bottom row: Editor's Insights + Peer-Matching promo */}
       <div className="admin-repository-bottom-row">
         <EditorInsightsCard insights={insights} />
         <PeerMatchingPromoCard />
       </div>
-    </>
+    </div>
   );
 }

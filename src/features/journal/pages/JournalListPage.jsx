@@ -1,10 +1,4 @@
 import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\journal\pages\JournalListPage.jsx
- */
-import { Container } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
 import Header from '../../landing/components/Header';
 import JournalStatsCards from '../components/JournalStatsCards';
@@ -12,11 +6,12 @@ import JournalSearchBar from '../components/JournalSearchBar';
 import JournalTable from '../components/JournalTable';
 import useJournalList from '../hooks/useJournalList';
 import AdminPagination from '../../../shared/components/Pagination';
+import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
+import { Alert } from '../../../shared/ui/alert';
 import './JournalListPage.css';
+
 export default function JournalListPage() {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const {
     journals,
     pagination,
@@ -40,58 +35,79 @@ export default function JournalListPage() {
     setSearchInput('');
     setQuartile('all');
     setIsOpenAccess('all');
-    // Force reset page and refetch via hook states indirectly
     window.location.reload();
   };
-  return <div className="journal-list-page text-main">
+
+  return (
+    <div className="journal-list-page text-main min-vh-100">
       <Header />
 
-      <Container>
-        <nav aria-label="breadcrumb" className="journal-list-breadcrumb mb-4">
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item">
-              <span className="journal-list-breadcrumb__link" onClick={() => window.location.href = '/'}>
-                Home
-              </span>
-            </li>
-            <li className="breadcrumb-item active text-primary" aria-current="page">{t("typeJournal")}</li>
-          </ol>
-        </nav>
-
-        <section className="journal-list-hero">
-          <div className="journal-list-hero__content">
-            <div className="journal-list-eyebrow">
-              <Icon icon="lucide:library" width="17" />
+      <PageContainer className="journal-list-shell">
+        <PageHeader
+          breadcrumbs={[
+            { label: t("home", "Home"), to: "/" },
+            { label: t("typeJournal") }
+          ]}
+          badge={
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-subtle text-primary text-xs font-semibold">
+              <Icon icon="lucide:library" width="14" />
               <span>Journal catalog</span>
             </div>
-            <h1 className="journal-list-title">{t("typeJournal")}</h1>
-            <p className="journal-list-description">{t("journal.danhSachTapChiKhoaHocTrongHeTh")}</p>
-          </div>
-        </section>
+          }
+          title={t("typeJournal")}
+          description={t("journal.danhSachTapChiKhoaHocTrongHeTh")}
+        />
 
         {/* Statistic Cards */}
         <JournalStatsCards stats={stats} loading={loadingStats} />
 
         {/* Search & Filter Bar */}
-        <JournalSearchBar searchInput={searchInput} setSearchInput={setSearchInput} quartile={quartile} setQuartile={setQuartile} isOpenAccess={isOpenAccess} setIsOpenAccess={setIsOpenAccess} onSubmit={handleSearchSubmit} onClear={handleClearAll} />
+        <JournalSearchBar
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+          quartile={quartile}
+          setQuartile={setQuartile}
+          isOpenAccess={isOpenAccess}
+          setIsOpenAccess={setIsOpenAccess}
+          onSubmit={handleSearchSubmit}
+          onClear={handleClearAll}
+        />
 
         {/* Error State */}
-        {error && <div className="journal-alert alert d-flex align-items-center gap-2 mb-4" role="alert">
-            <Icon icon="lucide:alert-circle" width="18" />
-            <div>{error}</div>
-          </div>}
+        {error && (
+          <Alert variant="destructive" className="mb-4">
+            <Icon icon="lucide:alert-circle" width="18" className="mr-2 inline" />
+            <span>{error}</span>
+          </Alert>
+        )}
 
         {/* Table & Loading Skeleton wrapper */}
-        {isLoading ? <div className="journal-loading-panel">
-            <div className="skeleton-shimmer journal-skeleton-line mb-3" />
-            {[1, 2, 3, 4, 5].map(i => <div key={i} className="skeleton-shimmer journal-skeleton-row mb-2" />)}
-          </div> : <>
+        {isLoading ? (
+          <div className="journal-loading-panel space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-12 bg-surface-muted animate-pulse rounded-card" />
+            ))}
+          </div>
+        ) : (
+          <>
             {/* Journal Table */}
             <JournalTable journals={journals} page={pagination.page} limit={pagination.limit} />
 
             {/* Pagination Controls */}
-            {journals.length > 0 && totalPages > 1 && <AdminPagination totalItems={pagination.total} currentPage={pagination.page} limit={pagination.limit} onPageChange={handlePageChange} entityName="tạp chí" />}
-          </>}
-      </Container>
-    </div>;
+            {journals.length > 0 && totalPages > 1 && (
+              <div className="mt-5">
+                <AdminPagination
+                  totalItems={pagination.total}
+                  currentPage={pagination.page}
+                  limit={pagination.limit}
+                  onPageChange={handlePageChange}
+                  entityName="tạp chí"
+                />
+              </div>
+            )}
+          </>
+        )}
+      </PageContainer>
+    </div>
+  );
 }

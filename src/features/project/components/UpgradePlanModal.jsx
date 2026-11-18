@@ -179,7 +179,7 @@ const UpgradePlanModal = ({
         </Modal.Header>
         <Modal.Body>
           <p style={{
-          fontSize: '1rem',
+          fontSize: '16px',
           color: 'var(--text-main)',
           marginBottom: 0
         }}>{t("project.banCoChacChanMuonKichHoatGoiVi")}<br />{t("project.banSeBiTru")}{" "}<strong>25 Coin</strong>{" "}{t("project.tuVi")}</p>

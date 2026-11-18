@@ -4,6 +4,7 @@ import { Table } from 'react-bootstrap';
 import RoleBadge from './RoleBadge';
 import UserStatusBadge from './UserStatusBadge';
 import Icon from '../../../../shared/components/Icon';
+import { Skeleton } from '../../../../shared/ui/skeleton';
 
 /**
  * UserTable Component
@@ -11,15 +12,39 @@ import Icon from '../../../../shared/components/Icon';
  * 
  * @param {Object} props - Props
  * @param {Array} props.users - List of user objects
+ * @param {boolean} props.loading - Loading state
  * @param {function} props.onEdit - Edit action handler: (userId) => void
  * @param {function} props.onDelete - Delete action handler: (userId) => void
  */
 export default function UserTable({
   users = [],
+  loading = false,
   onEdit,
   onDelete
 }) {
   const { t: _t } = useTranslation();
+
+  if (loading) {
+    return (
+      <div className="p-4 space-y-3 bg-white rounded-3 border">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              <div className="space-y-1.5">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-44" />
+              </div>
+            </div>
+            <Skeleton className="h-6 w-20 rounded-full" />
+            <Skeleton className="h-6 w-16 rounded-full" />
+            <Skeleton className="h-8 w-20 rounded-md" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (users.length === 0) {
     return <div className="text-center py-5 border rounded-3 bg-white">
         <Icon icon="lucide:users" width="48" className="text-muted mb-2 opacity-50" />
@@ -33,7 +58,7 @@ export default function UserTable({
     }}>
         {/* Table Header */}
         <thead className="border-bottom text-muted-custom" style={{
-        fontSize: '0.75rem',
+        fontSize: '13px',
         letterSpacing: '0.05em'
       }}>
           <tr>
@@ -73,17 +98,17 @@ export default function UserTable({
                 width: '42px',
                 height: '42px',
                 background: 'linear-gradient(135deg, #3393CB 0%, #005A96 100%)',
-                fontSize: '0.95rem',
+                fontSize: '15px',
                 boxShadow: '0 8px 18px rgba(234, 88, 12, 0.14)'
               }} aria-label={`Avatar chữ cái đầu của ${user.name || user.email || t("admin.nguoiDung")}`}>
                     {String(user.name || user.email || 'U').trim().charAt(0).toUpperCase() || 'U'}
                   </div>
                   <div>
                     <div className="fw-bold text-main" style={{
-                  fontSize: '0.9rem'
+                  fontSize: '14px'
                 }}>{user.name}</div>
                     <div className="text-muted-custom" style={{
-                  fontSize: '0.78rem'
+                  fontSize: '13px'
                 }}>{user.email}</div>
                   </div>
                 </div>

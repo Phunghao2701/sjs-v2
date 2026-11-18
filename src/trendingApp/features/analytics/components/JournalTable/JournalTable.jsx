@@ -8,7 +8,7 @@ import styles from '../../styles/Analytics.module.css';
  */
 const Sparkline = ({ data }) => {
   if (!data || data.length === 0) {
-    return <span style={{ color: 'var(--color-neutral-400)', fontSize: '12px' }}>No trend data</span>;
+    return <span style={{ color: 'var(--color-neutral-400)', fontSize: '13px' }}>No trend data</span>;
   }
 
   // Safeguard for single data point
@@ -76,7 +76,7 @@ export const JournalTable = ({ journals, page = 1, limit = 4, totalCount = 0, on
               <td>
                 <div className={styles.journalInfo}>
                   <div className={styles.journalCover}>
-                    <span style={{ color: '#999', fontSize: '12px', fontWeight: 'bold' }}>
+                    <span style={{ color: '#999', fontSize: '13px', fontWeight: 'bold' }}>
                       {journal.name.substring(0, 2).toUpperCase()}
                     </span>
                   </div>

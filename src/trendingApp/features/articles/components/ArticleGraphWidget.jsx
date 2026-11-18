@@ -187,7 +187,7 @@ export default function ArticleGraphWidget({
       ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
       ctx.stroke();
 
-      const fontSize = clamp(10 / globalScale, 6.5, 11);
+      const fontSize = clamp(14 / globalScale, 13, 16);
 
       ctx.font = `${isSelected ? 700 : 500} ${fontSize}px Arial, sans-serif`;
       ctx.textBaseline = 'middle';
@@ -465,7 +465,7 @@ function CircleButton({ children, onClick }) {
         border: '1px solid rgba(234, 88, 12, 0.5)',
         background: 'rgba(255, 255, 255, 0.92)',
         color: '#005A96',
-        fontSize: 22,
+        fontSize: 16,
         lineHeight: 1,
         cursor: 'pointer',
         display: 'grid',

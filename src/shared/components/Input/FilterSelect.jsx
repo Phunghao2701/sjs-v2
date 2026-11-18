@@ -1,5 +1,4 @@
-import { Form } from 'react-bootstrap';
-import './FilterInput.css';
+import { cn } from '../../../lib/utils';
 
 /**
  * Shared component cho ô Dropdown (Select) trong các Filter Card.
@@ -15,11 +14,14 @@ export default function FilterSelect({
   style = {} 
 }) {
   return (
-    <Form.Select
+    <select
       value={value}
       onChange={onChange}
       disabled={disabled}
-      className={`shared-filter-select ${className}`.trim()}
+      className={cn(
+        "h-9 rounded-md border border-border bg-surface px-3 py-1 text-sm text-text-main shadow-none transition-colors focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+        className
+      )}
       style={style}
     >
       {options.map((opt, idx) => (
@@ -31,6 +33,6 @@ export default function FilterSelect({
           {opt.label}
         </option>
       ))}
-    </Form.Select>
+    </select>
   );
 }

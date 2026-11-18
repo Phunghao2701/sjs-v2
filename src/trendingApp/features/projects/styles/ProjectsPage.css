@@ -73,22 +73,22 @@
   background-color: var(--color-primary-orange-light);
 }
 
-.chevron-icon {
+.projects-page-container .chevron-icon {
   font-size: 14px;
   color: var(--color-neutral-400);
   transition: transform 0.2s ease;
 }
 
-.projects-action-btn:hover .chevron-icon {
+.projects-page-container .projects-action-btn:hover .chevron-icon {
   color: var(--color-neutral-600);
 }
 
 /* Dropdowns */
-.dropdown-wrapper {
+.projects-page-container .dropdown-wrapper {
   position: relative;
 }
 
-.dropdown-menu {
+.projects-page-container .dropdown-menu {
   position: absolute;
   top: calc(100% + var(--spacing-xs));
   right: 0;
@@ -116,7 +116,7 @@
   }
 }
 
-.dropdown-item {
+.projects-page-container .dropdown-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -132,18 +132,18 @@
   transition: all 0.15s ease;
 }
 
-.dropdown-item:hover {
+.projects-page-container .dropdown-item:hover {
   background-color: var(--color-neutral-100);
   color: var(--color-neutral-900);
 }
 
-.dropdown-item.selected {
+.projects-page-container .dropdown-item.selected {
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary-orange);
   background-color: var(--color-primary-orange-light);
 }
 
-.check-icon {
+.projects-page-container .check-icon {
   font-size: 16px;
   color: var(--color-primary-orange);
 }
@@ -185,7 +185,7 @@
 
 .project-domain-tag {
   display: inline-block;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: var(--font-weight-bold);
   color: var(--color-primary-orange);
   background-color: rgba(0, 113, 188, 0.08);
@@ -197,7 +197,7 @@
 }
 
 .project-title {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-900);
   margin: 0 0 10px 0;
@@ -218,7 +218,7 @@
 }
 
 .project-sub-tag {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: var(--font-weight-medium);
   color: var(--color-neutral-600);
   background-color: var(--color-neutral-100);
@@ -251,7 +251,7 @@
 }
 
 .creator-name {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: var(--font-weight-medium);
   color: var(--color-neutral-700);
 }
@@ -296,7 +296,7 @@
 }
 
 .plus-icon {
-  font-size: 20px;
+  font-size: 16px;
   color: var(--color-primary-orange);
   transition: all 0.2s ease;
 }
@@ -318,8 +318,8 @@
   margin: 0;
 }
 
-/* Modal Styling */
-.modal-overlay {
+/* Modal Styling (scoped to ProjectsPage) */
+.projects-page-container .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -339,7 +339,7 @@
   to { opacity: 1; }
 }
 
-.modal-container {
+.projects-page-container .modal-container {
   background-color: var(--color-surface);
   border-radius: var(--radius-xl);
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -360,7 +360,7 @@
   }
 }
 
-.modal-header {
+.projects-page-container .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -368,17 +368,17 @@
   border-bottom: 1px solid var(--color-neutral-200);
 }
 
-.modal-title {
-  font-size: 18px;
+.projects-page-container .modal-title {
+  font-size: 16px;
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-900);
   margin: 0;
 }
 
-.modal-close-btn {
+.projects-page-container .modal-close-btn {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 16px;
   color: var(--color-neutral-400);
   cursor: pointer;
   transition: color 0.15s ease;
@@ -389,31 +389,31 @@
   border-radius: 50%;
 }
 
-.modal-close-btn:hover {
+.projects-page-container .modal-close-btn:hover {
   color: var(--color-neutral-700);
   background-color: var(--color-neutral-100);
 }
 
-.modal-form {
+.projects-page-container .modal-form {
   padding: var(--spacing-xl);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
 }
 
-.form-group {
+.projects-page-container .form-group {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
 }
 
-.form-label {
-  font-size: 13px;
+.projects-page-container .form-label {
+  font-size: 14px;
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-700);
 }
 
-.form-input, .form-select {
+.projects-page-container .form-input, .projects-page-container .form-select {
   padding: 10px var(--spacing-md);
   font-size: var(--font-size-body);
   border: var(--border-light);
@@ -425,19 +425,19 @@
   color: var(--color-neutral-800);
 }
 
-.form-input:focus, .form-select:focus {
+.projects-page-container .form-input:focus, .projects-page-container .form-select:focus {
   border-color: var(--color-primary-orange);
   box-shadow: 0 0 0 3px rgba(0, 113, 188, 0.15);
 }
 
-.modal-actions {
+.projects-page-container .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-md);
   margin-top: var(--spacing-sm);
 }
 
-.modal-btn {
+.projects-page-container .modal-btn {
   padding: 10px 20px;
   border-radius: var(--radius-md);
   font-size: var(--font-size-body);
@@ -447,23 +447,23 @@
   border: 1px solid transparent;
 }
 
-.btn-cancel {
+.projects-page-container .btn-cancel {
   background-color: var(--color-surface);
   color: var(--color-neutral-700);
   border-color: var(--color-neutral-300);
 }
 
-.btn-cancel:hover {
+.projects-page-container .btn-cancel:hover {
   background-color: var(--color-neutral-100);
   border-color: var(--color-neutral-400);
 }
 
-.btn-submit {
+.projects-page-container .btn-submit {
   background-color: var(--color-primary-orange);
   color: #ffffff;
 }
 
-.btn-submit:hover {
+.projects-page-container .btn-submit:hover {
   background-color: var(--color-primary-orange-hover);
   box-shadow: 0 4px 6px -1px rgba(0, 113, 188, 0.2);
 }
@@ -507,7 +507,7 @@
   display: inline-block;
   background-color: var(--color-neutral-200);
   color: var(--color-neutral-600);
-  font-size: 11px;
+  font-size: 13px;
   font-weight: var(--font-weight-medium);
   padding: 3px 8px;
   border-radius: var(--radius-sm);
@@ -529,7 +529,7 @@
 
 .inactive-overlay-content {
   color: var(--color-neutral-500);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
 }
 
@@ -540,7 +540,7 @@
 .inactive-overlay-divider {
   display: block;
   color: var(--color-neutral-300);
-  font-size: 10px;
+  font-size: 13px;
   letter-spacing: -1px;
   margin: 4px 0;
   overflow: hidden;

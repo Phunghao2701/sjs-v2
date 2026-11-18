@@ -20,7 +20,7 @@ function getConfig() {
     return { baseUrl: urls[0], callbackUrl: urls[1], workerUrl: urls[2], clientId };
   } catch (error) {
     if (error.message === 'SSO_CONFIGURATION_INVALID') throw error;
-    throw new Error('SSO_CONFIGURATION_INVALID');
+    throw new Error('SSO_CONFIGURATION_INVALID', { cause: error });
   }
 }
 

@@ -69,7 +69,7 @@ const ScatterVisualization = ({ data }) => {
           tick={false}
           tickLine={false}
           axisLine={false}
-          label={{ value: t('dashboard.citationVelocityUpper', 'CITATION VELOCITY'), position: 'bottom', offset: 0, fill: 'var(--color-neutral-500)', fontSize: 10, fontWeight: 600, letterSpacing: '1px' }}
+          label={{ value: t('dashboard.citationVelocityUpper', 'CITATION VELOCITY'), position: 'bottom', offset: 0, fill: 'var(--color-neutral-500)', fontSize: 13, fontWeight: 600, letterSpacing: '1px' }}
         />
         <YAxis 
           type="number" 
@@ -79,7 +79,7 @@ const ScatterVisualization = ({ data }) => {
           tick={false}
           tickLine={false}
           axisLine={false}
-          label={{ value: t('dashboard.impactFactorUpper', 'IMPACT FACTOR'), angle: -90, position: 'left', offset: 0, fill: 'var(--color-neutral-500)', fontSize: 10, fontWeight: 600, letterSpacing: '1px' }}
+          label={{ value: t('dashboard.impactFactorUpper', 'IMPACT FACTOR'), angle: -90, position: 'left', offset: 0, fill: 'var(--color-neutral-500)', fontSize: 13, fontWeight: 600, letterSpacing: '1px' }}
         />
         <ZAxis type="number" dataKey="size" range={[200, 1500]} name="Research Volume" />
         <Tooltip cursor={{ strokeDasharray: '3 3' }} content={<CustomTooltip />} />

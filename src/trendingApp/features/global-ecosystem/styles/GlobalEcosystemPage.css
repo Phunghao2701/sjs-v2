@@ -247,7 +247,7 @@
   z-index: 10;
 }
 
-.legend-title {
+.heatmap-legend .legend-title {
   display: block;
   font-size: var(--font-size-card-title);
   font-weight: var(--font-weight-semibold);
@@ -359,7 +359,7 @@
 }
 
 .landscape-column .landscape-value {
-  font-size: 24px;
+  font-size: 16px;
 }
 
 .landscape-card.ai {
@@ -543,7 +543,7 @@
 }
 
 .donut-text {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: var(--font-weight-medium);
   color: var(--color-neutral-800);
   margin-top: 2px;
@@ -658,7 +658,7 @@
 }
 
 .country-detail-flag-code {
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 700;
   background: rgba(255, 255, 255, 0.1);
   padding: 4px 8px;
@@ -727,7 +727,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 12px;
+  font-size: 13px;
   color: #e2e8f0;
 }
 
@@ -758,7 +758,7 @@
 }
 
 .country-detail-hint {
-  font-size: 10px;
+  font-size: 13px;
   color: #94a3b8;
   margin-top: 12px;
   text-align: center;

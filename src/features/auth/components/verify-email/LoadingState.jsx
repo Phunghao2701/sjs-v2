@@ -27,7 +27,7 @@ const LoadingState = () => {
 
       {/* Mô tả */}
       <p style={{
-      fontSize: '0.9rem',
+      fontSize: '14px',
       color: 'var(--text-muted, #6B6B6B)',
       marginBottom: 0
     }}>{t("auth.vuiLongChoTrongGiayLat")}</p>

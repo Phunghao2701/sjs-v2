@@ -92,7 +92,7 @@ export default function SearchableKeywordInput({
         backgroundColor: 'var(--bg-section)',
         color: 'var(--text-main)',
         border: '1px solid var(--border)',
-        fontSize: '0.85rem'
+        fontSize: '14px'
       }}>
             {kw}
             <Icon icon="lucide:x" width="14" className="cursor-pointer hover-danger" onClick={e => {

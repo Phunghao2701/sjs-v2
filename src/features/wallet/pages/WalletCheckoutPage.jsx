@@ -246,11 +246,7 @@ export default function WalletCheckoutPage() {
                   <div className="checkout-summary-total__label">{t("keywords.tongCong")}</div>
                   <div className="checkout-summary-total__value">{formatVND(totals.grandTotal)}</div>
                 </div>
-                <div style={{
-              color: '#16a34a',
-              fontSize: 12,
-              fontWeight: 800
-            }}>
+                <div className="text-xs font-extrabold text-success">
                   +{formatCoin(totals.bonus)} bonus
                 </div>
               </div>

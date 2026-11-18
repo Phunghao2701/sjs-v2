@@ -1,5 +1,4 @@
 import PaginationControls from './PaginationControls';
-import './Pagination.css';
 import { useTranslation } from 'react-i18next';
 
 /**
@@ -54,18 +53,18 @@ export default function Pagination({
   const displayEntity = getEntityLabel(entityName, totalItems);
 
   return (
-    <div className="admin-pagination-bar">
-      <div className="text-muted-custom small">
+    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 pt-4 max-sm:flex max-sm:flex-col max-sm:items-start">
+      <div className="text-muted-custom text-xs">
         {t('pagination.showing', 'Showing')}{' '}
-        <span className="fw-semibold text-main">{formatNum(startItem)}</span>{' '}
+        <span className="font-semibold text-main">{formatNum(startItem)}</span>{' '}
         {t('pagination.to', 'to')}{' '}
-        <span className="fw-semibold text-main">{formatNum(endItem)}</span>{' '}
+        <span className="font-semibold text-main">{formatNum(endItem)}</span>{' '}
         {t('pagination.of', 'of')}{' '}
-        <span className="fw-semibold text-main">{formatNum(totalItems)}</span>{' '}
+        <span className="font-semibold text-main">{formatNum(totalItems)}</span>{' '}
         {displayEntity}
       </div>
 
-      <div className="admin-pagination-bar__center">
+      <div className="justify-self-center">
         <PaginationControls
           currentPage={currentPage}
           totalPages={totalPages}
@@ -74,7 +73,7 @@ export default function Pagination({
       </div>
 
       {/* Placeholder to balance the 3-column grid layout and center the pagination */}
-      <div className="admin-pagination-bar__right-placeholder" />
+      <div className="hidden sm:block" />
     </div>
   );
 }

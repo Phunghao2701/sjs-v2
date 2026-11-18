@@ -12,7 +12,7 @@ import { useLocation } from 'react-router-dom';
 import { FaPaperPlane, FaExpand, FaPlus, FaTrashAlt } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import chatbotApi from '../../services/chatbotApi';
-import './ChatbotWidget.css';
+import '../../../../shared/components/Chatbot/ChatbotWidget.css';
 
 function GeminiMark({ size = 20 }) {
   return (

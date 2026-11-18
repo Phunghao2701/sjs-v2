@@ -10,8 +10,12 @@ import { getSubjectAreasApi } from '../../catalog/api/catalogApi';
 import keywordApi from '../../keywords/api/keywordApi';
 import keywordService from '../../keyword/services/keywordService';
 import SearchableKeywordInput from '../../../shared/components/Input/SearchableKeywordInput';
-import Header from '../../landing/components/Header';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
+import { Card, CardContent } from '../../../shared/ui/card';
+import { Button } from '../../../shared/ui/button';
+import { Badge } from '../../../shared/ui/badge';
+import { Alert } from '../../../shared/ui/alert';
+import { Skeleton } from '../../../shared/ui/skeleton';
 const EditProjectPage = () => {
   const { t: _t } = useTranslation();
   const {
@@ -141,75 +145,103 @@ const EditProjectPage = () => {
     }
   };
   if (loadingData) {
-    return <div className="container-fluid py-4 grid-bg min-vh-100 d-flex justify-content-center align-items-center">
-        <div className="spinner-border text-primary" role="status"></div>
-      </div>;
+    return (
+      <PageContainer className="max-w-[760px] py-6 sm:py-10 space-y-6">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-96" />
+        <Card>
+          <CardContent className="p-6 sm:p-8 space-y-6">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-10 w-32" />
+          </CardContent>
+        </Card>
+      </PageContainer>
+    );
   }
-  return <div className="container-fluid pb-4 grid-bg min-vh-100 position-relative overflow-hidden" style={{
-    paddingTop: '80px'
-  }}>
-      <div className="position-absolute w-100 h-100 radial-fade pe-none" style={{
-      top: 0,
-      left: 0,
-      zIndex: 0
-    }} />
-      <Header />
-      <div className="container mx-auto position-relative z-1" style={{
-      maxWidth: '650px',
-      marginTop: '40px'
-    }}>
-        <nav aria-label="breadcrumb" className="mb-4">
-          <ol className="breadcrumb mb-2 text-muted-custom small">
-            <li className="breadcrumb-item"><Link to="/dashboard" className="text-decoration-none text-muted-custom hover-primary">{t("author.tongQuan")}</Link></li>
-            <li className="breadcrumb-item"><Link to="/projects" className="text-decoration-none text-muted-custom hover-primary">{t("project.duAnTheoDoi")}</Link></li>
-            <li className="breadcrumb-item"><Link to={`/projects/${id}`} className="text-decoration-none text-muted-custom hover-primary">{title || t("landing.duAn")}</Link></li>
-            <li className="breadcrumb-item active" aria-current="page">{t("project.quanLyTuKhoa")}</li>
-          </ol>
-        </nav>
 
-        <div className="glass-card p-4 p-md-5 rounded-4 shadow-sm border bg-white">
-          <div className="mb-4">
-            <h2 className="font-display fw-bold text-main mb-2" style={{
-            fontSize: '1.75rem'
-          }}>{t("project.quanLyTuKhoaTheoDoi")}</h2>
-            <p className="text-muted-custom small mb-0">{t("project.themHoacXoaCacCumTuKhoaNghienC")}</p>
-          </div>
+  return (
+    <PageContainer className="max-w-[760px] py-6 sm:py-10 space-y-6">
+      <PageHeader
+        breadcrumbs={[
+          { label: t("author.tongQuan"), to: ROUTES.DASHBOARD },
+          { label: t("project.duAnTheoDoi"), to: ROUTES.PROJECTS },
+          { label: title || t("landing.duAn"), to: `/projects/${id}` },
+          { label: t("project.quanLyTuKhoa") }
+        ]}
+        title={t("project.quanLyTuKhoaTheoDoi")}
+        description={t("project.themHoacXoaCacCumTuKhoaNghienC")}
+      />
 
-          {error && <div className="alert alert-danger border-0 rounded-3 small py-2 d-flex align-items-center gap-2">
-              <Icon icon="lucide:alert-circle" width="18" />
-              {error}
-            </div>}
+      <Card>
+        <CardContent className="p-6 sm:p-8 space-y-6">
+          {error && (
+            <Alert variant="destructive" className="items-center">
+              <Icon icon="lucide:alert-circle" width="18" className="shrink-0" />
+              <div className="flex-1 text-xs">{error}</div>
+            </Alert>
+          )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="mb-5">
-              <label className="form-label fw-semibold text-muted-custom mb-2 small text-uppercase tracking-wider">{t("project.tuKhoaDangTheoDoi")}</label>
-              <SearchableKeywordInput keywords={keywords} subjectAreaId={subjectAreaId} placeholder={t("project.chonTuKhoaTheoDoi")} disabled={loading} onAddKeyword={val => {
-              if (val && !keywords.includes(val)) {
-                setKeywords([...keywords, val]);
-              }
-            }} onRemoveKeyword={removeKeyword} />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
+                {t("project.tuKhoaDangTheoDoi")}
+              </label>
+              <SearchableKeywordInput
+                keywords={keywords}
+                subjectAreaId={subjectAreaId}
+                placeholder={t("project.chonTuKhoaTheoDoi")}
+                disabled={loading}
+                onAddKeyword={val => {
+                  if (val && !keywords.includes(val)) {
+                    setKeywords([...keywords, val]);
+                  }
+                }}
+                onRemoveKeyword={removeKeyword}
+              />
 
-              {subjectAreaId && suggestedKeywords.length > 0 && <div className="mt-3 small">
-                  <span className="text-muted-custom">{t("project.goiYTuKhoaNoiBat")}</span>
-                  {loadingSuggestions ? <span className="text-muted-custom ms-2">{t("common.dangTai")}</span> : <div className="d-flex flex-wrap gap-2 mt-2">
-                      {suggestedKeywords.filter(k => !keywords.includes(k)).map(sugg => <span key={sugg} className="badge rounded-pill bg-light text-dark border cursor-pointer hover-primary" onClick={() => addSuggestedKeyword(sugg)}>
+              {subjectAreaId && suggestedKeywords.length > 0 && (
+                <div className="pt-2 text-xs">
+                  <span className="text-muted-foreground font-medium">{t("project.goiYTuKhoaNoiBat")}:</span>
+                  {loadingSuggestions ? (
+                    <span className="text-muted-foreground ms-2">{t("common.dangTai")}</span>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {suggestedKeywords.filter(k => !keywords.includes(k)).map(sugg => (
+                        <Badge
+                          key={sugg}
+                          variant="secondary"
+                          className="cursor-pointer hover:border-primary transition-colors py-1 px-2.5"
+                          onClick={() => addSuggestedKeyword(sugg)}
+                        >
                           + {sugg}
-                        </span>)}
-                    </div>}
-                </div>}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className="d-flex gap-3 justify-content-end pt-4 mt-4 border-top">
-              <PrimaryButton type="button" variant="outline" className="px-4 py-2" onClick={() => navigate(-1)} disabled={loading}>{t("auth.quayLai")}</PrimaryButton>
-              <PrimaryButton type="submit" className="px-4 py-2" disabled={loading}>
-                {loading ? <>
-                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>{t("project.dangLuu")}</> : <>
-                    <Icon icon="lucide:save" width="18" />{t("admin.luuThayDoi")}</>}
-              </PrimaryButton>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+              <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={loading}>
+                {t("auth.quayLai")}
+              </Button>
+              <Button
+                type="submit"
+                disabled={loading}
+                isLoading={loading}
+                loadingText={t("project.dangLuu")}
+                className="flex items-center gap-1.5"
+              >
+                <Icon icon="lucide:save" width="16" />
+                <span>{t("admin.luuThayDoi")}</span>
+              </Button>
             </div>
           </form>
-        </div>
-      </div>
-    </div>;
+        </CardContent>
+      </Card>
+    </PageContainer>
+  );
 };
 export default EditProjectPage;

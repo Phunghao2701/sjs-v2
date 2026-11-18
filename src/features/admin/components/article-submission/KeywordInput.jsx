@@ -107,7 +107,7 @@ export default function KeywordInput({
         className="border-0 bg-transparent flex-grow-1"
         style={{
           outline: 'none',
-          fontSize: '0.88rem',
+          fontSize: '14px',
           color: 'var(--text-main)',
           minWidth: '120px',
           padding: '4px'

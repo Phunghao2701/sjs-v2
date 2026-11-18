@@ -22,7 +22,7 @@
 
 .pageTitle {
   margin: 0;
-  font-size: 32px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-neutral-900, #1a1a1a);
   line-height: 1.2;
@@ -53,7 +53,7 @@
   cursor: pointer;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: 13px;
   letter-spacing: 0.5px;
   position: relative;
   transition: color 0.2s ease;
@@ -112,7 +112,7 @@
   text-align: left;
   padding: 16px 24px;
   color: var(--color-neutral-400, #999999);
-  font-size: 11px;
+  font-size: 13px;
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -152,7 +152,7 @@
 
 .journalPublisher {
   margin: 4px 0 0;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--color-neutral-500, #666666);
 }
 
@@ -172,7 +172,7 @@
   color: var(--color-neutral-500, #666666);
   padding: 4px 8px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -204,7 +204,7 @@
   padding: 8px 16px;
   border-radius: 6px;
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
   border: none;
   transition: all 0.2s ease;
@@ -247,7 +247,7 @@
   display: flex;
   justify-content: space-between;
   color: var(--color-neutral-500, #666666);
-  font-size: 12px;
+  font-size: 13px;
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 0.5px;
@@ -255,7 +255,7 @@
 }
 
 .summaryCardValue {
-  font-size: 32px;
+  font-size: 16px;
   font-weight: 700;
   color: var(--color-neutral-900, #1a1a1a);
   margin: 0 0 8px 0;
@@ -263,7 +263,7 @@
 }
 
 .summaryCardSubtext {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-neutral-500, #666666);
 }
 
@@ -290,13 +290,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 16px;
   margin-bottom: 16px;
 }
 
 .autoRefreshContent h3 {
   margin: 0 0 4px 0;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-neutral-900, #1a1a1a);
 }

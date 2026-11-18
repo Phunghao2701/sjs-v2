@@ -143,14 +143,14 @@ export default function UserAccountForm({
         width: '80px',
         height: '80px',
         background: 'linear-gradient(135deg, #3393CB 0%, #005A96 100%)',
-        fontSize: '2rem',
+        fontSize: '16px',
         boxShadow: '0 12px 24px rgba(234, 88, 12, 0.18)'
       }} aria-label={`Avatar chữ cái đầu của ${displayName || email || t("admin.nguoiDung")}`}>
             {avatarInitial}
           </div>
           <div>
             <div className="fw-bold text-main mb-1" style={{
-          fontSize: '1rem'
+          fontSize: '16px'
         }}>{fullName || t("admin.chuaCoTenNguoiDung")}</div>
             <div className="text-muted-custom small mb-0">{t("admin.hienThiAvatarBangChuCaiDauCuaN")}</div>
           </div>
@@ -159,7 +159,7 @@ export default function UserAccountForm({
       {/* Section 1: Personal Information */}
       <div>
         <h6 className="fw-bold d-flex align-items-center gap-2 mb-3.5 tracking-wider text-uppercase" style={{
-        fontSize: '0.85rem',
+        fontSize: '14px',
         color: '#005A96',
         letterSpacing: '0.03em'
       }}>
@@ -225,7 +225,7 @@ export default function UserAccountForm({
       {/* Section 2: Role & Status */}
       <div className="py-3 border-top">
         <h6 className="fw-bold d-flex align-items-center gap-2 mb-3.5 tracking-wider text-uppercase" style={{
-        fontSize: '0.85rem',
+        fontSize: '14px',
         color: '#005A96',
         letterSpacing: '0.03em'
       }}>
@@ -258,12 +258,12 @@ export default function UserAccountForm({
             marginTop: '28px' // Align vertical alignment with label spacing
           }}>
               <span className="small fw-semibold text-muted-custom" style={{
-              fontSize: '0.85rem'
+              fontSize: '14px'
             }}>{t("admin.trangThaiTaiKhoan")}</span>
               <div className="d-flex align-items-center gap-2.5 orange-switch-toggle">
                 <Form.Check type="switch" id="status-toggle" checked={status === 'Active'} onChange={e => setStatus(e.target.checked ? 'Active' : 'Inactive')} />
                 <span className="small fw-bold text-main" style={{
-                fontSize: '0.85rem'
+                fontSize: '14px'
               }}>{status === 'Active' ? t("admin.hoatDong") : t("admin.voHieuHoa")}</span>
               </div>
             </div>
@@ -274,7 +274,7 @@ export default function UserAccountForm({
       {/* Section 3: Identity & Password */}
       <div className="py-3 border-top">
         <h6 className="fw-bold d-flex align-items-center gap-2 mb-3.5 tracking-wider text-uppercase" style={{
-        fontSize: '0.85rem',
+        fontSize: '14px',
         color: '#005A96',
         letterSpacing: '0.03em'
       }}>
@@ -314,18 +314,18 @@ export default function UserAccountForm({
 
         {/* Password complexity helper note */}
         <div className="form-text text-muted-custom mt-2.5 small" style={{
-        fontSize: '0.78rem'
+        fontSize: '13px'
       }}>{t("admin.matKhauPhaiChuaItNhat8KyTuBaoG")}</div>
       </div>
 
       {/* Form Action buttons */}
       <div className="d-flex justify-content-end gap-3 mt-4 pt-4 border-top">
         <PrimaryButton type="button" variant="outline" onClick={onCancel} className="px-4 py-2" style={{
-        fontSize: '0.88rem'
+        fontSize: '14px'
       }}>{t("admin.huy")}</PrimaryButton>
         
         <PrimaryButton type="submit" className="px-4 py-2" style={{
-        fontSize: '0.88rem'
+        fontSize: '14px'
       }} disabled={submitting}>
           {submitting ? <>
               <Icon icon="lucide:loader-2" width="16" />

@@ -1,10 +1,4 @@
 import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\keywords\pages\KeywordListPage.jsx
- */
-import { Container } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import Header from '../../landing/components/Header';
@@ -12,6 +6,7 @@ import KeywordSearchBar from '../components/KeywordSearchBar';
 import KeywordSortDropdown from '../components/KeywordSortDropdown';
 import KeywordList from '../components/KeywordList';
 import { useKeywords } from '../hooks/useKeywords';
+import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
 import './KeywordListPage.css';
 
 /**
@@ -19,9 +14,7 @@ import './KeywordListPage.css';
  * Route: /keywords
  */
 export default function KeywordListPage() {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     keywords,
@@ -31,49 +24,60 @@ export default function KeywordListPage() {
     filters,
     actions
   } = useKeywords();
-  const handleSearch = q => {
+
+  const handleSearch = (q) => {
     actions.setKeyword(q);
   };
+
   const handleClearSearch = () => {
     actions.setKeyword('');
   };
+
   const handleSortChange = (sortBy, sortOrder) => {
     actions.setSort(sortBy, sortOrder);
   };
-  const handlePageChange = page => {
+
+  const handlePageChange = (page) => {
     actions.setPage(page);
     window.scrollTo({
       top: 0,
       behavior: 'smooth'
     });
   };
-  const handleViewArticles = keywordId => {
+
+  const handleViewArticles = (keywordId) => {
     navigate(`/keywords/${keywordId}/articles`);
   };
-  return <div className="grid-bg keyword-list-page d-flex flex-column">
+
+  return (
+    <div className="grid-bg keyword-list-page d-flex flex-column min-vh-100">
       <Header />
 
-      <Container className="pb-5 flex-grow-1">
-        <nav aria-label="breadcrumb" className="keyword-list-breadcrumb mb-4">
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item active text-main fw-semibold" aria-current="page">Keywords</li>
-          </ol>
-        </nav>
-
-        <section className="keyword-list-hero">
-          <div className="keyword-list-hero__content">
-            <div className="keyword-list-eyebrow">
-              <Icon icon="lucide:tags" width="18" />
+      <PageContainer className="keyword-list-shell">
+        <PageHeader
+          breadcrumbs={[
+            { label: t("home"), to: "/" },
+            { label: "Keywords" }
+          ]}
+          badge={
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-subtle text-primary text-xs font-semibold">
+              <Icon icon="lucide:tags" width="14" />
               <span>Research Keywords</span>
             </div>
-            <h1 className="keyword-list-title">{t("keywords.khamPhaKeywords")}</h1>
-            <p className="keyword-list-description">{t("keywords.timKiemCacTuKhoaNghienCuuVaMoN")}</p>
-            {pagination.total > 0 && <div className="keyword-list-total-pill">
-                <Icon icon="lucide:database" width="16" />
-                <span>{t("keywords.tongCong")}<strong>{pagination.total.toLocaleString()}</strong>{t("keywords.keywordTrongHeThong")}</span>
-              </div>}
-          </div>
-        </section>
+          }
+          title={t("keywords.khamPhaKeywords")}
+          description={t("keywords.timKiemCacTuKhoaNghienCuuVaMoN")}
+          actions={
+            pagination.total > 0 && (
+              <aside className="keyword-list-total-pill text-end" aria-label="Tổng kết từ khóa">
+                <div className="text-xs text-muted-foreground">{t("keywords.tongCong")}</div>
+                <div className="text-base font-bold text-foreground mt-0.5">
+                  {pagination.total.toLocaleString()}
+                </div>
+              </aside>
+            )
+          }
+        />
 
         <div className="keyword-toolbar">
           <div className="keyword-toolbar__search">
@@ -83,17 +87,34 @@ export default function KeywordListPage() {
         </div>
 
         {/* Active filter context */}
-        {filters.keyword && <div className="keyword-active-filter">
+        {filters.keyword && (
+          <div className="keyword-active-filter">
             <span>{t("keywords.ketQuaTimKiemCho")}</span>
             <span className="keyword-active-filter__term">
               "{filters.keyword}"
             </span>
-            <button type="button" className="btn btn-link btn-sm p-0 keyword-active-filter__clear" onClick={handleClearSearch}>
-              <Icon icon="lucide:x" width="14" className="me-1" />{t("keyword.xoa")}</button>
-          </div>}
+            <button
+              type="button"
+              className="btn btn-link btn-sm p-0 keyword-active-filter__clear"
+              onClick={handleClearSearch}
+            >
+              <Icon icon="lucide:x" width="14" className="me-1" />
+              {t("keyword.xoa")}
+            </button>
+          </div>
+        )}
 
         {/* Keyword grid */}
-        <KeywordList keywords={keywords} loading={loading} error={error} pagination={pagination} onPageChange={handlePageChange} onViewArticles={handleViewArticles} onRetry={actions.refetch} />
-      </Container>
-    </div>;
+        <KeywordList
+          keywords={keywords}
+          loading={loading}
+          error={error}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onViewArticles={handleViewArticles}
+          onRetry={actions.refetch}
+        />
+      </PageContainer>
+    </div>
+  );
 }

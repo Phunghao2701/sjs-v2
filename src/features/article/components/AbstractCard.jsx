@@ -28,7 +28,7 @@ export default function AbstractCard({
         color: 'var(--primary)'
       }} width="20" />{t("article.tomTatBaiBaoAbstract")}</h5>
       <p className="text-main p-3 rounded-3 mb-0" style={{
-      fontSize: '0.95rem',
+      fontSize: '15px',
       lineHeight: '1.7',
       backgroundColor: 'var(--bg-section)',
       borderLeft: '4px solid var(--primary)',
@@ -39,7 +39,7 @@ export default function AbstractCard({
 
       {isLong && <div className="d-flex justify-content-start mt-2">
           <Button variant="link" className="text-main hover:text-dark p-0 text-decoration-none d-flex align-items-center gap-1 mt-2 font-semibold" style={{
-        fontSize: '0.875rem',
+        fontSize: '14px',
         fontWeight: 600
       }} onClick={() => setIsExpanded(!isExpanded)}>
             <span>{isExpanded ? t("article.thuGon") : t("article.xemThem")}</span>

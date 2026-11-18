@@ -28,10 +28,10 @@ export default function EmptyState({
         <Icon icon={icon} width="24" height="24" />
       </div>
       <h5 className="font-display text-main fw-semibold mb-2" style={{
-      fontSize: '1.05rem'
+      fontSize: '16px'
     }}>{resolvedTitle}</h5>
       <p className="text-muted-custom mb-0 text-center" style={{
-      fontSize: '0.8rem',
+      fontSize: '13px',
       maxWidth: '320px',
       lineHeight: '1.5'
     }}>

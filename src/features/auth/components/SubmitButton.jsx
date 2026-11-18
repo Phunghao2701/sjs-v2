@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 *
 * File: features\auth\components\SubmitButton.jsx
 */
-import { Button, Spinner } from 'react-bootstrap';
+import { Button } from '../../../shared/ui/button';
 export default function SubmitButton({
   type = 'submit',
   disabled = false,
@@ -18,26 +18,7 @@ export default function SubmitButton({
   } = useTranslation();
   const resolvedLabel = label || t("auth.xacNhan");
   const resolvedLoadingText = loadingText || t("admin.dangXuLy");
-  return <Button type={type} disabled={disabled || isLoading} onClick={onClick} className="w-100 py-2.5 rounded-3 border-0 text-sm font-semibold transition-all d-flex align-items-center justify-content-center gap-2" style={{
-    background: 'var(--primary)',
-    // #0071BC
-    color: '#ffffff',
-    boxShadow: '0 4px 14px rgba(0, 113, 188, 0.2)',
-    transition: 'transform 0.15s ease, background 0.15s ease'
-  }} onMouseEnter={e => {
-    if (!disabled && !isLoading) {
-      e.currentTarget.style.transform = 'translateY(-1px)';
-      e.currentTarget.style.background = '#005A96'; // Slightly darker orange
-      e.currentTarget.style.boxShadow = '0 6px 18px rgba(0, 113, 188, 0.3)';
-    }
-  }} onMouseLeave={e => {
-    e.currentTarget.style.transform = 'translateY(0)';
-    e.currentTarget.style.background = 'var(--primary)';
-    e.currentTarget.style.boxShadow = '0 4px 14px rgba(0, 113, 188, 0.2)';
-  }}>
-      {isLoading ? <>
-          <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" className="me-1" />
-          <span>{resolvedLoadingText}</span>
-        </> : <span>{resolvedLabel}</span>}
+  return <Button type={type} disabled={disabled} isLoading={isLoading} loadingText={resolvedLoadingText} onClick={onClick} className="w-100">
+      {resolvedLabel}
     </Button>;
 }

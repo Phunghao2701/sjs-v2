@@ -1,12 +1,14 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState } from 'react';
-import { Alert, Card, Row, Col } from 'react-bootstrap';
+import { Card, Row, Col } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import Icon from '../../../../shared/components/Icon';
 import UserAccountForm from '../../components/account/UserAccountForm';
 import { createAdminUser } from '../../api/adminUsers.api';
 import ROUTES from '../../../../app/routes/routePaths';
+import { Alert } from '../../../../shared/ui/alert';
+import { PageHeader } from '../../../../shared/ui/page-layout';
 const getApiErrorMessage = error => {
   if (error.response?.status === 403) {
     return t("admin.backendTuChoiQuyenAdminTokenHi");
@@ -46,39 +48,24 @@ export default function AddNewAccountPage() {
       setSubmitting(false);
     }
   };
-  return <div className="container-fluid py-2">
-      {/* Page Breadcrumbs - Sử dụng hằng số ROUTES */}
-      <nav className="mb-2">
-        <div className="d-flex align-items-center gap-2 text-xs text-muted-custom fw-semibold select-none" style={{
-        fontSize: '0.78rem'
-      }}>
-          <Link to={ROUTES.ADMIN_USERS} className="text-decoration-none text-muted-custom hover-primary">Account</Link>
-          <span className="text-muted-custom opacity-50">&gt;</span>
-          <Link to={ROUTES.ADMIN_USERS} className="text-decoration-none text-muted-custom hover-primary">User Directory</Link>
-          <span className="text-muted-custom opacity-50">&gt;</span>
-          <span className="text-main">New Account</span>
-        </div>
-      </nav>
-
-      {/* Main title banner matching Page 17 */}
-      <div className="mb-4">
-        <h1 className="font-display fw-bold text-main mb-1.5" style={{
-        fontSize: '1.8rem',
-        letterSpacing: '-0.02em'
-      }}>{t("admin.themTaiKhoanMoi")}</h1>
-        <p className="text-muted-custom small mb-0" style={{
-        maxWidth: '750px',
-        fontSize: '0.85rem',
-        lineHeight: '1.5'
-      }}>{t("admin.vuiLongDienDayDuCacThongTinBen")}</p>
-      </div>
+  return (
+    <div className="container-fluid py-2 space-y-6">
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Platform Directory', to: ROUTES.ADMIN_USERS },
+          { label: 'User Directory', to: ROUTES.ADMIN_USERS },
+          { label: 'New Account' }
+        ]}
+        title={t("admin.themTaiKhoanMoi")}
+        description={t("admin.vuiLongDienDayDuCacThongTinBen")}
+      />
 
       <div className="mx-auto" style={{
       maxWidth: '820px'
     }}>
         {/* Core Account Form card */}
         <Card className="p-4 p-md-5 rounded-4 border bg-white shadow-sm mb-4">
-          {submitError && <Alert variant="danger" className="border-0 rounded-3 small">
+          {submitError && <Alert variant="destructive" className="mb-4">
               {submitError}
             </Alert>}
 
@@ -104,11 +91,11 @@ export default function AddNewAccountPage() {
                 </div>
                 <div>
                   <h6 className="fw-bold mb-1.5" style={{
-                  fontSize: '0.85rem',
+                  fontSize: '14px',
                   color: '#7f1d1d'
                 }}>{t("admin.thongBaoTuDong")}</h6>
                   <p className="small mb-0 lh-sm" style={{
-                  fontSize: '0.78rem',
+                  fontSize: '13px',
                   color: '#991b1b',
                   opacity: 0.95
                 }}>{t("admin.heThongSeTuDongGuiEmailKichHoa")}</p>
@@ -134,11 +121,11 @@ export default function AddNewAccountPage() {
                 </div>
                 <div>
                   <h6 className="fw-bold mb-1.5" style={{
-                  fontSize: '0.85rem',
+                  fontSize: '14px',
                   color: '#9a3412'
                 }}>{t("admin.phanQuyenThongMinh")}</h6>
                   <p className="small mb-0 lh-sm" style={{
-                  fontSize: '0.78rem',
+                  fontSize: '13px',
                   color: '#9a3412',
                   opacity: 0.95
                 }}>{t("admin.vaiTroXacDinhCacQuyenTruyCapVa")}</p>
@@ -164,11 +151,11 @@ export default function AddNewAccountPage() {
                 </div>
                 <div>
                   <h6 className="fw-bold mb-1.5" style={{
-                  fontSize: '0.85rem',
+                  fontSize: '14px',
                   color: '#1e293b'
                 }}>{t("admin.lichSuThaoTac")}</h6>
                   <p className="small mb-0 lh-sm" style={{
-                  fontSize: '0.78rem',
+                  fontSize: '13px',
                   color: '#475569',
                   opacity: 0.95
                 }}>{t("admin.moiHanhDongTaoTaiKhoanDeuDuocG")}</p>
@@ -178,5 +165,6 @@ export default function AddNewAccountPage() {
           </Col>
         </Row>
       </div>
-    </div>;
+    </div>
+  );
 }

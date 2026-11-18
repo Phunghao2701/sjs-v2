@@ -15,15 +15,15 @@ const DomainCrossLinksCard = ({ data }) => {
       </div>
       
       <div style={{ backgroundColor: 'var(--color-neutral-900)', color: 'var(--color-white)', borderRadius: '4px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', margin: '16px 0', padding: '32px 16px', minHeight: '150px' }}>
-        <div style={{ fontSize: '3rem', fontWeight: 800, color: 'var(--color-primary-orange)' }}>{interDisciplinaryLinkage}%</div>
-        <div style={{ fontSize: '0.75rem', fontWeight: 600, letterSpacing: '0.1em', opacity: 0.8, marginTop: '8px', textTransform: 'uppercase' }}>{t('volume.interDisciplinaryLinkage', 'INTER-DISCIPLINARY LINKAGE')}</div>
+        <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--color-primary-orange)' }}>{interDisciplinaryLinkage}%</div>
+        <div style={{ fontSize: '13px', fontWeight: 600, letterSpacing: '0.1em', opacity: 0.8, marginTop: '8px', textTransform: 'uppercase' }}>{t('volume.interDisciplinaryLinkage', 'INTER-DISCIPLINARY LINKAGE')}</div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
-        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-neutral-600)' }}>{t('volume.transferRate', 'Transfer Rate')}</div>
-        <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-chart-2)' }}>{transferRate}</div>
+        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-neutral-600)' }}>{t('volume.transferRate', 'Transfer Rate')}</div>
+        <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--color-chart-2)' }}>{transferRate}</div>
       </div>
-      <p className="kn-stat-desc" style={{ fontSize: '0.75rem' }}>
+      <p className="kn-stat-desc" style={{ fontSize: '13px' }}>
         {description}
       </p>
     </div>

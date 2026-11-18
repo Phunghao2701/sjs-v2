@@ -70,10 +70,10 @@ export default function CountryStatsTable({
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
         <div>
           <h2 className="font-display fw-bold text-main mb-1" style={{
-          fontSize: '1.2rem'
+          fontSize: '16px'
         }}>{t("zone.thongKeTheoQuocGia")}</h2>
           <p className="text-muted-custom mb-0" style={{
-          fontSize: '0.75rem'
+          fontSize: '13px'
         }}>{t("zone.danhSachCacQuocGiaCungTongSoLu")}</p>
         </div>
       </div>
@@ -92,7 +92,7 @@ export default function CountryStatsTable({
           </InputGroup.Text>
           <Form.Control type="text" placeholder={t("zone.timKiemQuocGia")} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="border-0 bg-transparent text-main w-100 p-1" style={{
           outline: 'none',
-          fontSize: '0.82rem',
+          fontSize: '14px',
           boxShadow: 'none'
         }} />
           {searchTerm && <button className="bg-transparent border-0 p-0 text-muted-custom hover:text-main" onClick={() => setSearchTerm('')}>
@@ -107,7 +107,7 @@ export default function CountryStatsTable({
     }}>
         <Table hover className="align-middle mb-0 text-start" style={{
         minWidth: '400px',
-        fontSize: '0.85rem'
+        fontSize: '14px'
       }}>
           <thead style={{
           backgroundColor: 'var(--bg-chip)',
@@ -155,7 +155,7 @@ export default function CountryStatsTable({
               fontWeight: isSelected ? 600 : 400
             }} onClick={() => onSelectCountry(country)}>
                     <td className="ps-3 text-muted-custom font-monospace" style={{
-                fontSize: '0.8rem'
+                fontSize: '13px'
               }}>
                       {globalIndex}
                     </td>
@@ -170,7 +170,7 @@ export default function CountryStatsTable({
                     </td>
                     <td className="pe-3 text-end">
                       <button className="btn btn-link text-primary p-0 text-decoration-none d-inline-flex align-items-center gap-1 hover:translate-x-1" style={{
-                  fontSize: '0.78rem',
+                  fontSize: '13px',
                   transition: 'all 0.15s ease'
                 }} onClick={e => {
                   e.stopPropagation();

@@ -54,7 +54,7 @@ export default function JournalResultCard({
             
             {/* Publisher & Meta info line */}
             <div className="d-flex flex-wrap align-items-center gap-2 text-muted-custom text-xs mb-3" style={{
-            fontSize: '0.8rem'
+            fontSize: '13px'
           }}>
               <span>{publisher}</span>
               <span className="text-muted-custom">•</span>
@@ -68,7 +68,7 @@ export default function JournalResultCard({
               
               {quartile && <Badge className="font-display fw-bold px-2.5 py-1.5" style={{
               borderRadius: '6px',
-              fontSize: '0.75rem',
+              fontSize: '13px',
               backgroundColor: quartile === 'Q1' ? 'var(--primary-light)' : 'var(--bg-main)',
               color: quartile === 'Q1' ? 'var(--primary)' : 'var(--text-muted)',
               border: '1px solid var(--border)'
@@ -79,7 +79,7 @@ export default function JournalResultCard({
               {/* Open Access / Subscription Badge */}
               {is_open_access ? <Badge bg="success" className="d-flex align-items-center gap-1 px-2.5 py-1.5 border border-success-20" style={{
               borderRadius: '6px',
-              fontSize: '0.75rem',
+              fontSize: '13px',
               backgroundColor: 'rgba(40, 167, 69, 0.08)',
               color: '#28a745'
             }}>
@@ -87,7 +87,7 @@ export default function JournalResultCard({
                   <span>Open Access</span>
                 </Badge> : <Badge bg="warning" className="d-flex align-items-center gap-1 px-2.5 py-1.5 border border-warning-20" style={{
               borderRadius: '6px',
-              fontSize: '0.75rem',
+              fontSize: '13px',
               backgroundColor: 'rgba(255, 193, 7, 0.08)',
               color: '#b28000'
             }}>
@@ -101,7 +101,7 @@ export default function JournalResultCard({
               if (onTagClick) onTagClick(subject_category_name);
             }} className="px-2.5 py-1.5 text-muted-custom hover:text-primary border border-light" style={{
               borderRadius: '6px',
-              fontSize: '0.72rem',
+              fontSize: '13px',
               backgroundColor: 'var(--bg-main)',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
@@ -115,7 +115,7 @@ export default function JournalResultCard({
               if (onTagClick) onTagClick(subject_area_name);
             }} className="px-2.5 py-1.5 text-muted-custom hover:text-primary border border-light" style={{
               borderRadius: '6px',
-              fontSize: '0.72rem',
+              fontSize: '13px',
               backgroundColor: 'var(--bg-main)',
               cursor: 'pointer',
               transition: 'all 0.15s ease'
@@ -138,13 +138,13 @@ export default function JournalResultCard({
                     {metric_value}
                   </div>
                   <div className="text-muted-custom text-uppercase tracking-wide mt-1" style={{
-                fontSize: '0.68rem',
+                fontSize: '13px',
                 letterSpacing: '0.05em'
               }}>
                     {metric_name || 'SJR'}{metric_year ? ` · ${metric_year}` : ''}
                   </div>
                 </> : <span className="text-muted-custom text-xs italic" style={{
-              fontSize: '0.75rem'
+              fontSize: '13px'
             }}>{t("catalog.chuaCoDuLieu")}</span>}
             </div>
 
@@ -155,7 +155,7 @@ export default function JournalResultCard({
               onFollow(id);
             }} className={`d-flex align-items-center justify-content-center gap-1.5 px-3 py-1.5 fw-semibold ${isFollowed ? 'bg-success-10' : 'btn-outline-glow'}`} style={{
               borderRadius: '8px',
-              fontSize: '0.8rem',
+              fontSize: '13px',
               transition: 'all 0.2s ease'
             }}>
                 {isFollowed ? <>

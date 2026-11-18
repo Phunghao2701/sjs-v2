@@ -36,18 +36,18 @@ export default function RegionStatsPanel({
           height: '24px',
           borderRadius: '6px',
           background: 'var(--btn-dark)',
-          fontSize: '0.75rem',
+          fontSize: '13px',
           fontWeight: 700
         }}>
             {selectedCountry.code || selectedCountry.iso_code || '??'}
           </div>
           <h2 className="font-display fw-bold text-main mb-0" style={{
-          fontSize: '1.2rem'
+          fontSize: '16px'
         }}>{t("zone.khuVucTrong")}{selectedCountry.name}
           </h2>
         </div>
         <p className="text-muted-custom mb-0 text-xs" style={{
-        fontSize: '0.75rem'
+        fontSize: '13px'
       }}>{t("zone.sanLuongXuatBanKhoaHocChiTietT")}</p>
       </div>
 
@@ -70,7 +70,7 @@ export default function RegionStatsPanel({
       maxHeight: '350px'
     }}>
           <Table hover className="align-middle mb-0 text-start" style={{
-        fontSize: '0.82rem'
+        fontSize: '14px'
       }}>
             <thead style={{
           backgroundColor: 'var(--bg-chip)',
@@ -95,7 +95,7 @@ export default function RegionStatsPanel({
             <tbody>
               {regions.map((region, index) => <tr key={region.zone_id || region.code} className="transition-all duration-150">
                   <td className="ps-3 text-muted-custom font-monospace" style={{
-              fontSize: '0.75rem'
+              fontSize: '13px'
             }}>
                     {index + 1}
                   </td>

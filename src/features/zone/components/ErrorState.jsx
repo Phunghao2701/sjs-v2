@@ -26,17 +26,17 @@ export default function ErrorState({
         <Icon icon="lucide:alert-circle" width="24" height="24" />
       </div>
       <h5 className="font-display text-main fw-semibold mb-2" style={{
-      fontSize: '1.05rem'
+      fontSize: '16px'
     }}>{t("profile.daXayRaLoi")}</h5>
       <p className="text-muted-custom mb-3 text-center" style={{
-      fontSize: '0.8rem',
+      fontSize: '13px',
       maxWidth: '320px',
       lineHeight: '1.5'
     }}>
         {resolvedMessage}
       </p>
       {onRetry && <button className="btn btn-sm btn-dark-solid d-inline-flex align-items-center gap-1.5 px-3 py-1.5" onClick={onRetry} style={{
-      fontSize: '0.78rem',
+      fontSize: '13px',
       borderRadius: '8px'
     }}>
           <Icon icon="lucide:refresh-cw" width="14" />

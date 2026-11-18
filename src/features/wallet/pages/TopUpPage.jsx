@@ -239,11 +239,7 @@ export default function TopUpPage() {
               {PAYMENT_METHODS.map(m => <button key={m.key} type="button" className={`topup-method-btn ${paymentMethod === m.key ? 'active' : ''}`} onClick={() => !m.disabled && setPaymentMethod(m.key)} disabled={m.disabled} title={m.disabled ? t("wallet.sapRaMat") : m.label}>
                   <Icon icon={m.icon} width={18} color={m.color} />
                   {m.label}
-                  {m.disabled && <span style={{
-              fontSize: 10,
-              marginLeft: 4,
-              color: 'var(--text-muted)'
-            }}>{t("wallet.sapRaMat1")}</span>}
+                  {m.disabled && <span className="text-xs ml-1 text-text-muted">{t("wallet.sapRaMat1")}</span>}
                 </button>)}
             </div>
           </>}

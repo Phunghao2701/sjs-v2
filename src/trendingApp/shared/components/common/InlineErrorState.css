@@ -24,20 +24,20 @@
 }
 
 .inline-error-icon {
-  font-size: 22px;
+  font-size: 16px;
   color: #ef4444;
 }
 
 .inline-error-copy h4 {
   margin: 0 0 4px 0;
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--color-neutral-900, #111827);
 }
 
 .inline-error-copy p {
   margin: 0 0 16px 0;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--color-neutral-500, #6b7280);
   line-height: 1.4;
   max-width: 280px;
@@ -53,7 +53,7 @@
   border: none;
   border-radius: 6px;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;

@@ -23,7 +23,7 @@ function StepItem({ number, title, description }) {
           borderRadius: '50%',
           background: 'var(--btn-dark)',
           fontWeight: 800,
-          fontSize: '1.25rem',
+          fontSize: '16px',
           boxShadow: '0 4px 16px rgba(7, 26, 28, 0.2)'
         }}
       >
@@ -33,13 +33,13 @@ function StepItem({ number, title, description }) {
       {/* Step Content */}
       <h3 
         className="font-display text-main mb-2" 
-        style={{ fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.02em' }}
+        style={{ fontWeight: 700, fontSize: '16px', letterSpacing: '0.02em' }}
       >
         {title}
       </h3>
       <p 
         className="text-muted-custom leading-relaxed mx-auto" 
-        style={{ fontSize: '0.85rem', maxWidth: '240px', lineHeight: 1.6 }}
+        style={{ fontSize: '14px', maxWidth: '240px', lineHeight: 1.6 }}
       >
         {description}
       </p>
@@ -69,7 +69,7 @@ export default function HowToUse() {
         <div className="text-center mb-5 reveal-on-scroll">
           <div 
             className="d-inline-flex align-items-center gap-2 mb-2 text-uppercase font-bold tracking-wider" 
-            style={{ fontSize: '0.75rem', color: 'var(--primary)', fontWeight: 700, letterSpacing: '0.1em' }}
+            style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: 700, letterSpacing: '0.1em' }}
           >
             <span style={{ width: '24px', height: '1px', backgroundColor: 'var(--primary)' }} />
             <span>{t('howToUseSubtitle')}</span>
@@ -82,7 +82,7 @@ export default function HowToUse() {
           </h2>
           <p 
             className="text-muted-custom mx-auto" 
-            style={{ fontSize: '0.9rem', maxWidth: '420px', lineHeight: 1.5 }}
+            style={{ fontSize: '14px', maxWidth: '420px', lineHeight: 1.5 }}
           >
             {t('howToUseDesc')}
           </p>

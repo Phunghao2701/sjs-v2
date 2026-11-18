@@ -5,6 +5,9 @@ import { FiFilter, FiCheck, FiChevronDown, FiX } from 'react-icons/fi';
 import { BiSortAlt2 } from 'react-icons/bi';
 import { coreApiClient } from '../../../shared/api/axios';
 import ErrorStateSection from '../../../shared/components/common/ErrorStateSection';
+import { Skeleton } from '../../../../shared/ui/skeleton';
+import { StatePanel } from '../../../../shared/ui/state-panel';
+import { Card } from '../../../../shared/ui/card';
 import '../styles/ProjectsPage.css';
 
 const mapProjectFromApi = (project) => {
@@ -226,22 +229,41 @@ export default function ProjectsPage() {
       {/* Projects Grid */}
       <div className="projects-grid">
         {loading ? (
-          <div style={{ gridColumn: '1 / -1', padding: '40px', textAlign: 'center', color: 'var(--color-neutral-500)' }}>
-            <div className="update-icon spin" style={{ width: '32px', height: '32px', border: '3px solid var(--color-primary-orange)', borderTopColor: 'transparent', borderRadius: '50%', margin: '0 auto 16px' }}></div>
-            <div>{t('common.loading')}</div>
+          <div style={{ gridColumn: '1 / -1' }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="p-6 space-y-4">
+                <div className="flex justify-between items-center">
+                  <Skeleton className="h-6 w-24 rounded-full" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+                <Skeleton className="h-6 w-3/4" />
+                <div className="flex gap-4 pt-4 border-t border-[var(--color-neutral-200)]">
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-16" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              </Card>
+            ))}
           </div>
         ) : error ? (
           <div style={{ gridColumn: '1 / -1' }}>
-            <ErrorStateSection
+            <StatePanel
+              variant="error"
               title={t('common.error')}
-              message={error}
-              onRetry={fetchProjects}
-              minHeight={300}
+              description={error}
+              action={{
+                label: t('common.retry') || 'Thử lại',
+                onClick: fetchProjects,
+              }}
             />
           </div>
         ) : projects.length === 0 ? (
-          <div style={{ gridColumn: '1 / -1', padding: '60px', textAlign: 'center', color: 'var(--color-neutral-500)', backgroundColor: 'var(--color-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--color-neutral-300)' }}>
-            <h3>{t('dashboard.noProjects')}</h3>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <StatePanel
+              variant="neutral"
+              title={t('dashboard.noProjects')}
+              description={t('dashboard.noProjectsDescription') || 'Chưa có dự án nào được tạo trong hệ thống.'}
+            />
           </div>
         ) : (
           sortedProjects.map(project => {

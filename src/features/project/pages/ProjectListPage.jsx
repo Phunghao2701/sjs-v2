@@ -1,16 +1,19 @@
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import ROUTES from '../../../app/routes/routePaths';
 import useProjects from '../hooks/useProjects';
 import ProjectCard from '../components/ProjectCard';
-import EmptyState from '../../../shared/components/EmptyState';
-import LoadingSkeleton from '../../../shared/components/LoadingSkeleton';
 import { Icon } from '@iconify/react';
-import { Modal, Button } from 'react-bootstrap';
-import Header from '../../landing/components/Header';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { Modal } from 'react-bootstrap';
+import { Button } from '../../../shared/ui/button';
+import { Skeleton } from '../../../shared/ui/skeleton';
+import { StatePanel } from '../../../shared/ui/state-panel';
+import { Card } from '../../../shared/ui/card';
 import useAuth from '../../auth/hooks/useAuth';
+import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
+import { getSubjectAreasApi } from '../../catalog/api/catalogApi';
+
 const ProjectListPage = () => {
   const navigate = useNavigate();
   const {
@@ -19,14 +22,37 @@ const ProjectListPage = () => {
     error,
     deleteProject,
     restoreProject,
-    refetch
+    refetch,
   } = useProjects();
+  const [areas, setAreas] = useState([]);
   const [recentIds, setRecentIds] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'ACTIVE' | 'DELETED'
+  const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest' | 'title' | 'keywords'
+  const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
   const [confirmModal, setConfirmModal] = useState({ show: false, projectId: null, action: null });
   const { t } = useTranslation();
   const auth = useAuth();
   const currentUser = auth?.user;
 
+  // Preload subject areas catalogue for clean label mapping
+  useEffect(() => {
+    let isMounted = true;
+    getSubjectAreasApi({ limit: 100 })
+      .then((res) => {
+        if (!isMounted) return;
+        const list = res?.data?.data?.items || res?.data?.data || res?.data || [];
+        if (Array.isArray(list)) setAreas(list);
+      })
+      .catch((err) => {
+        console.warn('Could not preload subject areas catalogue:', err);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Read recently viewed project IDs from local storage
   useEffect(() => {
     try {
       const raw = localStorage.getItem('recently_viewed_projects');
@@ -36,8 +62,9 @@ const ProjectListPage = () => {
     } catch (e) {
       console.error(t("project.loiDocDuAnXemGanDay"), e);
     }
-  }, []);
-  const handleDelete = async id => {
+  }, [t]);
+
+  const handleDelete = (id) => {
     setConfirmModal({ show: true, projectId: id, action: 'delete' });
   };
 
@@ -47,12 +74,10 @@ const ProjectListPage = () => {
     setConfirmModal({ show: false, projectId: null, action: null });
     try {
       await deleteProject(id);
-
-      // Xóa khỏi danh sách xem gần đây
       const storageKey = 'recently_viewed_projects';
       const raw = localStorage.getItem(storageKey);
       if (raw) {
-        const list = JSON.parse(raw).filter(recentId => String(recentId) !== String(id));
+        const list = JSON.parse(raw).filter((recentId) => String(recentId) !== String(id));
         localStorage.setItem(storageKey, JSON.stringify(list));
         setRecentIds(list);
       }
@@ -61,7 +86,7 @@ const ProjectListPage = () => {
     }
   };
 
-  const handleRestore = async id => {
+  const handleRestore = (id) => {
     setConfirmModal({ show: true, projectId: id, action: 'restore' });
   };
 
@@ -76,149 +101,387 @@ const ProjectListPage = () => {
     }
   };
 
-  const activeProjects = projects.filter(p => p.status !== 'DELETED');
-  
-  // Lọc các dự án xem gần đây từ danh sách active projects
-  const recentProjects = recentIds.map(id => activeProjects.find(p => (p.project_id || p.id) === id)).filter(Boolean);
-  return <div className="container-fluid pb-4 grid-bg min-vh-100 position-relative overflow-hidden" style={{
-    paddingTop: '80px'
-  }}>
-      <div className="position-absolute w-100 h-100 radial-fade pe-none" style={{
-      top: 0,
-      left: 0,
-      zIndex: 0
-    }} />
-      <Header />
-      <div className="container mx-auto position-relative z-1" style={{
-      maxWidth: '1200px',
-      marginTop: '40px'
-    }}>
-        {/* Breadcrumb */}
-        <nav aria-label="breadcrumb" className="mb-4">
-          <ol className="breadcrumb mb-2 text-muted-custom small">
-            <li className="breadcrumb-item"><Link to={ROUTES.DASHBOARD} className="text-decoration-none text-muted-custom hover-primary">{t("author.tongQuan")}</Link></li>
-            <li className="breadcrumb-item active" aria-current="page">{t("project.duAnTheoDoi")}</li>
-          </ol>
-        </nav>
+  // Helper to resolve area name for chips
+  const resolveAreaNameFor = (p) => {
+    if (p.subject_area && typeof p.subject_area === 'object') {
+      return p.subject_area.name || p.subject_area.display_name || 'General Science';
+    }
+    const rawVal = p.subject_area || p.subject_area_id;
+    if (!rawVal) return 'General Science';
+    if (areas?.length) {
+      const found = areas.find((a) => String(a.id || a.subject_area_id) === String(rawVal));
+      if (found) return found.name || found.display_name;
+    }
+    if (!isNaN(rawVal)) return `Area #${rawVal}`;
+    return String(rawVal);
+  };
 
-        {/* Page Header */}
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-5">
-          <div>
-            <h1 className="font-display fw-bold text-main mb-2">{t("project.duAnNghienCuuCuaToi")}</h1>
-            <p className="text-muted-custom mb-0">{t("project.quanLyCacKeywordWatchlistsPhan")}</p>
+  // KPI Calculations
+  const nonDeletedProjects = useMemo(() => projects.filter((p) => p.status !== 'DELETED'), [projects]);
+  const deletedProjects = useMemo(() => projects.filter((p) => p.status === 'DELETED'), [projects]);
+  const activeProjectsCount = useMemo(
+    () => nonDeletedProjects.filter((p) => p.status === 'ACTIVE' || (!p.status && p.status !== 'INACTIVE')).length,
+    [nonDeletedProjects]
+  );
+  const totalKeywordsMonitored = useMemo(() => {
+    return nonDeletedProjects.reduce((sum, p) => {
+      const count = p.keywords_count || p.watch_keywords?.length || 0;
+      return sum + count;
+    }, 0);
+  }, [nonDeletedProjects]);
+
+  // Filter and sort projects
+  const filteredAndSortedProjects = useMemo(() => {
+    return projects
+      .filter((p) => {
+        if (statusFilter === 'ACTIVE') {
+          return p.status === 'ACTIVE' || (p.status !== 'DELETED' && p.status !== 'INACTIVE');
+        }
+        if (statusFilter === 'DELETED') {
+          return p.status === 'DELETED';
+        }
+        return p.status !== 'DELETED';
+      })
+      .filter((p) => {
+        if (!searchTerm.trim()) return true;
+        const term = searchTerm.toLowerCase();
+        const titleMatch = (p.title || '').toLowerCase().includes(term);
+        const areaStr =
+          (typeof p.subject_area === 'object' ? p.subject_area?.name || p.subject_area?.display_name : p.subject_area) || '';
+        const areaMatch = String(areaStr).toLowerCase().includes(term);
+        const keywordMatch = (p.watch_keywords || []).some((kw) => (kw.keyword || kw || '').toLowerCase().includes(term));
+        return titleMatch || areaMatch || keywordMatch;
+      })
+      .sort((a, b) => {
+        if (sortBy === 'newest') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+        if (sortBy === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+        if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '');
+        if (sortBy === 'keywords') {
+          const countA = a.keywords_count || a.watch_keywords?.length || 0;
+          const countB = b.keywords_count || b.watch_keywords?.length || 0;
+          return countB - countA;
+        }
+        return 0;
+      });
+  }, [projects, statusFilter, searchTerm, sortBy]);
+
+  // Recent projects
+  const recentProjects = useMemo(() => {
+    return recentIds
+      .map((id) => nonDeletedProjects.find((p) => String(p.project_id || p.id) === String(id)))
+      .filter(Boolean);
+  }, [recentIds, nonDeletedProjects]);
+
+  return (
+    <PageContainer>
+      {/* 1. Header with Breadcrumb & Primary Action Button */}
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Workspace', to: ROUTES.DASHBOARD },
+          { label: 'Research Projects' }
+        ]}
+        title={t("project.duAnNghienCuuCuaToi", "My Research Projects")}
+        description={t("project.quanLyCacKeywordWatchlistsPhan", "Manage keyword watch-lists, analyze publishing trends and monitor scientific articles.")}
+        actions={
+          <Button onClick={() => navigate(ROUTES.PROJECT_CREATE)} size="default" className="gap-2 shrink-0">
+            <Icon icon="lucide:plus" width={16} aria-hidden="true" />
+            <span>{t("project.taoDuAnMoi", "Create Project")}</span>
+          </Button>
+        }
+      />
+
+      {/* 2. Exactly 3 KPI Metric Cards (as in proposed wireframe) */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* KPI 1: Total Projects */}
+        <Card className="p-3 sm:p-3.5 flex items-center justify-between border-border bg-surface shadow-xs">
+          <div className="space-y-0.5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
+              Total Projects
+            </p>
+            <p className="text-xl font-bold tracking-tight text-foreground m-0 leading-none">
+              {nonDeletedProjects.length}
+            </p>
+            <p className="text-[11px] text-muted-foreground m-0">
+              In your workspace
+            </p>
           </div>
-          <PrimaryButton icon="lucide:plus" onClick={() => navigate(ROUTES.PROJECT_CREATE)}>{t("journal.taoDuAnMoi")}</PrimaryButton>
-        </div>
-
-        {/* Filter / Search Bar Placeholder */}
-        <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-          <div className="position-relative" style={{
-          maxWidth: '300px',
-          width: '100%'
-        }}>
-            <Icon icon="lucide:search" width="18" className="position-absolute top-50 translate-middle-y text-muted" style={{
-            left: '12px'
-          }} />
-            <input type="text" className="form-control ps-5 bg-white border" placeholder={t("project.timKiemDuAn")} style={{
-            fontSize: '0.9rem',
-            borderRadius: '15px',
-            boxShadow: 'none'
-          }} onFocus={e => {
-            e.currentTarget.style.borderColor = 'var(--border)';
-            e.currentTarget.style.boxShadow = 'none';
-            e.currentTarget.style.outline = 'none';
-          }} onBlur={e => {
-            e.currentTarget.style.borderColor = 'var(--border)';
-          }} />
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary-subtle text-primary shrink-0">
+            <Icon icon="lucide:folder-kanban" width="18" aria-hidden="true" />
           </div>
-          <div className="d-flex gap-4 text-muted-custom small">
-            <span>{t("project.tongSoDuAn")}{" "}<strong className="text-main">{activeProjects.length}</strong></span>
-            <span>{t("project.dangHoatDong")}{" "}<strong className="text-success">{activeProjects.filter(p => p.status === 'ACTIVE').length}</strong></span>
+        </Card>
+
+        {/* KPI 2: Active Monitoring */}
+        <Card className="p-3 sm:p-3.5 flex items-center justify-between border-border bg-surface shadow-xs">
+          <div className="space-y-0.5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
+              Active Monitoring
+            </p>
+            <p className="text-xl font-bold tracking-tight text-success m-0 leading-none">
+              {activeProjectsCount}
+            </p>
+            <p className="text-[11px] text-muted-foreground m-0">
+              Live feeds enabled
+            </p>
           </div>
-        </div>
+          <div className="flex size-9 items-center justify-center rounded-lg bg-success-subtle text-success shrink-0">
+            <Icon icon="lucide:activity" width="18" aria-hidden="true" />
+          </div>
+        </Card>
 
-        {/* Content */}
-        {error ? <div className="alert alert-danger border-0 rounded-4 shadow-sm p-4 d-flex align-items-center gap-3">
-            <Icon icon="lucide:alert-triangle" width="24" className="text-danger flex-shrink-0" />
-            <div>
-              <h6 className="fw-bold mb-1">{t("article.loiTaiDuLieu")}</h6>
-              <p className="mb-0 small">{error}</p>
-            </div>
-            <PrimaryButton variant="outline" className="ms-auto" onClick={() => refetch()}>{t("article.thuLai")}</PrimaryButton>
-          </div> : isLoading ? <div className="row g-4">
-            {[1, 2, 3].map(i => <div key={i} className="col-12 col-md-6 col-lg-4">
-                <div className="card glass-card border-0 shadow-sm rounded-4 p-4 h-100">
-                  <LoadingSkeleton height="24px" width="40%" className="mb-3 rounded-pill" />
-                  <LoadingSkeleton height="28px" width="80%" className="mb-4 rounded" />
-                  <LoadingSkeleton height="16px" width="60%" className="mb-2 rounded" />
-                  <LoadingSkeleton height="16px" width="50%" className="mb-4 rounded" />
-                  <LoadingSkeleton height="1px" width="100%" className="mb-3 rounded" />
-                  <div className="d-flex justify-content-between mt-auto">
-                    <LoadingSkeleton height="16px" width="40%" className="rounded" />
-                    <LoadingSkeleton height="16px" width="20%" className="rounded" />
-                  </div>
-                </div>
-              </div>)}
-          </div> : projects.length === 0 ? <EmptyState title={t("project.banChuaCoDuAnNao")} description={t("project.taoDuAnDauTienDeBatDauTheoDoiT")} icon="lucide:folder-open" actionLabel="+ Tạo dự án mới" onAction={() => navigate(ROUTES.PROJECT_CREATE)} className="mt-4" /> : <div className="d-flex flex-column gap-5">
-            {/* Section: Dự án xem gần đây */}
-            {recentProjects.length > 0 && <div>
-                <h5 className="font-display fw-bold text-main mb-3 d-flex align-items-center gap-2">
-                  <Icon icon="lucide:clock" width={18} style={{
-              color: 'var(--primary)'
-            }} />
-                  <span>{t("project.duAnXemGanDay")}</span>
-                </h5>
-                <div className="row g-4">
-                  {recentProjects.map(project => <div key={`recent-${project.project_id || project.id}`} className="col-12 col-md-6 col-lg-4">
-                      <ProjectCard project={project} onDelete={handleDelete} onRestore={handleRestore} isRecent={true} currentUser={currentUser} />
-                    </div>)}
-                </div>
-              </div>}
-
-            {/* Section: Tất cả dự án */}
-            <div>
-              <h5 className="font-display fw-bold text-main mb-3 d-flex align-items-center gap-2">
-                <Icon icon="lucide:folder" width={18} style={{
-              color: 'var(--primary)'
-            }} />
-                <span>{t("project.tatCaDuAn")} ({activeProjects.length})</span>
-              </h5>
-              <div className="row g-4">
-                {activeProjects.map(project => <div key={project.project_id || project.id} className="col-12 col-md-6 col-lg-4">
-                    <ProjectCard project={project} onDelete={handleDelete} onRestore={handleRestore} currentUser={currentUser} />
-                  </div>)}
-              </div>
-            </div>
-          </div>}
+        {/* KPI 3: Keywords */}
+        <Card className="p-3 sm:p-3.5 flex items-center justify-between border-border bg-surface shadow-xs">
+          <div className="space-y-0.5">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
+              Keywords
+            </p>
+            <p className="text-xl font-bold tracking-tight text-foreground m-0 leading-none">
+              {totalKeywordsMonitored}
+            </p>
+            <p className="text-[11px] text-muted-foreground m-0">
+              Across all watchlists
+            </p>
+          </div>
+          <div className="flex size-9 items-center justify-center rounded-lg bg-primary-subtle text-primary shrink-0">
+            <Icon icon="lucide:key" width="18" aria-hidden="true" />
+          </div>
+        </Card>
       </div>
 
-      <Modal show={confirmModal.show} onHide={() => setConfirmModal({ show: false, projectId: null, action: null })} centered>
-        <Modal.Header border="0" closeButton>
-          <Modal.Title className="fw-bold">
-            {confirmModal.action === 'delete' ? t("project.xacNhanXoaDuAn", "Xác nhận xóa dự án") : "Xác nhận khôi phục dự án"}
+      {/* 3. Toolbar: [ 🔍 Search projects... ] [ Filter: Status ▾ ] [ Sort ▾ ] [ ⊞ ☰ ] */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-border">
+        {/* Left: Search Input */}
+        <div className="relative w-full sm:max-w-xs">
+          <Icon
+            icon="lucide:search"
+            width="16"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            aria-hidden="true"
+          />
+          <input
+            type="text"
+            className="w-full h-9 pl-9 pr-8 rounded-control border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 transition-colors"
+            placeholder="Search projects..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              aria-label="Clear search"
+            >
+              <Icon icon="lucide:x" width="14" />
+            </button>
+          )}
+        </div>
+
+        {/* Right: Status Filter + Sort + View Mode */}
+        <div className="flex items-center gap-2.5 flex-wrap self-end sm:self-auto">
+          {/* Status Dropdown */}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-9 px-3 rounded-control border border-border bg-surface text-xs font-medium text-foreground focus-visible:outline-none focus-visible:border-primary cursor-pointer shadow-xs"
+              aria-label="Filter status"
+            >
+              <option value="ALL">Status: All ({nonDeletedProjects.length})</option>
+              <option value="ACTIVE">Status: Active ({activeProjectsCount})</option>
+              {deletedProjects.length > 0 && (
+                <option value="DELETED">Status: Deleted ({deletedProjects.length})</option>
+              )}
+            </select>
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="h-9 px-3 rounded-control border border-border bg-surface text-xs font-medium text-foreground focus-visible:outline-none focus-visible:border-primary cursor-pointer shadow-xs"
+              aria-label="Sort order"
+            >
+              <option value="newest">Sort: Newest</option>
+              <option value="oldest">Sort: Oldest</option>
+              <option value="title">Sort: Name (A-Z)</option>
+              <option value="keywords">Sort: Most Keywords</option>
+            </select>
+          </div>
+
+          {/* View Toggle */}
+          <div className="flex items-center rounded-control bg-surface-muted p-0.5 border border-border/60">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`p-1.5 rounded-control transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-surface text-primary shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+              title="Grid view"
+              aria-label="Grid view"
+            >
+              <Icon icon="lucide:layout-grid" width="16" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('list')}
+              className={`p-1.5 rounded-control transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-surface text-primary shadow-xs font-semibold'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+              title="List view"
+              aria-label="List view"
+            >
+              <Icon icon="lucide:list" width="16" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* 4. RECENTLY ACCESSED (Quick Chips / Mini Bento Cards as in wireframe) */}
+      {recentProjects.length > 0 && !searchTerm && (
+        <div className="space-y-2">
+          <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground m-0 flex items-center gap-1.5">
+            <Icon icon="lucide:clock-4" width="14" className="text-primary" />
+            <span>RECENTLY ACCESSED</span>
+          </p>
+          <div className="flex flex-wrap gap-2.5">
+            {recentProjects.map((p) => (
+              <Link
+                key={`recent-chip-${p.project_id || p.id}`}
+                to={`/projects/${p.project_id || p.id}`}
+                className="inline-flex items-center gap-2 rounded-control border border-border bg-surface px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:bg-primary-subtle/30 no-underline shadow-xs"
+              >
+                <Icon icon="lucide:folder" width="15" className="text-primary shrink-0" />
+                <span className="font-semibold text-foreground">{p.title}</span>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-muted-foreground text-[11px]">{resolveAreaNameFor(p)}</span>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-muted-foreground text-[11px]">
+                  {p.created_at ? new Date(p.created_at).toLocaleDateString('vi-VN') : 'Recently'}
+                </span>
+                <Icon icon="lucide:arrow-right" width="13" className="text-primary" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 5. ALL PROJECTS (Grid / List) */}
+      <div className="space-y-4">
+        <h3 className="m-0 text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+          <Icon icon="lucide:folder-kanban" width="16" className="text-primary" />
+          <span>
+            {statusFilter === 'DELETED' ? 'DELETED PROJECTS' : 'ALL PROJECTS'} ({filteredAndSortedProjects.length})
+          </span>
+        </h3>
+
+        {error ? (
+          <StatePanel
+            variant="error"
+            title="Error Loading Projects"
+            description={error}
+            action={{
+              label: "Try again",
+              onClick: () => refetch(),
+            }}
+          />
+        ) : isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="p-5 space-y-4">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <div className="border-t border-border pt-3">
+                  <Skeleton className="h-4 w-full" />
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : filteredAndSortedProjects.length === 0 ? (
+          <StatePanel
+            variant="neutral"
+            icon={<Icon icon="lucide:search-x" width="36" className="text-muted-foreground" />}
+            title="No projects found"
+            description="Try adjusting your search query or filters."
+            action={
+              searchTerm
+                ? {
+                    label: "Clear search",
+                    onClick: () => setSearchTerm(''),
+                  }
+                : undefined
+            }
+          />
+        ) : viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filteredAndSortedProjects.map((project) => (
+              <ProjectCard
+                key={project.project_id || project.id}
+                project={project}
+                onDelete={handleDelete}
+                onRestore={handleRestore}
+                currentUser={currentUser}
+                areas={areas}
+                viewMode="grid"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {filteredAndSortedProjects.map((project) => (
+              <ProjectCard
+                key={project.project_id || project.id}
+                project={project}
+                onDelete={handleDelete}
+                onRestore={handleRestore}
+                currentUser={currentUser}
+                areas={areas}
+                viewMode="list"
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Confirmation Modal */}
+      <Modal
+        show={confirmModal.show}
+        onHide={() => setConfirmModal({ show: false, projectId: null, action: null })}
+        centered
+      >
+        <Modal.Header closeButton className="border-0 pb-0">
+          <Modal.Title className="text-base font-semibold text-foreground">
+            {confirmModal.action === 'delete' ? 'Confirm Project Deletion' : 'Confirm Project Restoration'}
           </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
-          <p className="text-muted-custom mb-0">
-            {confirmModal.action === 'delete' 
-              ? (t("project.banCoChacMuonXoaDuAnNayHanhDon") || "Bạn có chắc muốn xóa dự án này? Hành động này không thể hoàn tác.")
-              : "Bạn có chắc muốn khôi phục dự án này?"}
+        <Modal.Body className="py-3">
+          <p className="text-sm text-muted-foreground m-0">
+            {confirmModal.action === 'delete'
+              ? 'Are you sure you want to delete this project? You can restore it later from the deleted filter.'
+              : 'Are you sure you want to restore this project?'}
           </p>
         </Modal.Body>
-        <Modal.Footer border="0" className="gap-2">
-          <Button variant="light" className="px-4 fw-medium" onClick={() => setConfirmModal({ show: false, projectId: null, action: null })} style={{ borderRadius: '10px' }}>
-            Hủy bỏ
-          </Button>
-          <Button 
-            variant={confirmModal.action === 'delete' ? "danger" : "success"} 
-            className="px-4 fw-medium text-white" 
-            onClick={confirmModal.action === 'delete' ? executeDelete : executeRestore}
-            style={{ borderRadius: '10px' }}
+        <Modal.Footer className="border-0 pt-0 gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setConfirmModal({ show: false, projectId: null, action: null })}
           >
-            {confirmModal.action === 'delete' ? t("project.xoaDuAn") : "Khôi phục"}
+            Cancel
+          </Button>
+          <Button
+            variant={confirmModal.action === 'delete' ? 'destructive' : 'default'}
+            onClick={confirmModal.action === 'delete' ? executeDelete : executeRestore}
+          >
+            {confirmModal.action === 'delete' ? 'Delete Project' : 'Restore'}
           </Button>
         </Modal.Footer>
       </Modal>
-    </div>;
+    </PageContainer>
+  );
 };
+
 export default ProjectListPage;

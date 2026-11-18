@@ -41,7 +41,7 @@ export default function UserFilterBar({
       }} />
         <input type="text" placeholder={t("admin.searchByNameemail")} value={search} onChange={e => onSearchChange(e.target.value)} className="border-0 bg-transparent text-main w-100" style={{
         outline: 'none',
-        fontSize: '0.85rem'
+        fontSize: '14px'
       }} />
       </div>
 
@@ -50,7 +50,7 @@ export default function UserFilterBar({
       width: '130px',
       height: '34px',
       borderColor: 'var(--border)',
-      fontSize: '0.85rem',
+      fontSize: '14px',
       cursor: 'pointer'
     }}>
         <option value="all">All Roles</option>
@@ -64,7 +64,7 @@ export default function UserFilterBar({
       width: '130px',
       height: '34px',
       borderColor: 'var(--border)',
-      fontSize: '0.85rem',
+      fontSize: '14px',
       cursor: 'pointer'
     }}>
         <option value="all">All Statuses</option>
@@ -79,7 +79,7 @@ export default function UserFilterBar({
       onRoleChange('all');
       onStatusChange('all');
     }} className="btn btn-link p-0 text-decoration-none text-muted-custom hover-primary d-flex align-items-center gap-1" style={{
-      fontSize: '0.85rem'
+      fontSize: '14px'
     }}>
           <Icon icon="lucide:x-circle" width="16" />
           <span>Reset</span>

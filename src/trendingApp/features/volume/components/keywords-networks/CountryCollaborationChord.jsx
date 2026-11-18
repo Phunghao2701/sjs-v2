@@ -155,7 +155,7 @@ const CountryCollaborationChord = ({ data }) => {
 
         {/* Right side: Detailed Stats */}
         <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: '14px', alignSelf: 'stretch', justifyContent: 'center' }}>
-          <h4 style={{ margin: 0, fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-neutral-500)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <h4 style={{ margin: 0, fontSize: '13px', fontWeight: 700, color: 'var(--color-neutral-500)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             {t('volume.primaryCollaborationLinks', 'Primary Collaboration Links')}
           </h4>
           
@@ -177,18 +177,18 @@ const CountryCollaborationChord = ({ data }) => {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ width: '4px', height: '16px', backgroundColor: link.color, borderRadius: '2px' }} />
-                    <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--color-neutral-800)' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-neutral-800)' }}>
                       {link.source} ↔ {link.target}
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.8125rem', fontWeight: 700, color: 'var(--color-neutral-900)' }}>{link.papers}</div>
-                      <div style={{ fontSize: '0.6875rem', color: 'var(--color-neutral-500)' }}>{link.pct} {t('volume.ofTotal', 'of total')}</div>
+                      <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-neutral-900)' }}>{link.papers}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--color-neutral-500)' }}>{link.pct} {t('volume.ofTotal', 'of total')}</div>
                     </div>
                     <span 
                       style={{ 
-                        fontSize: '0.75rem', 
+                        fontSize: '13px', 
                         fontWeight: 700, 
                         color: 'var(--color-chart-2)',
                         backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -205,7 +205,7 @@ const CountryCollaborationChord = ({ data }) => {
                 </div>
               ))
             ) : (
-              <div style={{ color: 'var(--color-neutral-400)', fontSize: '0.8125rem', padding: '24px 12px', textAlign: 'center', border: '1px dashed var(--color-neutral-200)', borderRadius: '6px' }}>
+              <div style={{ color: 'var(--color-neutral-400)', fontSize: '14px', padding: '24px 12px', textAlign: 'center', border: '1px dashed var(--color-neutral-200)', borderRadius: '6px' }}>
                 {t('volume.noCountryCollabLinks', 'No country collaboration links found for this timeframe.')}
               </div>
             )}

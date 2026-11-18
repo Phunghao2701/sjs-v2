@@ -44,7 +44,7 @@ export default function RoleBadge({ role }) {
     <span 
       className="badge rounded-3 px-2.5 py-1 fw-semibold text-xs" 
       style={{
-        fontSize: '0.75rem',
+        fontSize: '13px',
         textTransform: 'capitalize',
         ...currentStyle
       }}

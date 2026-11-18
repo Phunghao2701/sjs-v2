@@ -953,7 +953,7 @@ export const generateProfessionalReport = async (queryClient, projectId) => {
           border: 4px solid #E5E7EB; border-top-color: #2563EB;
           border-radius: 50%; animation: spin 0.8s linear infinite;
         "></div>
-        <h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 700; color: #111827;">
+        <h3 style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #111827;">
           Generating Report
         </h3>
         <p style="margin: 0; font-size: 13px; color: #6B7280; line-height: 1.5;">

@@ -7,20 +7,12 @@ import QuartileDistributionCard from '../components/QuartileDistributionCard';
 import ImpactMatrixCard from '../components/ImpactMatrixCard';
 import MigrationAnalysisCard from '../components/MigrationAnalysisCard';
 import { useJournalsData } from '../hooks/useJournalsData';
-import ErrorStateSection from '../../../shared/components/common/ErrorStateSection';
+import { StatePanel } from '../../../../shared/ui/state-panel';
+import { Skeleton } from '../../../../shared/ui/skeleton';
+import { Card } from '../../../../shared/ui/card';
+import { Button } from '../../../../shared/ui/button';
+import { Icon } from '@iconify/react';
 import '../styles/JournalsPage.css';
-
-const placeholderStyle = {
-  background: 'var(--color-surface)',
-  border: 'var(--border-light)',
-  borderStyle: 'dashed',
-  borderRadius: 'var(--radius-md)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  color: 'var(--color-neutral-500)',
-  fontSize: 'var(--font-size-body)',
-};
 
 export default function JournalsPage() {
   const { t } = useTranslation();
@@ -28,28 +20,44 @@ export default function JournalsPage() {
 
   if (loading && !data) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', padding: '24px' }}>
-        <div style={{ ...placeholderStyle, height: '400px', flexDirection: 'column', gap: '16px' }}>
-          <div className="update-icon spin" style={{ width: '24px', height: '24px', border: '3px solid var(--color-primary-orange)', borderTopColor: 'transparent', borderRadius: '50%' }}></div>
-          <div>{t('common.loading', 'Loading Journals...')}</div>
-        </div>
+      <div className="journals-page flex flex-col h-full w-full">
+        <DashboardContainer>
+          <DashboardGrid columns={2}>
+            {[1, 2, 3, 4].map((i) => (
+              <Card key={i} className="p-6 space-y-4 min-h-[360px]">
+                <div className="flex items-center justify-between">
+                  <Skeleton className="h-5 w-40 rounded" />
+                  <Skeleton className="h-4 w-16 rounded" />
+                </div>
+                <Skeleton className="h-64 w-full rounded" />
+              </Card>
+            ))}
+          </DashboardGrid>
+        </DashboardContainer>
       </div>
     );
   }
 
   if (error && !data) {
     return (
-      <ErrorStateSection 
-        title={t('common.error', 'Data Loading Failed')}
-        message={t('dashboard.loadingFailedDesc', 'Unable to load journals data. Please check your connection or try again.')}
-        onRetry={refetch}
-        minHeight={400}
-      />
+      <div className="p-6">
+        <StatePanel
+          variant="error"
+          icon={<Icon icon="lucide:alert-triangle" width="32" className="text-danger" />}
+          title={t('common.error', 'Data Loading Failed')}
+          description={t('dashboard.loadingFailedDesc', 'Unable to load journals data. Please check your connection or try again.')}
+          actions={
+            <Button variant="outline" size="sm" onClick={refetch}>
+              {t('common.retry', 'Thử lại')}
+            </Button>
+          }
+        />
+      </div>
     );
   }
 
   return (
-    <div className="journals-page" style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+    <div className="journals-page flex flex-col h-full w-full">
       <DashboardContainer>
         <DashboardGrid columns={2}>
           <QuartileDistributionCard 

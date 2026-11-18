@@ -9,6 +9,7 @@ import ResetPasswordSuccess from '../components/ResetPasswordSuccess';
 import { resetPasswordApi } from '../api/auth.api';
 import Icon from '../../../shared/components/Icon';
 import ROUTES from '../../../app/routes/routePaths';
+import { Alert } from '../../../shared/ui/alert';
 export default function ResetPasswordPage() {
   const { t: _t } = useTranslation();
   const [searchParams] = useSearchParams();
@@ -58,39 +59,37 @@ export default function ResetPasswordPage() {
             </span>
           </div>
 
-          <div className="mb-4">
-            <h2 className="font-display fw-bold mb-1" style={{
-          fontSize: '1.85rem',
-          color: 'var(--text-main)'
-        }}>{t("auth.datLaiMatKhau")}</h2>
-            <p className="text-muted-custom text-sm mb-0" style={{
-          color: 'var(--text-muted)'
-        }}>{t("auth.vuiLongNhapMatKhauMoiCuaBanBen")}</p>
+          <div className="mb-6 space-y-1">
+            <h2 className="font-display font-semibold text-base text-foreground m-0">{t("auth.datLaiMatKhau")}</h2>
+            <p className="text-sm text-muted-foreground m-0">{t("auth.vuiLongNhapMatKhauMoiCuaBanBen")}</p>
           </div>
 
-          {!token ? <div className="alert alert-danger d-flex align-items-center gap-3 py-3 px-3 border-0 rounded-3 mb-4 text-danger bg-danger bg-opacity-10" style={{
-        fontSize: '13px',
-        fontWeight: 500
-      }}>
-              <Icon icon="lucide:alert-triangle" width="18" className="flex-shrink-0" />
-              <div>{t("auth.lienKetKhoiPhucMatKhauKhongHop")}<div className="mt-2">
-                  <Link to={ROUTES.FORGOT_PASSWORD} style={{
-              color: 'var(--primary)',
-              textDecoration: 'none',
-              fontWeight: 600
-            }}>{t("auth.yeuCauLienKetMoi")}</Link>
+          {!token ? (
+            <Alert variant="destructive" className="items-center mb-4">
+              <Icon icon="lucide:alert-triangle" width="18" className="shrink-0" />
+              <div className="flex-1 text-xs">
+                {t("auth.lienKetKhoiPhucMatKhauKhongHop")}
+                <div className="mt-2">
+                  <Link to={ROUTES.FORGOT_PASSWORD} className="text-primary font-semibold hover:underline">
+                    {t("auth.yeuCauLienKetMoi")}
+                  </Link>
                 </div>
               </div>
-            </div> : <ResetPasswordForm onSubmit={handleResetPasswordSubmit} isLoading={isLoading} apiError={error} />}
+            </Alert>
+          ) : (
+            <ResetPasswordForm onSubmit={handleResetPasswordSubmit} isLoading={isLoading} apiError={error} />
+          )}
 
           {/* Link back to Login */}
-          {!isSubmitted && <div className="text-center mt-4 text-sm font-medium">
-              <span className="text-muted-custom">{t("auth.quayLai")}</span>{' '}
-              <Link to={ROUTES.LOGIN} className="text-decoration-none transition-all" style={{
-          color: 'var(--primary)',
-          fontWeight: 600
-        }}>{t("signIn")}</Link>
-            </div>}
-        </>}
+          {!isSubmitted && (
+            <div className="text-center mt-6 text-sm">
+              <span className="text-muted-foreground">{t("auth.quayLai")}</span>{' '}
+              <Link to={ROUTES.LOGIN} className="text-primary font-semibold hover:underline">
+                {t("signIn")}
+              </Link>
+            </div>
+          )}
+        </>
+      }
     </AuthLayout>;
 }

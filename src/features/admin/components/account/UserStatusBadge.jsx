@@ -26,7 +26,7 @@ export default function UserStatusBadge({ status }) {
   const config = statusConfig[status] || statusConfig.Pending;
 
   return (
-    <div className="d-inline-flex align-items-center fw-medium text-xs" style={{ fontSize: '0.825rem', color: config.textColor, gap: '8px' }}>
+    <div className="d-inline-flex align-items-center fw-medium text-xs" style={{ fontSize: '14px', color: config.textColor, gap: '8px' }}>
       <span 
         className="rounded-circle d-inline-block" 
         style={{

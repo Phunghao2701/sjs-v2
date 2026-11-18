@@ -8,7 +8,7 @@
 
 .keyword-articles-breadcrumb .breadcrumb {
   margin-bottom: 0;
-  font-size: 0.86rem;
+  font-size: 14px;
 }
 
 .keyword-articles-back-link {
@@ -65,7 +65,7 @@
 
 .keyword-articles-eyebrow span {
   color: var(--text-muted);
-  font-size: 0.74rem;
+  font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -83,7 +83,7 @@
 
 .keyword-articles-title {
   margin: 0 0 0.85rem;
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: 16px;
   line-height: 1.12;
   letter-spacing: -0.03em;
 }
@@ -91,7 +91,7 @@
 .keyword-articles-summary {
   margin: 0;
   color: var(--text-muted);
-  font-size: 1rem;
+  font-size: 16px;
   line-height: 1.72;
 }
 
@@ -101,7 +101,7 @@
 
 .keyword-articles-empty-title {
   margin: 0 0 0.2rem;
-  font-size: 1.8rem;
+  font-size: 16px;
 }
 
 .keyword-articles-heading {
@@ -114,13 +114,13 @@
 
 .keyword-articles-section-title {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 16px;
 }
 
 .keyword-articles-return {
   color: var(--text-muted) !important;
   text-decoration: none !important;
-  font-size: 0.9rem !important;
+  font-size: 14px !important;
 }
 
 .keyword-articles-return:hover {
@@ -166,7 +166,7 @@
   align-items: center;
   gap: 0.35rem;
   color: var(--text-muted);
-  font-size: 0.85rem;
+  font-size: 14px;
 }
 
 .keyword-article-year {
@@ -180,20 +180,20 @@
 
 .keyword-article-item__title {
   margin: 0 0 0.55rem;
-  font-size: 1.15rem;
+  font-size: 16px;
   line-height: 1.38;
 }
 
 .keyword-article-doi {
   margin: 0 0 0.8rem;
   color: var(--text-muted);
-  font-size: 0.88rem;
+  font-size: 14px;
 }
 
 .keyword-article-abstract {
   margin: 0 0 1rem;
   color: var(--text-muted);
-  font-size: 0.95rem;
+  font-size: 15px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -234,7 +234,7 @@
 
 .keyword-article-state-title {
   margin: 0 0 0.5rem;
-  font-size: 1.25rem;
+  font-size: 16px;
 }
 
 .keyword-article-pagination {

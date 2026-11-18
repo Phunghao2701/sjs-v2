@@ -1,226 +1,162 @@
-import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\dashboard\components\TopAuthorsTable.jsx
- */
+﻿import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
-import { useNavigate } from 'react-router-dom';
-import { EntityCard } from '../../../shared/components/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../shared/ui/card';
+import { Skeleton } from '../../../shared/ui/skeleton';
 import { formatCount } from '../../../shared/utils/formatNumber';
-import { truncate } from '../../../shared/utils/formatNumber';
 
-/** Rank badge — top 3 có màu riêng */
-function RankBadge({
-  rank
-}) {
-  const cfg = {
-    1: {
-      bg: 'rgba(245, 158, 11, 0.15)',
-      color: '#d97706',
-      icon: 'lucide:crown'
-    },
-    2: {
-      bg: 'rgba(156, 163, 175, 0.15)',
-      color: '#6b7280',
-      icon: null
-    },
-    3: {
-      bg: 'rgba(217, 119, 6, 0.1)',
-      color: '#b45309',
-      icon: null
-    }
-  }[rank] ?? {
-    bg: 'transparent',
-    color: 'var(--text-muted)',
-    icon: null
-  };
-  return <div className="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0" style={{
-    width: 28,
-    height: 28,
-    backgroundColor: cfg.bg,
-    color: cfg.color,
-    fontSize: '0.75rem',
-    fontWeight: 700
-  }}>
-      {cfg.icon ? <Icon icon={cfg.icon} width={12} /> : rank}
-    </div>;
+function RankBadge({ rank }) {
+  if (rank === 1) {
+    return (
+      <span
+        title="Rank 1"
+        className="inline-flex size-6 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-[11px] font-bold"
+      >
+        <Icon icon="lucide:crown" width={13} />
+      </span>
+    );
+  }
+  if (rank === 2) {
+    return (
+      <span
+        title="Rank 2"
+        className="inline-flex size-6 items-center justify-center rounded-full bg-slate-200/80 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700 text-[11px] font-bold font-mono"
+      >
+        2
+      </span>
+    );
+  }
+  if (rank === 3) {
+    return (
+      <span
+        title="Rank 3"
+        className="inline-flex size-6 items-center justify-center rounded-full bg-amber-800/10 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-700/20 text-[11px] font-bold font-mono"
+      >
+        3
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex size-6 items-center justify-center rounded-full text-muted-foreground text-[11px] font-medium font-mono">
+      {rank}
+    </span>
+  );
 }
 
-/** Author field badge */
-function FieldBadge({
-  field
-}) {
-  return <span className="px-2 py-1 rounded-pill d-none d-sm-inline" style={{
-    fontSize: '0.65rem',
-    fontWeight: 600,
-    backgroundColor: 'var(--bg-section)',
-    color: 'var(--text-muted)',
-    border: '1px solid var(--border)',
-    justifySelf: 'start'
-  }}>
-      {field}
-    </span>;
-}
+export default function TopAuthorsTable({ authors = [], loading, error, onAuthorClick, onViewAll }) {
+  const { t } = useTranslation();
 
-/** Author avatar initials */
-function AuthorAvatar({
-  name
-}) {
-  const initials = (name || '?').split(' ').slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('');
-  return <div className="d-flex align-items-center justify-content-center flex-shrink-0 text-white" style={{
-    width: 32,
-    height: 32,
-    borderRadius: '50%',
-    background: 'var(--btn-dark)',
-    fontSize: '0.7rem',
-    fontWeight: 700
-  }}>
-      {initials}
-    </div>;
-}
-
-/**
- * TopAuthorsTable — bảng top 5 tác giả nổi bật tuần này.
- * Reusable: có thể dùng lại cho Author Leaderboard page.
- */
-export default function TopAuthorsTable({
-  authors,
-  loading,
-  error,
-  onAuthorClick,
-  onViewAll
-}) {
-  const {
-    t
-  } = useTranslation();
-  const navigate = useNavigate();
-  const actions = onViewAll ? <button className="btn btn-link p-0 text-decoration-none" onClick={onViewAll} style={{
-    fontSize: '0.75rem',
-    color: 'var(--primary)'
-  }} onMouseEnter={e => {
-    e.currentTarget.style.textDecoration = 'underline';
-    e.currentTarget.style.textUnderlineOffset = '4px';
-  }} onMouseLeave={e => {
-    e.currentTarget.style.textDecoration = 'none';
-  }}>{t("dashboard.bangXepHang")}</button> : null;
-  const description = loading ? <div className="p-4">
-      {[1, 2, 3, 4, 5].map(i => <div key={i} className="d-flex align-items-center gap-3 py-2">
-          <div className="skeleton-shimmer rounded-circle" style={{
-        width: 28,
-        height: 28
-      }} />
-          <div className="skeleton-shimmer rounded-circle" style={{
-        width: 32,
-        height: 32
-      }} />
-          <div className="flex-grow-1">
-            <div className="skeleton-shimmer rounded mb-1" style={{
-          width: '50%',
-          height: 13
-        }} />
-            <div className="skeleton-shimmer rounded" style={{
-          width: '30%',
-          height: 10
-        }} />
+  return (
+    <Card className="min-w-0 overflow-hidden">
+      <CardHeader>
+        <CardTitle>
+          <Icon icon="lucide:users" width={16} className="text-primary" />
+          <span>{t('dashboard.topAuthorsTuanNay', 'Top Contributing Authors')}</span>
+        </CardTitle>
+        {onViewAll && (
+          <button
+            type="button"
+            onClick={onViewAll}
+            className="shrink-0 text-[11px] text-primary hover:text-primary-hover font-medium inline-flex items-center gap-1 transition-colors cursor-pointer"
+          >
+            <span>{t('dashboard.bangXepHang', 'View Leaderboard')}</span>
+            <Icon icon="lucide:arrow-right" width={13} />
+          </button>
+        )}
+      </CardHeader>
+      <CardContent className="p-0">
+        {loading ? (
+          <div role="status" aria-label={t('common.dangCapNhat', 'Loading')} className="p-4 space-y-2.5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-9 rounded-md" />
+            ))}
           </div>
-          <div className="skeleton-shimmer rounded" style={{
-        width: 60,
-        height: 13
-      }} />
-        </div>)}
-    </div> : error ? <div className="text-center py-5 px-4">
-      <Icon icon="lucide:alert-circle" width={32} style={{
-      color: '#ef4444'
-    }} />
-      <p className="text-muted-custom mt-2 mb-0" style={{
-      fontSize: '0.8rem'
-    }}>{error}</p>
-    </div> : authors.length === 0 ? <div className="text-center py-5 px-4">
-      <Icon icon="lucide:users" width={36} style={{
-      color: 'var(--text-muted)'
-    }} />
-      <p className="text-main fw-semibold mt-2 mb-1" style={{
-      fontSize: '0.85rem'
-    }}>{t("dashboard.chuaCoDuLieuTacGia")}</p>
-      <p className="text-muted-custom mb-0" style={{
-      fontSize: '0.75rem'
-    }}>{t("dashboard.duLieuLeaderboardSeHienThiODay")}</p>
-    </div> : <div>
-      {/* Table header */}
-      <div className="d-none d-md-grid px-4 py-2 mb-2 rounded-3 mx-2 mt-2" style={{
-      gridTemplateColumns: '40px 200px 1fr 80px 90px',
-      gap: '12px',
-      alignItems: 'center',
-      backgroundColor: 'var(--bg-section)'
-    }}>
-        {['#', t("typeAuthor"), t("author.linhVuc"), t("articles"), 'Citations'].map(h => <span key={h} className="text-muted-custom" style={{
-        fontSize: '0.7rem',
-        fontWeight: 600,
-        textTransform: 'uppercase',
-        letterSpacing: '0.05em'
-      }}>{h}</span>)}
-      </div>
-
-      {/* Rows */}
-      <div className="d-flex flex-column gap-2 pb-3 px-2">
-      {authors.map((author, i) => {
-      const name = author.display_name ?? author.full_name ?? author.author_name ?? author.name ?? 'Unknown';
-      const orcid = author.orcid ?? null;
-      const field = author.subject_area ?? author.primary_subject_area ?? author.field ?? author.area ?? '—';
-      const articles = author.article_count ?? author.papers ?? author.works_count ?? 0;
-      const citations = author.citation_count ?? author.citations ?? author.cited_by_count ?? 0;
-      const rank = i + 1;
-      return <div key={author.author_id ?? author.id ?? i} className="d-flex d-md-grid px-3 py-3 align-items-center gap-3 font-display rounded-4" style={{
-        gridTemplateColumns: '40px 200px 1fr 80px 90px',
-        cursor: 'pointer',
-        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-        border: '1px solid transparent'
-      }} onClick={() => onAuthorClick?.(author)} onMouseEnter={e => {
-        e.currentTarget.style.backgroundColor = 'var(--bg-section)';
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.borderColor = 'var(--border)';
-        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
-      }} onMouseLeave={e => {
-        e.currentTarget.style.backgroundColor = 'transparent';
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.borderColor = 'transparent';
-        e.currentTarget.style.boxShadow = 'none';
-      }}>
-            <RankBadge rank={rank} />
-            <div className="d-flex align-items-center gap-2">
-              <AuthorAvatar name={name} />
-              <div className="text-truncate" style={{
-            minWidth: 0
-          }}>
-                <div className="text-main fw-semibold" style={{
-              fontSize: '0.85rem'
-            }}>
-                  {truncate(name, 24)}
-                </div>
-                {orcid ? <div className="text-muted-custom" style={{
-              fontSize: '0.75rem'
-            }}>
-                    {truncate(orcid, 32)}
-                  </div> : null}
-              </div>
+        ) : error ? (
+          <div className="py-8 text-center text-xs text-danger">
+            <Icon icon="lucide:alert-circle" width={24} className="mx-auto mb-1.5" />
+            {error}
+          </div>
+        ) : authors.length === 0 ? (
+          <div className="py-8 text-center">
+            <div className="size-9 rounded-full bg-surface-muted text-muted-foreground flex items-center justify-center mx-auto mb-2">
+              <Icon icon="lucide:users" width={18} />
             </div>
-            <FieldBadge field={field == "" ? "—" : field} />
-            <span className="text-muted-custom" style={{
-          fontSize: '0.85rem'
-        }}>
-              {formatCount(articles)}
-            </span>
-            <span style={{
-          fontSize: '0.85rem',
-          color: 'var(--text-main)',
-          fontWeight: 600
-        }}>
-              ↑ {formatCount(citations)}
-            </span>
-          </div>;
-    })}
-      </div>
-    </div>;
-  return <EntityCard title={t("dashboard.topAuthorsTuanNay")} actions={actions} description={description} bodyClassName="flex-column align-items-stretch" />;
+            <p className="mb-0.5 text-xs font-semibold text-foreground">
+              {t('dashboard.chuaCoDuLieuTacGia', 'No author data yet')}
+            </p>
+            <p className="m-0 text-[11px] text-muted-foreground">
+              {t('dashboard.duLieuLeaderboardSeHienThiODay', 'Leaderboard data will be displayed here.')}
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[620px] border-collapse text-left text-xs table-fixed">
+              <thead className="bg-surface-muted/60 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">
+                <tr>
+                  <th scope="col" className="px-3 py-2 w-14 text-center">#</th>
+                  <th scope="col" className="px-3 py-2 w-auto">{t('typeAuthor', 'Author')}</th>
+                  <th scope="col" className="px-3 py-2 w-44 hidden sm:table-cell">{t('author.linhVuc', 'Research Field')}</th>
+                  <th scope="col" className="px-3 py-2 w-28 text-right">{t('articles', 'Articles')}</th>
+                  <th scope="col" className="px-4 py-2 w-28 text-right">Citations</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {authors.map((author, i) => {
+                  const name = author.display_name ?? author.full_name ?? author.author_name ?? author.name ?? 'Unknown';
+                  const field = author.subject_area ?? author.primary_subject_area ?? author.field ?? author.area ?? '—';
+                  const articles = author.article_count ?? author.papers ?? author.works_count ?? 0;
+                  const citations = author.citation_count ?? author.citations ?? author.cited_by_count ?? 0;
+                  const initials = name
+                    .split(' ')
+                    .filter(Boolean)
+                    .slice(0, 2)
+                    .map((part) => part[0].toUpperCase())
+                    .join('');
+
+                  return (
+                    <tr key={author.author_id ?? author.id ?? i} className="transition-colors hover:bg-surface-muted/40">
+                      <td className="px-3 py-2 text-center">
+                        <RankBadge rank={i + 1} />
+                      </td>
+                      <td className="px-3 py-2">
+                        <button
+                          type="button"
+                          onClick={() => onAuthorClick?.(author)}
+                          className="flex max-w-full items-center gap-2 rounded border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-primary cursor-pointer group"
+                        >
+                          <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-[11px] font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+                            {initials}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate font-semibold text-foreground text-xs group-hover:text-primary transition-colors" title={name}>
+                              {name}
+                            </span>
+                            {author.orcid && (
+                              <span className="block truncate text-[10px] font-mono text-muted-foreground">
+                                {author.orcid}
+                              </span>
+                            )}
+                          </span>
+                        </button>
+                      </td>
+                      <td className="px-3 py-2 hidden sm:table-cell">
+                        <span className="inline-block max-w-[160px] truncate rounded-full bg-surface-muted border border-border px-2 py-0.5 text-[10px] text-muted-foreground" title={field}>
+                          {field || '—'}
+                        </span>
+                      </td>
+                      <td className="px-3 py-2 text-right font-mono text-foreground font-medium tabular-nums text-xs">
+                        {formatCount(articles)}
+                      </td>
+                      <td className="px-4 py-2 text-right font-mono font-semibold text-primary tabular-nums text-xs">
+                        {formatCount(citations)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
 }

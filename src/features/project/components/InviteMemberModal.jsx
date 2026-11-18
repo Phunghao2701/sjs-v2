@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal, Form, Spinner } from 'react-bootstrap';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { Modal } from 'react-bootstrap';
+import { Button } from '../../../shared/ui/button';
+import { Input } from '../../../shared/ui/input';
 import { Icon } from '@iconify/react';
 
 const InviteMemberModal = ({ show, onHide, onInvite, actionLoading }) => {
@@ -20,47 +21,64 @@ const InviteMemberModal = ({ show, onHide, onInvite, actionLoading }) => {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton className="border-0 pb-0">
-        <Modal.Title className="fw-bold text-main">
-          <Icon icon="lucide:user-plus" width="24" className="me-2 text-primary" />
-          {t("project.moiThanhVienMoi", "Mời thành viên mới")}
+        <Modal.Title className="flex items-center gap-2 text-base font-semibold text-foreground">
+          <Icon icon="lucide:user-plus" width="20" className="text-primary" aria-hidden="true" />
+          <span>{t("project.moiThanhVienMoi", "Mời thành viên mới")}</span>
         </Modal.Title>
       </Modal.Header>
-      <Form onSubmit={handleSubmit}>
-        <Modal.Body>
-          <Form.Group className="mb-3" controlId="inviteEmail">
-            <Form.Label className="small fw-medium text-muted-custom">{t("project.diaChiEmail", "Địa chỉ Email")}</Form.Label>
-            <Form.Control 
-              type="email" 
-              placeholder={t("project.nhapEmailNguoiMuonMoi", "Nhập email người dùng...")} 
+      <form onSubmit={handleSubmit}>
+        <Modal.Body className="py-4 space-y-4">
+          <div className="space-y-1.5">
+            <label htmlFor="inviteEmail" className="block text-xs font-medium text-muted-foreground">
+              {t("project.diaChiEmail", "Địa chỉ Email")} <span className="text-danger">*</span>
+            </label>
+            <Input
+              id="inviteEmail"
+              type="email"
+              placeholder={t("project.nhapEmailNguoiMuonMoi", "Nhập email người dùng...")}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="py-2"
+              disabled={actionLoading}
             />
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="inviteRole">
-            <Form.Label className="small fw-medium text-muted-custom">{t("project.vaiTro", "Quyền hạn")}</Form.Label>
-            <Form.Select 
-              value={role} 
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="inviteRole" className="block text-xs font-medium text-muted-foreground">
+              {t("project.vaiTro", "Quyền hạn")}
+            </label>
+            <select
+              id="inviteRole"
+              value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="py-2"
+              disabled={actionLoading}
+              className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="VIEWER">Viewer ({t("project.nguoiXem", "Người xem")})</option>
               <option value="MEMBER">Member ({t("project.thanhVien", "Thành viên")})</option>
               <option value="ADMIN">Admin ({t("project.quanTriVien", "Quản trị viên")})</option>
               <option value="OWNER">Owner ({t("project.chuSoHuu", "Chủ sở hữu")})</option>
-            </Form.Select>
-          </Form.Group>
+            </select>
+          </div>
         </Modal.Body>
-        <Modal.Footer className="border-0 pt-0">
-          <PrimaryButton variant="outline" className="px-4" onClick={onHide} disabled={actionLoading}>
+        <Modal.Footer className="border-0 pt-0 gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onHide}
+            disabled={actionLoading}
+          >
             {t("admin.huy", "Hủy")}
-          </PrimaryButton>
-          <PrimaryButton type="submit" className="px-4" disabled={!email || actionLoading}>
-            {actionLoading ? <Spinner size="sm" /> : t("project.guiLoiMoi", "Gửi lời mời")}
-          </PrimaryButton>
+          </Button>
+          <Button
+            type="submit"
+            disabled={!email || actionLoading}
+            isLoading={actionLoading}
+            loadingText={t("admin.dangXuLy", "Đang xử lý...")}
+          >
+            {t("project.guiLoiMoi", "Gửi lời mời")}
+          </Button>
         </Modal.Footer>
-      </Form>
+      </form>
     </Modal>
   );
 };

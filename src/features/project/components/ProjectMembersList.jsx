@@ -1,10 +1,10 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { Dropdown } from 'react-bootstrap';
 import { useAuthStore } from '../../../app/store/authStore';
 import { useUserStore } from '../../../app/store/userStore';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../shared/ui/button';
+import { Badge } from '../../../shared/ui/badge';
 
 const ProjectMembersList = ({ 
   project,
@@ -14,17 +14,17 @@ const ProjectMembersList = ({
   onChangeRole, 
   onRemoveMember, 
   actionLoading,
-  currentUser
+  currentUser,
 }) => {
   const { t } = useTranslation();
 
-  const getRoleBadgeColor = (role) => {
+  const getRoleBadgeVariant = (role) => {
     switch (role?.toUpperCase()) {
-      case 'OWNER': return { bg: '#fee2e2', color: '#dc2626' }; // red
-      case 'ADMIN': return { bg: '#e0e7ff', color: '#4f46e5' }; // indigo
-      case 'MEMBER': return { bg: '#dcfce7', color: '#16a34a' }; // green
-      case 'VIEWER': return { bg: '#f1f5f9', color: '#64748b' }; // slate
-      default: return { bg: '#f1f5f9', color: '#64748b' };
+      case 'OWNER': return 'destructive';
+      case 'ADMIN': return 'default';
+      case 'MEMBER': return 'success';
+      case 'VIEWER': return 'secondary';
+      default: return 'secondary';
     }
   };
 
@@ -38,32 +38,15 @@ const ProjectMembersList = ({
     }
   };
 
-  const getStatusBadge = (status) => {
-    if (status?.toUpperCase() === 'INVITED') {
-      return (
-        <span className="badge rounded-pill fw-medium px-2 py-1" style={{ backgroundColor: '#fef3c7', color: '#d97706', fontSize: '0.75rem' }}>
-          {t("project.daMoi", "Đã mời")}
-        </span>
-      );
-    }
-    return (
-      <span className="badge rounded-pill fw-medium px-2 py-1" style={{ backgroundColor: '#dcfce7', color: '#16a34a', fontSize: '0.75rem' }}>
-        {t("project.dangHoatDong", "Đang hoạt động")}
-      </span>
-    );
-  };
-
   const authStateUser = useAuthStore.getState()?.user;
   const userStoreEmail = useUserStore.getState()?.email;
 
   const currentUserId = currentUser?.user_id || currentUser?.id || authStateUser?.user_id || authStateUser?.id;
   const currentEmail = (currentUser?.email || authStateUser?.email || userStoreEmail || '').trim().toLowerCase();
 
-  // 1. Vai trò từ project do backend trả về trực tiếp (getProjectById trả về p.user_role)
   const projectUserRole = (project?.user_role || '').toUpperCase();
 
-  // 2. Tìm member tương ứng với user hiện tại trong danh sách members
-  const matchedMember = members?.find(m => {
+  const matchedMember = members?.find((m) => {
     const mUserId = m.user_id || m.id;
     const mEmail = (m.email || '').trim().toLowerCase();
     if (mUserId && currentUserId && String(mUserId) === String(currentUserId)) return true;
@@ -73,19 +56,15 @@ const ProjectMembersList = ({
 
   const memberRole = matchedMember?.role?.toUpperCase();
 
-  // 3. Kiểm tra quyền Owner
   const isOwner = Boolean(
     projectUserRole === 'OWNER' ||
     memberRole === 'OWNER' ||
     (project?.user_id && currentUserId && String(project.user_id) === String(currentUserId)) ||
-    (currentEmail && members?.some(m => m.role?.toUpperCase() === 'OWNER' && (m.email || '').trim().toLowerCase() === currentEmail)) ||
-    // Nếu project chỉ có 1 member duy nhất là OWNER và user đang xem được trang này -> user chính là Owner
+    (currentEmail && members?.some((m) => m.role?.toUpperCase() === 'OWNER' && (m.email || '').trim().toLowerCase() === currentEmail)) ||
     (members?.length === 1 && members[0]?.role?.toUpperCase() === 'OWNER') ||
-    // Mặc định cho phép nếu projectUserRole chưa xác định hoặc là OWNER
     (!projectUserRole || projectUserRole === 'OWNER')
   );
 
-  // 4. Cho phép quản lý/mời nếu là Owner, Admin, Administrator, hoặc mặc định nếu không bị gán rõ là VIEWER
   const canManageOthers = Boolean(
     isOwner ||
     projectUserRole === 'ADMIN' ||
@@ -96,71 +75,80 @@ const ProjectMembersList = ({
   );
 
   return (
-    <div className="glass-card rounded-4 shadow-sm border p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
+    <div className="rounded-card border border-border bg-surface p-5 shadow-card">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-          <h5 className="fw-bold text-main mb-1">{t("project.thanhVienDuAn", "Project Members")}</h5>
-          <p className="text-muted-custom small mb-0">{t("project.quanLyNhungNguoiCoQuyen", "Manage people with access to this project.")}</p>
+          <h3 className="m-0 text-base font-semibold text-foreground">
+            {t("project.thanhVienDuAn", "Project Members")}
+          </h3>
+          <p className="mt-1 mb-0 text-xs text-muted-foreground">
+            {t("project.quanLyNhungNguoiCoQuyen", "Manage people with access to this project.")}
+          </p>
         </div>
         {canManageOthers && (
-          <PrimaryButton 
+          <Button 
             id="btn-invite-member"
-            className="d-flex align-items-center gap-2 px-3 py-2"
+            size="sm"
             onClick={onInviteClick}
+            className="self-start sm:self-auto"
           >
-            <Icon icon="lucide:user-plus" width="18" /> {t("project.themThanhVien", "Add Member")}
-          </PrimaryButton>
+            <Icon icon="lucide:user-plus" width="16" aria-hidden="true" />
+            <span>{t("project.themThanhVien", "Add Member")}</span>
+          </Button>
         )}
       </div>
 
       {loading ? (
-        <div className="d-flex justify-content-center py-5">
-          <div className="spinner-border text-primary" role="status" />
+        <div className="flex items-center justify-center py-10" aria-live="polite">
+          <Icon icon="lucide:loader-2" className="animate-spin text-primary" width="32" />
         </div>
       ) : members?.length === 0 ? (
-        <div className="text-center py-5 text-muted-custom">
-          <Icon icon="lucide:users" width="48" className="mb-3 opacity-50" />
-          <p className="mb-0">{t("project.duAnNayChuaCoThanhVien")}</p>
+        <div className="py-10 text-center text-muted-foreground">
+          <Icon icon="lucide:users" width="40" className="mx-auto mb-2.5 opacity-40" aria-hidden="true" />
+          <p className="m-0 text-xs">{t("project.duAnNayChuaCoThanhVien")}</p>
         </div>
       ) : (
-        <div className="list-group list-group-flush border-top pt-2">
+        <div className="divide-y divide-border border-t border-border">
           {members?.map((member) => {
-            const roleStyle = getRoleBadgeColor(member.role);
+            const roleVariant = getRoleBadgeVariant(member.role);
+            const isInvited = member.status?.toUpperCase() === 'INVITED';
             
             return (
-              <div key={member.id || member.user_id} className="list-group-item bg-transparent px-0 py-3 border-bottom d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center gap-3">
-                  <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{
-                    width: '42px',
-                    height: '42px',
-                    backgroundColor: 'var(--primary-light)',
-                    color: 'var(--primary)',
-                    fontSize: '1.2rem',
-                    fontWeight: 'bold'
-                  }}>
+              <div
+                key={member.id || member.user_id}
+                className="flex items-center justify-between gap-3 py-3.5"
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary font-bold text-sm">
                     {((member.first_name?.[0] || member.last_name?.[0] || member.user?.full_name?.[0] || member.email?.[0] || 'U')).toUpperCase()}
                   </div>
-                  <div>
-                    <h6 className="fw-bold text-main mb-0 d-flex align-items-center gap-2">
-                      {(member.first_name || member.last_name)
-                        ? `${member.first_name || ''} ${member.last_name || ''}`.trim()
-                        : (member.user?.full_name || member.name || member.email || t("project.nguoiDung"))} 
-                      {getStatusBadge(member.status)}
-                    </h6>
-                    <div className="text-muted-custom small mt-1">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="truncate text-sm font-semibold text-foreground">
+                        {(member.first_name || member.last_name)
+                          ? `${member.first_name || ''} ${member.last_name || ''}`.trim()
+                          : (member.user?.full_name || member.name || member.email || t("project.nguoiDung"))}
+                      </span>
+                      {isInvited ? (
+                        <Badge variant="warning" className="text-xs">
+                          {t("project.daMoi", "Đã mời")}
+                        </Badge>
+                      ) : (
+                        <Badge variant="success" className="text-xs">
+                          {t("project.dangHoatDong", "Đang hoạt động")}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="truncate text-xs text-muted-foreground mt-0.5">
                       {member.email || member.user?.email}
                     </div>
                   </div>
                 </div>
 
-                <div className="d-flex align-items-center gap-3">
-                  <span className="badge fw-medium px-2 py-1" style={{ 
-                    backgroundColor: roleStyle.bg, 
-                    color: roleStyle.color,
-                    border: 'none'
-                  }}>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Badge variant={roleVariant} className="text-xs">
                     {translateRole(member.role)}
-                  </span>
+                  </Badge>
                   {(() => {
                     const memberUserId = member.user_id || member.id;
                     const isSelf = Boolean(
@@ -168,29 +156,29 @@ const ProjectMembersList = ({
                       (member.email && currentUser?.email && member.email.toLowerCase() === currentUser.email.toLowerCase())
                     );
                     
-                    const isOwner = member.role?.toUpperCase() === 'OWNER';
+                    const isMemberOwner = member.role?.toUpperCase() === 'OWNER';
                     
-                    if (isOwner) return null; // Owner cannot be kicked/leave via this list
+                    if (isMemberOwner) return null;
                     
                     if (isSelf) {
-                      // Bản thân có thể tự rời đi
                       return (
-                        <Dropdown>
+                        <Dropdown align="end">
                           <Dropdown.Toggle 
-                            variant="light" 
-                            className="btn-sm border-0 bg-transparent text-muted-custom" 
+                            variant="ghost" 
+                            className="size-8 p-0 border-0 bg-transparent text-muted-foreground hover:bg-surface-muted hover:text-foreground inline-flex items-center justify-center rounded-control" 
                             id={`dropdown-${member.id || member.user_id}`}
                             disabled={actionLoading}
+                            aria-label="Member options"
                           >
-                            <Icon icon="lucide:more-vertical" width="18" />
+                            <Icon icon="lucide:more-vertical" width="16" />
                           </Dropdown.Toggle>
-                          <Dropdown.Menu align="end" className="shadow border-0 rounded-3">
+                          <Dropdown.Menu className="border border-border bg-surface shadow-popover rounded-card p-1 text-xs">
                             <Dropdown.Item 
                               onClick={() => onRemoveMember(member.user_id)}
-                              className="small text-danger dropdown-item-custom-hover"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-control text-xs text-danger hover:bg-danger-subtle"
                             >
-                              <Icon icon="lucide:log-out" width="16" className="me-2" /> 
-                              {t("project.roiKhoiDuAn", "Rời khỏi dự án")}
+                              <Icon icon="lucide:log-out" width="14" /> 
+                              <span>{t("project.roiKhoiDuAn", "Rời khỏi dự án")}</span>
                             </Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>
@@ -198,43 +186,46 @@ const ProjectMembersList = ({
                     }
 
                     if (canManageOthers) {
-                      // Có quyền quản lý người khác
                       return (
-                        <Dropdown>
+                        <Dropdown align="end">
                           <Dropdown.Toggle 
-                            variant="light" 
-                            className="btn-sm border-0 bg-transparent text-muted-custom" 
+                            variant="ghost" 
+                            className="size-8 p-0 border-0 bg-transparent text-muted-foreground hover:bg-surface-muted hover:text-foreground inline-flex items-center justify-center rounded-control" 
                             id={`dropdown-${member.id || member.user_id}`}
                             disabled={actionLoading}
+                            aria-label="Manage member options"
                           >
-                            <Icon icon="lucide:more-vertical" width="18" />
+                            <Icon icon="lucide:more-vertical" width="16" />
                           </Dropdown.Toggle>
-                          <Dropdown.Menu align="end" className="shadow border-0 rounded-3">
+                          <Dropdown.Menu className="border border-border bg-surface shadow-popover rounded-card p-1 text-xs">
                             <Dropdown.Item 
                               onClick={() => onChangeRole(member.user_id, 'ADMIN')}
-                              className="small dropdown-item-custom-hover"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-control text-xs text-foreground hover:bg-surface-muted"
                             >
-                              <Icon icon="lucide:shield" width="16" className="me-2" /> {t("project.datLamAdmin")}
+                              <Icon icon="lucide:shield" width="14" /> 
+                              <span>{t("project.datLamAdmin")}</span>
                             </Dropdown.Item>
                             <Dropdown.Item 
                               onClick={() => onChangeRole(member.user_id, 'MEMBER')}
-                              className="small dropdown-item-custom-hover"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-control text-xs text-foreground hover:bg-surface-muted"
                             >
-                              <Icon icon="lucide:user" width="16" className="me-2" /> {t("project.datLamMember")}
+                              <Icon icon="lucide:user" width="14" /> 
+                              <span>{t("project.datLamMember")}</span>
                             </Dropdown.Item>
                             <Dropdown.Item 
                               onClick={() => onChangeRole(member.user_id, 'VIEWER')}
-                              className="small dropdown-item-custom-hover"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-control text-xs text-foreground hover:bg-surface-muted"
                             >
-                              <Icon icon="lucide:eye" width="16" className="me-2" /> {t("project.datLamViewer")}
+                              <Icon icon="lucide:eye" width="14" /> 
+                              <span>{t("project.datLamViewer")}</span>
                             </Dropdown.Item>
-                            <Dropdown.Divider />
+                            <Dropdown.Divider className="my-1 border-border" />
                             <Dropdown.Item 
                               onClick={() => onRemoveMember(member.user_id)}
-                              className="small text-danger dropdown-item-custom-hover"
+                              className="flex items-center gap-2 px-3 py-1.5 rounded-control text-xs text-danger hover:bg-danger-subtle"
                             >
-                              <Icon icon="lucide:user-x" width="16" className="me-2" /> 
-                              {member.status?.toUpperCase() === 'INVITED' ? t("project.huyLoiMoi") : t("project.xoaThanhVien")}
+                              <Icon icon="lucide:user-x" width="14" /> 
+                              <span>{member.status?.toUpperCase() === 'INVITED' ? t("project.huyLoiMoi") : t("project.xoaThanhVien")}</span>
                             </Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>

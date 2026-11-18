@@ -23,14 +23,14 @@ const AuthActionButtons = ({
         borderRadius: '8px',
         padding: '0.65rem 1rem',
         fontWeight: 600,
-        fontSize: '0.95rem'
+        fontSize: '15px'
       }}>{t("article.dangNhapNgay")}</button>
 
         {/* Link phụ — về trang chủ */}
         <button onClick={onHome} className="btn btn-link" style={{
         color: 'var(--text-muted, #6B6B6B)',
         textDecoration: 'none',
-        fontSize: '0.9rem'
+        fontSize: '14px'
       }}>{t("auth.veTrangChu")}</button>
       </div>;
   }
@@ -46,14 +46,14 @@ const AuthActionButtons = ({
         borderRadius: '8px',
         padding: '0.65rem 1rem',
         fontWeight: 600,
-        fontSize: '0.95rem'
+        fontSize: '15px'
       }}>{t("auth.dangKyLai")}</button>
 
         {/* Link phụ — về trang đăng nhập */}
         <button onClick={onLogin} className="btn btn-link" style={{
         color: 'var(--text-muted, #6B6B6B)',
         textDecoration: 'none',
-        fontSize: '0.9rem'
+        fontSize: '14px'
       }}>{t("auth.veTrangDangNhap")}</button>
       </div>;
   }

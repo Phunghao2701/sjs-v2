@@ -27,7 +27,7 @@ export default function JournalTableAdmin({
   return <div className="journal-table-shell table-responsive shadow-sm rounded-3 overflow-hidden">
       <Table hover className="journal-table align-middle mb-0 text-start bg-white">
         <thead className="border-bottom" style={{
-        fontSize: '0.75rem',
+        fontSize: '13px',
         letterSpacing: '0.05em'
       }}>
           <tr>

@@ -70,7 +70,7 @@ export default function VolumeList({
               </div>
               
               <Badge bg={isSelected ? 'light' : 'dark'} text={isSelected ? 'dark' : 'light'} className="rounded px-2 py-1" style={{
-            fontSize: '0.75rem'
+            fontSize: '13px'
           }}>
                 Select
               </Badge>

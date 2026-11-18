@@ -1,32 +1,79 @@
-import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { EntityCard } from '../../../shared/components/Card';
+import { Card } from '../../../shared/ui/card';
+import { Badge } from '../../../shared/ui/badge';
+import { formatCount } from '../../../shared/utils/formatNumber';
+
 const ProjectCard = ({
   project,
   onDelete,
   onRestore,
-  isRecent = false,
-  currentUser = null
+  currentUser = null,
+  areas = [],
+  viewMode = 'grid',
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const handleDelete = e => {
-    e.preventDefault();
-    e.stopPropagation();
-    onDelete(project.project_id || project.id);
-  };
-  const handleRestore = e => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onRestore) onRestore(project.project_id || project.id);
-  };
-  const title = project.title || 'Untitled Project';
-  const areaName = project.subject_area?.name || project.subject_area || t("project.chuaXacDinhLinhVuc");
-  const createdAt = project.created_at ? new Date(project.created_at).toLocaleDateString('vi-VN') : 'N/A';
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
-  // Try to find counts
+  const projectId = project.project_id || project.id;
+  const title = project.title || 'Untitled Project';
+  const createdAt = project.created_at ? new Date(project.created_at).toLocaleDateString('vi-VN') : 'N/A';
   const keywordCount = project.keywords_count || project.watch_keywords?.length || 0;
+  const articleCount = project.articles_count ?? project.article_count ?? project.total_articles ?? 0;
+  const isDeleted = project.status === 'DELETED';
+  const isActive = project.status === 'ACTIVE' || (!isDeleted && project.status !== 'INACTIVE');
+
+  // Close menu on click outside
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handleOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [menuOpen]);
+
+  // Resolve Area Name
+  const resolveAreaName = () => {
+    if (project.subject_area && typeof project.subject_area === 'object') {
+      return project.subject_area.name || project.subject_area.display_name || t('project.chuaXacDinhLinhVuc', 'General Science');
+    }
+    const rawVal = project.subject_area || project.subject_area_id;
+    if (!rawVal) return t('project.chuaXacDinhLinhVuc', 'General Science');
+    if (areas?.length) {
+      const found = areas.find((a) => String(a.id || a.subject_area_id) === String(rawVal));
+      if (found) return found.name || found.display_name;
+    }
+    if (!isNaN(rawVal)) return `${t('project.linhVuc', 'Field')} #${rawVal}`;
+    return String(rawVal);
+  };
+
+  const areaName = resolveAreaName();
+
+  const handleCardClick = (e) => {
+    // If clicked on an interactive control inside (menu button, member avatars), do not navigate
+    if (e?.target?.closest('button') || e?.target?.closest('a') || e?.target?.closest('[role="menu"]')) {
+      return;
+    }
+    try {
+      const storageKey = 'recently_viewed_projects';
+      const raw = localStorage.getItem(storageKey);
+      let list = raw ? JSON.parse(raw) : [];
+      list = list.filter((id) => String(id) !== String(projectId));
+      list.unshift(projectId);
+      list = list.slice(0, 5);
+      localStorage.setItem(storageKey, JSON.stringify(list));
+    } catch (err) {
+      console.error(t('project.loiLuuDuAnXemGanDay'), err);
+    }
+    navigate(`/projects/${projectId}`);
+  };
 
   const getInitials = (first, last, email) => {
     if (first && last) return `${first[0]}${last[0]}`.toUpperCase();
@@ -39,7 +86,7 @@ const ProjectCard = ({
     const members = project.members || [];
     const allUsers = [];
     if (owner) allUsers.push({ ...owner, isOwner: true });
-    members.forEach(m => allUsers.push(m));
+    members.forEach((m) => allUsers.push(m));
 
     if (allUsers.length === 0) return null;
 
@@ -51,160 +98,277 @@ const ProjectCard = ({
       e.preventDefault();
       e.stopPropagation();
       handleCardClick();
-      navigate(`/projects/${project.project_id || project.id}?tab=members`);
+      navigate(`/projects/${projectId}?tab=members`);
     };
 
     return (
-      <div 
-        className="d-flex align-items-center" 
+      <button
+        type="button"
+        className="inline-flex items-center border-0 bg-transparent p-0 cursor-pointer focus-visible:outline-2 focus-visible:outline-primary rounded-full shrink-0"
         onClick={handleMembersClick}
-        title={t("project.quanLyThanhVien", "Quản lý thành viên")}
-        style={{ cursor: 'pointer' }}
+        title={t('project.quanLyThanhVien', 'Manage Members')}
+        aria-label={t('project.quanLyThanhVien', 'Manage Members')}
       >
-        {displayUsers.map((u, idx) => (
-          <div 
-            key={idx} 
-            className="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm"
-            style={{
-              width: '26px', height: '26px', fontSize: '10px',
-              backgroundColor: u.isOwner ? '#0071BC' : '#6b7280',
-              marginLeft: idx > 0 ? '-8px' : '0',
-              border: '2px solid white',
-              zIndex: 10 - idx
-            }}
-            title={`${u.first_name || ''} ${u.last_name || ''} ${u.isOwner ? '(Owner)' : ''}`}
-          >
-            {getInitials(u.first_name, u.last_name, u.email)}
-          </div>
-        ))}
-        {extraCount > 0 && (
-          <div 
-            className="rounded-circle d-flex align-items-center justify-content-center text-secondary fw-medium shadow-sm bg-light"
-            style={{
-              width: '26px', height: '26px', fontSize: '10px',
-              marginLeft: '-8px',
-              border: '2px solid white',
-              zIndex: 0
-            }}
-          >
-            +{extraCount}
-          </div>
-        )}
-      </div>
+        <span className="flex items-center -space-x-1.5">
+          {displayUsers.map((u, idx) => (
+            <span
+              key={idx}
+              className={`inline-flex size-6 items-center justify-center rounded-full text-[10px] font-semibold ring-2 ring-surface text-white shadow-xs ${
+                u.isOwner ? 'bg-primary' : 'bg-muted-foreground'
+              }`}
+              title={`${u.first_name || ''} ${u.last_name || ''} ${u.isOwner ? '(Owner)' : ''}`}
+            >
+              {getInitials(u.first_name, u.last_name, u.email)}
+            </span>
+          ))}
+          {extraCount > 0 && (
+            <span className="inline-flex size-6 items-center justify-center rounded-full bg-surface-muted text-[10px] font-medium text-muted-foreground ring-2 ring-surface shadow-xs">
+              +{extraCount}
+            </span>
+          )}
+        </span>
+      </button>
     );
   };
-  const handleCardClick = () => {
-    try {
-      const storageKey = 'recently_viewed_projects';
-      const raw = localStorage.getItem(storageKey);
-      let list = raw ? JSON.parse(raw) : [];
-      const projectId = project.project_id || project.id;
-      list = list.filter(id => id !== projectId);
-      list.unshift(projectId);
-      list = list.slice(0, 3); // Giới hạn tối đa 3 dự án xem gần nhất
-      localStorage.setItem(storageKey, JSON.stringify(list));
-    } catch (e) {
-      console.error(t("project.loiLuuDuAnXemGanDay"), e);
-    }
-  };
-  if (isRecent) {
-    return <Link to={`/projects/${project.project_id || project.id}`} className="text-decoration-none h-100 d-block" onClick={handleCardClick}>
-        <div className="glass-card rounded-4 border shadow-sm p-3 h-100 d-flex align-items-center gap-3 project-card-recent-hover">
-          <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{
-          width: '46px',
-          height: '46px',
-          backgroundColor: 'var(--primary-light)',
-          color: 'var(--primary)'
-        }}>
-            <Icon icon="lucide:folder-open" width="22" />
+
+  // Ownership check
+  const currentUserId = currentUser?.user_id || currentUser?.id;
+  const isOwner =
+    project.user_role === 'OWNER' ||
+    (currentUser &&
+      ((project.user_id && project.user_id === currentUserId) ||
+        (project.owner && project.owner.user_id === currentUserId) ||
+        (project.owner_id && project.owner_id === currentUserId)));
+
+  const ownerName = project.owner?.first_name || project.owner?.last_name || project.owner?.email?.split('@')[0] || 'Admin';
+
+  // 1. LIST VIEW CARD (Clean, Clickable Card Container, No Links Underlines)
+  if (viewMode === 'list') {
+    return (
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={handleCardClick}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleCardClick(e);
+          }
+        }}
+        className="group flex flex-col sm:flex-row sm:items-center justify-between p-3.5 gap-4 transition-colors hover:border-primary/50 hover:bg-surface-muted/20 shadow-xs cursor-pointer border border-border bg-surface rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary select-none"
+      >
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0 flex-1">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-control bg-primary-subtle text-primary">
+            <Icon icon="lucide:folder-kanban" width="18" aria-hidden="true" />
           </div>
-          <div className="flex-grow-1 min-w-0" style={{
-          minWidth: 0
-        }}>
-            <h6 className="fw-bold text-main mb-1 text-truncate">{title}</h6>
-            <div className="d-flex align-items-center gap-2 text-truncate">
-              <span className="badge fw-medium text-truncate" style={{
-              fontSize: '0.65rem',
-              backgroundColor: 'var(--bg-chip)',
-              color: 'var(--text-muted)'
-            }}>
-                {areaName}
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="m-0 truncate text-sm font-semibold text-foreground group-hover:text-primary transition-colors">
+                {title}
+              </h3>
+              <span className="text-xs text-muted-foreground flex items-center gap-1">
+                <span>Field:</span>
+                <span className="text-foreground font-medium">{areaName}</span>
               </span>
-              <span className="text-muted-custom small flex-shrink-0">• {createdAt}</span>
+              {isDeleted ? (
+                <Badge variant="destructive" className="text-[11px] py-0">
+                  {t('project.daXoa', 'Deleted')}
+                </Badge>
+              ) : isActive ? (
+                <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-success">
+                  <span className="size-1.5 rounded-full bg-success" />
+                  {t('project.dangHoatDong', 'Active')}
+                </span>
+              ) : (
+                <Badge variant="secondary" className="text-[11px] py-0">
+                  {t('project.chuaKichHoat', 'Inactive')}
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+              <span className="flex items-center gap-1">
+                <Icon icon="lucide:file-text" width="13" className="text-primary" /> {formatCount(articleCount)} Articles
+              </span>
+              <span className="flex items-center gap-1">
+                <Icon icon="lucide:key" width="13" className="text-amber-600" /> {formatCount(keywordCount)} Keywords
+              </span>
+              <span>•</span>
+              <span>Updated {createdAt}</span>
             </div>
           </div>
-          <div className="flex-shrink-0 text-muted-custom recent-arrow-icon">
-            <Icon icon="lucide:chevron-right" width="20" />
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+          {renderAvatarGroup()}
+          <span className="text-xs font-semibold text-primary flex items-center gap-1 pl-2">
+            {t('common.details', 'Open')} <Icon icon="lucide:arrow-right" width="14" />
+          </span>
+        </div>
+      </Card>
+    );
+  }
+
+  // 2. GRID CARD - STRICTLY MATCHING DESIGN SYSTEM (Clean, Clickable Card Container, No Accidental Underlines)
+  return (
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleCardClick(e);
+        }
+      }}
+      className="group flex h-full flex-col justify-between p-3.5 transition-colors hover:border-primary/50 shadow-xs border border-border bg-surface rounded-card cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary select-none"
+    >
+      <div>
+        {/* Top Row: [Icon] title [● Active] [⋮] */}
+        <div className="flex items-start justify-between gap-2.5">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-control bg-primary-subtle text-primary">
+              <Icon icon="lucide:folder-kanban" width="16" aria-hidden="true" />
+            </div>
+            <h3 className="m-0 text-sm font-semibold text-foreground group-hover:text-primary transition-colors truncate">
+              {title}
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            {isDeleted ? (
+              <Badge variant="destructive" className="text-[11px] font-medium py-0">
+                {t('project.daXoa', 'Deleted')}
+              </Badge>
+            ) : isActive ? (
+              <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold bg-success-subtle text-success border border-success/20">
+                <span className="size-1.5 rounded-full bg-success" />
+                {t('project.dangHoatDong', 'Active')}
+              </span>
+            ) : null}
+
+            {/* Action Menu [⋮] */}
+            {isOwner && (
+              <div className="relative" ref={menuRef}>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setMenuOpen(!menuOpen);
+                  }}
+                  className="flex size-7 items-center justify-center rounded-control border-0 bg-transparent text-muted-foreground hover:bg-surface-muted hover:text-foreground transition-colors cursor-pointer"
+                  title="Actions"
+                  aria-label="Actions"
+                >
+                  <Icon icon="lucide:more-vertical" width="16" />
+                </button>
+
+                {menuOpen && (
+                  <div className="absolute right-0 top-full z-20 mt-1 w-36 rounded-control border border-border bg-surface py-1 shadow-popover">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setMenuOpen(false);
+                        navigate(`/projects/${projectId}/edit`);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs font-medium text-foreground hover:bg-surface-muted cursor-pointer"
+                    >
+                      <Icon icon="lucide:edit-3" width="13" />
+                      <span>Edit Project</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setMenuOpen(false);
+                        navigate(`/projects/${projectId}?tab=members`);
+                      }}
+                      className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs font-medium text-foreground hover:bg-surface-muted cursor-pointer"
+                    >
+                      <Icon icon="lucide:users" width="13" />
+                      <span>Members</span>
+                    </button>
+                    <div className="my-1 border-t border-border" />
+                    {isDeleted ? (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setMenuOpen(false);
+                          if (onRestore) onRestore(projectId);
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs font-medium text-success hover:bg-success-subtle cursor-pointer"
+                      >
+                        <Icon icon="lucide:refresh-cw" width="13" />
+                        <span>Restore</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setMenuOpen(false);
+                          onDelete(projectId);
+                        }}
+                        className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-xs font-medium text-danger hover:bg-danger-subtle cursor-pointer"
+                      >
+                        <Icon icon="lucide:trash-2" width="13" />
+                        <span>Delete</span>
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
-      </Link>;
-  }
-  const isDeleted = project.status === 'DELETED';
-  const meta = (
-    <div className="d-flex align-items-center gap-2">
-      <span className="badge rounded-pill fw-medium" style={{
-        backgroundColor: 'var(--primary-light)',
-        color: 'var(--primary)'
-      }}>
-        {areaName}
-      </span>
-      {isDeleted && (
-        <span className="badge rounded-pill bg-danger text-white fw-medium" style={{ fontSize: '0.7rem' }}>
-          {t("project.daXoa", "Đã xóa")}
-        </span>
-      )}
-    </div>
-  );
-  
-  // Kiểm tra quyền owner
-  const currentUserId = currentUser?.user_id || currentUser?.id;
-  const isOwner = project.user_role === 'OWNER' || (currentUser && (
-    (project.user_id && project.user_id === currentUserId) || 
-    (project.owner && project.owner.user_id === currentUserId) ||
-    (project.owner_id && project.owner_id === currentUserId)
-  ));
 
-  const actions = isOwner ? (isDeleted ? (
-    <button className="btn btn-sm btn-link text-success p-0 ms-2 hover-primary" onClick={handleRestore} title={t("project.khoiPhucDuAn", "Khôi phục dự án")}>
-      <Icon icon="lucide:refresh-cw" width="18" />
-    </button>
-  ) : (
-    <button className="btn btn-sm btn-link text-muted p-0 ms-2 hover-danger" onClick={handleDelete} title={t("project.xoaDuAn", "Xóa dự án")}>
-      <Icon icon="lucide:trash-2" width="18" />
-    </button>
-  )) : null;
-  const description = keywordCount > 0 ? <div>
-      <span className="text-muted-custom small d-block mb-1">{t("project.tuKhoaTheoDoi")}{keywordCount}):</span>
-      <div className="d-flex flex-wrap gap-1">
-        {project.watch_keywords?.slice(0, 3).map((kw, idx) => <span key={idx} className="badge bg-light text-muted border fw-normal" style={{
-        fontSize: '0.75rem'
-      }}>
-            {kw.keyword || kw}
-          </span>)}
-        {keywordCount > 3 && <span className="badge bg-light text-muted border fw-normal" style={{
-        fontSize: '0.75rem'
-      }}>
-            +{keywordCount - 3}
-          </span>}
-      </div>
-    </div> : null;
-  const footer = <div className="d-flex justify-content-between align-items-center w-100 mt-2">
-      <div className="d-flex align-items-center gap-2">
-        {renderAvatarGroup()}
-        <div className="d-flex flex-column justify-content-center" style={{ lineHeight: '1.2' }}>
-          <span className="text-muted-custom" style={{ fontSize: '0.7rem' }}>
-            Tạo bởi <span className="fw-semibold text-main">{project.owner?.last_name || 'Admin'}</span>
-          </span>
-          <span className="text-muted-custom" style={{ fontSize: '0.65rem' }}>{createdAt}</span>
+        {/* Second Line: Field: AreaName */}
+        <p className="m-0 mt-2 text-xs text-muted-foreground flex items-center gap-1.5">
+          <span>Field:</span>
+          <span className="font-semibold text-foreground">{areaName}</span>
+        </p>
+
+        {/* Divider line ─────────────────────────────── */}
+        <div className="border-t border-border my-3" />
+
+        {/* Third Line: 📊 X Articles   🔑 X Keywords */}
+        <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <Icon icon="lucide:file-text" width="15" className="text-primary shrink-0" />
+            <span>
+              <strong className="font-bold text-foreground">{formatCount(articleCount)}</strong> {t('dashboard.articles', 'Articles')}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Icon icon="lucide:key" width="15" className="text-amber-600 shrink-0" />
+            <span>
+              <strong className="font-bold text-foreground">{formatCount(keywordCount)}</strong> {t('project.keywords', 'Keywords')}
+            </span>
+          </div>
         </div>
       </div>
-      <span className="small fw-medium d-flex align-items-center gap-1 mt-1" style={{
-      color: 'var(--primary)'
-    }}>{t("article.chiTiet1")}<Icon icon="lucide:arrow-right" width="14" />
-      </span>
-    </div>;
-  return <Link to={`/projects/${project.project_id || project.id}`} className="text-decoration-none h-100 d-block" onClick={handleCardClick}>
-      <EntityCard className="h-100" title={title} meta={meta} actions={actions} description={description} footer={footer} bodyClassName="flex-column align-items-stretch" />
-    </Link>;
+
+      {/* Bottom Line: 👥 [Avatar Group]   Updated 17/11/2026 */}
+      <div className="mt-3.5 flex items-center justify-between gap-2 pt-2.5 border-t border-border/60">
+        <div className="flex items-center gap-2 min-w-0">
+          {renderAvatarGroup()}
+          <span className="truncate text-xs text-muted-foreground">
+            By <strong className="font-medium text-foreground">{ownerName}</strong>
+          </span>
+        </div>
+
+        <span className="text-xs text-muted-foreground shrink-0 flex items-center gap-1">
+          <Icon icon="lucide:calendar" width="12" /> {createdAt}
+        </span>
+      </div>
+    </Card>
+  );
 };
+
 export default ProjectCard;

@@ -24,7 +24,7 @@ export default function GeographyRankingTable({
       {/* Header */}
       <div className="mb-3">
         <h3 className="font-display fw-bold text-main mb-0" style={{
-        fontSize: '1.1rem'
+        fontSize: '16px'
       }}>{t("zone.xepHangQuocGia")}</h3>
       </div>
 
@@ -40,7 +40,7 @@ export default function GeographyRankingTable({
       maxHeight: '400px'
     }}>
         <table className="table table-hover align-middle mb-0 geography-table" style={{
-        fontSize: '0.85rem'
+        fontSize: '14px'
       }}>
           <thead style={{
           position: 'sticky',

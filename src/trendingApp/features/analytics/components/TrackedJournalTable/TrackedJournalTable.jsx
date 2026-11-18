@@ -53,7 +53,7 @@ export const TrackedJournalTable = ({ journals = [] }) => {
               <td>
                 <div className={styles.journalInfo}>
                   <div className={styles.journalCover}>
-                    <span style={{ color: '#999', fontSize: '12px', fontWeight: 'bold' }}>
+                    <span style={{ color: '#999', fontSize: '13px', fontWeight: 'bold' }}>
                       {journal.name.substring(0, 2).toUpperCase()}
                     </span>
                   </div>

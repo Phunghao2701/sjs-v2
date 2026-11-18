@@ -31,10 +31,10 @@ export default function PaginationControls({ currentPage, totalPages, onPageChan
   const pageItems = buildPageItems(currentPage, totalPages);
 
   return (
-    <nav className="admin-pagination" aria-label="Pagination">
+    <nav className="flex items-center justify-center gap-1.5" aria-label="Pagination">
       <button
         type="button"
-        className="admin-pagination__btn"
+        className="inline-flex items-center justify-center min-w-[32px] h-8 px-2 rounded-md border border-border bg-surface text-text-main text-xs font-medium transition-colors hover:not-disabled:border-primary hover:not-disabled:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
         aria-label="Previous page"
@@ -44,14 +44,18 @@ export default function PaginationControls({ currentPage, totalPages, onPageChan
 
       {pageItems.map((item, index) =>
         item === 'ellipsis' ? (
-          <span key={`ellipsis-${index}`} className="admin-pagination__ellipsis">
+          <span key={`ellipsis-${index}`} className="inline-flex items-center justify-center min-w-[32px] h-8 text-text-muted text-xs">
             ...
           </span>
         ) : (
           <button
             key={item}
             type="button"
-            className={`admin-pagination__btn${item === currentPage ? ' admin-pagination__btn--active' : ''}`}
+            className={`inline-flex items-center justify-center min-w-[32px] h-8 px-2.5 rounded-md border text-xs font-medium transition-colors ${
+              item === currentPage
+                ? 'bg-primary border-primary text-white hover:text-white'
+                : 'border-border bg-surface text-text-main hover:border-primary hover:text-primary'
+            }`}
             onClick={() => onPageChange(item)}
           >
             {item}
@@ -61,7 +65,7 @@ export default function PaginationControls({ currentPage, totalPages, onPageChan
 
       <button
         type="button"
-        className="admin-pagination__btn"
+        className="inline-flex items-center justify-center min-w-[32px] h-8 px-2 rounded-md border border-border bg-surface text-text-main text-xs font-medium transition-colors hover:not-disabled:border-primary hover:not-disabled:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
         aria-label="Next page"

@@ -45,22 +45,22 @@ export default function AuthorAvatar({
     sm: {
       width: '32px',
       height: '32px',
-      fontSize: '0.75rem'
+      fontSize: '13px'
     },
     md: {
       width: '48px',
       height: '48px',
-      fontSize: '1.1rem'
+      fontSize: '16px'
     },
     lg: {
       width: '80px',
       height: '80px',
-      fontSize: '1.8rem'
+      fontSize: '16px'
     },
     xl: {
       width: '100px',
       height: '100px',
-      fontSize: '2.2rem'
+      fontSize: '16px'
     }
   };
   const currentSize = sizeMap[size] || sizeMap.md;

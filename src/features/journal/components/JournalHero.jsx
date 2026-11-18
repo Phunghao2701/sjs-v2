@@ -4,9 +4,12 @@ import { useTranslation } from "react-i18next";
  *
  * File: features\journal\components\JournalHero.jsx
  */
-import { Row, Col, Button, Spinner } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
+import { Button, Spinner } from '../../../shared/ui/button';
+import { Badge } from '../../../shared/ui/badge';
+import { Skeleton } from '../../../shared/ui/skeleton';
 import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
 export default function JournalHero({
   journal,
@@ -21,61 +24,33 @@ export default function JournalHero({
   } = useTranslation();
   const navigate = useNavigate();
   if (loading || !journal) {
-    return <section className="journal-surface journal-hero-card mb-4" aria-label="Đang tải thông tin tạp chí">
+    return (
+      <section className="journal-surface journal-hero-card mb-4 rounded-card border border-border bg-surface p-6" aria-label="Đang tải thông tin tạp chí">
         <Row className="gy-4 journal-hero-content">
           <Col lg={8}>
-            <div className="d-flex gap-2 mb-3">
-              <div className="skeleton-shimmer" style={{
-              width: '60px',
-              height: '24px',
-              borderRadius: '6px'
-            }} />
-              <div className="skeleton-shimmer" style={{
-              width: '100px',
-              height: '24px',
-              borderRadius: '6px'
-            }} />
+            <div className="flex gap-2 mb-3">
+              <Skeleton className="h-6 w-16 rounded" />
+              <Skeleton className="h-6 w-24 rounded" />
             </div>
-            <div className="skeleton-shimmer mb-3" style={{
-            width: '80%',
-            height: '44px'
-          }} />
-            <div className="skeleton-shimmer mb-4" style={{
-            width: '95%',
-            height: '64px'
-          }} />
-            <div className="d-flex gap-2 flex-wrap">
-              {[1, 2, 3].map(i => <div key={i} className="skeleton-shimmer" style={{
-              width: '92px',
-              height: '32px',
-              borderRadius: '999px'
-            }} />)}
+            <Skeleton className="h-10 w-4/5 rounded mb-3" />
+            <Skeleton className="h-16 w-11/12 rounded mb-4" />
+            <div className="flex gap-2 flex-wrap">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-8 w-24 rounded-full" />
+              ))}
             </div>
           </Col>
           <Col lg={4} className="text-lg-end">
-            <div className="skeleton-shimmer mb-2 ms-lg-auto" style={{
-            width: '150px',
-            height: '72px'
-          }} />
-            <div className="skeleton-shimmer mb-3 ms-lg-auto" style={{
-            width: '160px',
-            height: '20px'
-          }} />
-            <div className="d-flex gap-2 justify-content-lg-end flex-wrap">
-              <div className="skeleton-shimmer" style={{
-              width: '110px',
-              height: '38px',
-              borderRadius: '6px'
-            }} />
-              <div className="skeleton-shimmer" style={{
-              width: '140px',
-              height: '38px',
-              borderRadius: '6px'
-            }} />
+            <Skeleton className="h-16 w-36 rounded mb-2 ms-lg-auto" />
+            <Skeleton className="h-5 w-40 rounded mb-3 ms-lg-auto" />
+            <div className="flex gap-2 justify-content-lg-end flex-wrap">
+              <Skeleton className="h-9 w-28 rounded" />
+              <Skeleton className="h-9 w-32 rounded" />
             </div>
           </Col>
         </Row>
-      </section>;
+      </section>
+    );
   }
   const {
     display_name,
@@ -107,10 +82,22 @@ export default function JournalHero({
   return <section className="journal-surface journal-hero-card mb-4" aria-labelledby="journal-detail-title">
       <Row className="gy-4 align-items-start journal-hero-content">
         <Col lg={8} md={7}>
-          <div className="journal-meta-line">
-            {displayQuartile && <span>{displayQuartile}</span>}
-            {is_open_access && <span>Open Access</span>}
-            {publisher_name && <span>{publisher_name}</span>}
+          <div className="journal-meta-line flex items-center gap-2 mb-2 flex-wrap">
+            {displayQuartile && (
+              <Badge variant="success" className="text-xs font-bold px-2 py-0.5">
+                {displayQuartile}
+              </Badge>
+            )}
+            {is_open_access && (
+              <Badge variant="info" className="text-xs font-semibold px-2 py-0.5">
+                Open Access
+              </Badge>
+            )}
+            {publisher_name && (
+              <span className="text-xs text-muted-foreground font-medium">
+                {publisher_name}
+              </span>
+            )}
           </div>
 
           <h1 id="journal-detail-title" className="journal-title">

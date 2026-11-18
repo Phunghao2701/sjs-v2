@@ -32,9 +32,7 @@ export default function ForgotPasswordSuccess({
         <Icon icon="lucide:check-circle" width="40" height="40" />
       </div>
 
-      <h3 className="font-display fw-bold mb-3 text-main" style={{
-      fontSize: '1.75rem'
-    }}>{t("auth.kiemTraEmailCuaBan")}</h3>
+      <h3 className="font-display font-semibold text-base mb-3 text-main">{t("auth.kiemTraEmailCuaBan")}</h3>
       
       <p className="text-muted-custom text-sm mb-4 leading-relaxed" style={{
       lineHeight: 1.6

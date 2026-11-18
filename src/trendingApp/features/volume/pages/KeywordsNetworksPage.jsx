@@ -11,6 +11,8 @@ import DomainCrossLinksCard from '../components/keywords-networks/DomainCrossLin
 import TemporalClusterShiftCard from '../components/keywords-networks/TemporalClusterShiftCard';
 import { useDashboardContext } from '../../dashboard/contexts/DashboardContext';
 import ErrorStateSection from '../../../shared/components/common/ErrorStateSection';
+import { Skeleton } from '../../../../shared/ui/skeleton';
+import { Card } from '../../../../shared/ui/card';
 import {
   useKeywordVectorsQuery,
   useCountryCollaborationQuery,
@@ -42,9 +44,17 @@ const KeywordsNetworksPage = () => {
         <VolumeAnalyticsTabs />
         
         {isLoading ? (
-          <div className="kn-loading" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '400px', gap: '16px' }}>
-            <div className="update-icon spin" style={{ width: '24px', height: '24px', border: '3px solid var(--color-primary-orange)', borderTopColor: 'transparent', borderRadius: '50%' }}></div>
-            <div>{t('common.loading', 'Loading...')}</div>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="p-6 space-y-4 min-h-[380px]">
+                <Skeleton className="h-6 w-48 rounded" />
+                <Skeleton className="h-64 w-full rounded" />
+              </Card>
+              <Card className="p-6 space-y-4 min-h-[380px]">
+                <Skeleton className="h-6 w-52 rounded" />
+                <Skeleton className="h-64 w-full rounded" />
+              </Card>
+            </div>
           </div>
         ) : hasError ? (
           <ErrorStateSection 

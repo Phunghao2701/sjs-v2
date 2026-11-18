@@ -30,22 +30,22 @@ const TemporalClusterShiftCard = ({ data }) => {
             })}
           </div>
         ) : (
-          <div style={{ color: 'var(--color-neutral-400)', fontSize: '0.875rem' }}>
+          <div style={{ color: 'var(--color-neutral-400)', fontSize: '14px' }}>
             {t('volume.noShiftHeatmap', 'No shift heatmap data available')}
           </div>
         )}
         {heatmap.length > 0 && (
-          <div style={{ position: 'absolute', bottom: '8px', right: '8px', backgroundColor: 'var(--color-white)', padding: '4px 8px', borderRadius: '4px', fontSize: '0.625rem', fontWeight: 700, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', color: 'var(--color-primary-orange)' }}>
+          <div style={{ position: 'absolute', bottom: '8px', right: '8px', backgroundColor: 'var(--color-white)', padding: '4px 8px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', color: 'var(--color-primary-orange)' }}>
             {t('volume.t24mProjection', 'T + 24m Projection')}
           </div>
         )}
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
-        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-neutral-600)' }}>{t('volume.driftEntropy', 'Drift Entropy')}</div>
-        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--color-neutral-900)' }}>{driftEntropy}</div>
+        <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-neutral-600)' }}>{t('volume.driftEntropy', 'Drift Entropy')}</div>
+        <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-neutral-900)' }}>{driftEntropy}</div>
       </div>
-      <p className="kn-stat-desc" style={{ fontSize: '0.75rem' }}>
+      <p className="kn-stat-desc" style={{ fontSize: '13px' }}>
         {description}
       </p>
     </div>

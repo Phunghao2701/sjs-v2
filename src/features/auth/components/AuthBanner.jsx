@@ -61,11 +61,11 @@ export default function AuthBanner() {
       zIndex: 2
     }}>
         <Navbar.Brand onClick={() => navigate("/")} className="transition-all hover-lift">
-          <Logo size={42} fontSize="1.5rem" />
+          <Logo size={42} fontSize="1rem" />
         </Navbar.Brand>
 
         {/* Live Academic Pulse Tag */}
-        <div className="d-none d-lg-flex align-items-center gap-2 px-3 py-1.5 rounded-full border bg-white bg-opacity-75 backdrop-blur shadow-xs" style={{ fontSize: '0.78rem', borderColor: 'var(--border)' }}>
+        <div className="d-none d-lg-flex align-items-center gap-2 px-3 py-1.5 rounded-full border bg-white bg-opacity-75 backdrop-blur shadow-xs text-xs" style={{ borderColor: 'var(--border)' }}>
           <span className="position-relative d-flex" style={{ width: '8px', height: '8px' }}>
             <span className="position-absolute w-100 h-100 rounded-circle bg-success opacity-75 animate-ping" />
             <span className="position-relative w-100 h-100 rounded-circle bg-success" />
@@ -84,11 +84,7 @@ export default function AuthBanner() {
           <span className="text-xs font-semibold" style={{ color: 'var(--primary)' }}>Academic Intelligence Platform</span>
         </div>
 
-        <h1 className="font-display fw-bold mb-3 tracking-tight" style={{
-        fontSize: '2.5rem',
-        lineHeight: '1.2',
-        color: 'var(--text-main)'
-      }}>{t("auth.thamGiaCongDongNghienCuu")}</h1>
+        <h1 className="font-display font-semibold text-base text-main mb-3 leading-snug tracking-tight">{t("auth.thamGiaCongDongNghienCuu")}</h1>
         
         <p className="fs-6 mb-4 text-muted-custom" style={{
         color: 'var(--text-muted)',

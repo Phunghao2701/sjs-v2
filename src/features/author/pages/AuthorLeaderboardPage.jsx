@@ -1,26 +1,19 @@
 import { useTranslation } from "react-i18next";
-/**
- * @file AuthorLeaderboardPage.jsx
- * @description Trang hiển thị Bảng xếp hạng Tác giả.
- */
-
 import { useEffect, useState } from 'react';
-import { Container, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../../shared/components/Icon';
-import Header from '../../landing/components/Header';
 import useAuthors from '../hooks/useAuthors';
 import AuthorLeaderboardTable from '../components/AuthorLeaderboardTable';
 import AuthorNavigationTabs from '../components/AuthorNavigationTabs';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../shared/ui/button';
+import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
 import { FilterCard } from '../../../shared/components/Card';
 import { FilterSelect } from '../../../shared/components/Input';
 import AdminPagination from '../../../shared/components/Pagination';
 import './AuthorLeaderboardPage.css';
+
 export default function AuthorLeaderboardPage() {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     leaderboard,
@@ -48,92 +41,111 @@ export default function AuthorLeaderboardPage() {
       subject_area: selectedArea,
       period: selectedPeriod,
       page: currentPage,
-      limit: limit
+      limit: limit,
     });
   }, [selectedArea, selectedPeriod, currentPage, fetchLeaderboard]);
-  const handleAreaChange = e => {
+
+  const handleAreaChange = (e) => {
     setSelectedArea(e.target.value);
     setCurrentPage(1);
   };
-  const handlePeriodChange = e => {
+
+  const handlePeriodChange = (e) => {
     setSelectedPeriod(e.target.value);
     setCurrentPage(1);
   };
-  return <div className="author-leaderboard-page">
-      <Header />
 
-      <Container>
-        <nav className="author-leaderboard-breadcrumb mb-4" aria-label="breadcrumb">
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item">
-              <span className="author-leaderboard-breadcrumb__link" onClick={() => navigate('/')}>{t("author.tongQuan")}</span>
-            </li>
-            <li className="breadcrumb-item">
-              <span className="author-leaderboard-breadcrumb__link" onClick={() => navigate('/authors')}>{t("author.tacGiaNoiBat")}</span>
-            </li>
-            <li className="breadcrumb-item active text-primary" aria-current="page">{t("author.bangXepHang")}</li>
-          </ol>
-        </nav>
-
-        <section className="author-leaderboard-hero">
-          <div className="author-leaderboard-hero__content d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
-            <div>
-              <div className="author-leaderboard-eyebrow">
-                <Icon icon="lucide:trophy" width="17" />
-                <span>Author leaderboard</span>
-              </div>
-              <h1 className="author-leaderboard-title">{t("author.bangXepHangTacGia")}</h1>
-              <p className="author-leaderboard-description">{t("author.cacTacGiaNoiBatNhatHeThongDuoc")}</p>
+  return (
+    <PageContainer>
+        <PageHeader
+          breadcrumbs={[
+            { label: t("author.tongQuan"), to: "/" },
+            { label: t("author.tacGiaNoiBat"), to: "/authors" },
+            { label: t("author.bangXepHang") }
+          ]}
+          badge={
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-subtle text-primary text-xs font-semibold">
+              <Icon icon="lucide:trophy" width="14" />
+              <span>Author leaderboard</span>
             </div>
-            <PrimaryButton variant="outline" onClick={() => navigate('/authors')} className="px-3 py-2" icon="lucide:arrow-left">
+          }
+          title={t("author.bangXepHangTacGia")}
+          description={t("author.cacTacGiaNoiBatNhatHeThongDuoc")}
+          actions={
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate('/authors')}
+            >
+              <Icon icon="lucide:arrow-left" width="14" className="mr-1.5" />
               <span>{t("author.quayLaiDanhSachTacGia")}</span>
-            </PrimaryButton>
-          </div>
-        </section>
+            </Button>
+          }
+        />
 
         <AuthorNavigationTabs activeTab="leaderboard" />
 
-        <FilterCard className="author-leaderboard-filter-card">
-          <Row className="g-3 align-items-center">
-            <Col xs={12} sm={6} md={4}>
-              <div className="author-leaderboard-filter-control">
-                <span className="author-leaderboard-label">{t("author.linhVuc1")}</span>
-                <FilterSelect value={selectedArea} onChange={handleAreaChange} options={[{
-                value: '',
-                label: t("author.tatCaLinhVuc")
-              }, ...(subjectAreas || []).map(area => ({
-                value: area.display_name || area.name || '',
-                label: area.display_name || area.name || ''
-              }))]} />
-              </div>
-            </Col>
+        <FilterCard className="mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <span className="block text-xs font-medium text-muted-foreground mb-1.5">
+                {t("author.linhVuc1")}
+              </span>
+              <FilterSelect
+                value={selectedArea}
+                onChange={handleAreaChange}
+                options={[
+                  { value: '', label: t("author.tatCaLinhVuc") },
+                  ...(subjectAreas || []).map((area) => ({
+                    value: area.display_name || area.name || '',
+                    label: area.display_name || area.name || '',
+                  })),
+                ]}
+              />
+            </div>
 
-            <Col xs={12} sm={6} md={4}>
-              <div className="author-leaderboard-filter-control">
-                <span className="author-leaderboard-label">{t("author.thoiGian")}</span>
-                <FilterSelect value={selectedPeriod} onChange={handlePeriodChange} options={[{
-                value: 'all',
-                label: t("author.tatCaThoiGian")
-              }, {
-                value: 'month',
-                label: t("author.thangNay")
-              }, {
-                value: 'year',
-                label: t("author.namNay")
-              }]} />
-              </div>
-            </Col>
-          </Row>
+            <div>
+              <span className="block text-xs font-medium text-muted-foreground mb-1.5">
+                {t("author.thoiGian")}
+              </span>
+              <FilterSelect
+                value={selectedPeriod}
+                onChange={handlePeriodChange}
+                options={[
+                  { value: 'all', label: t("author.tatCaThoiGian") },
+                  { value: 'month', label: t("author.thangNay") },
+                  { value: 'year', label: t("author.namNay") },
+                ]}
+              />
+            </div>
+          </div>
         </FilterCard>
 
-        <AuthorLeaderboardTable authors={leaderboard} loading={loadingLeaderboard} error={errorLeaderboard} onRetry={() => fetchLeaderboard({
-        subject_area: selectedArea,
-        period: selectedPeriod,
-        page: currentPage,
-        limit: limit
-      })} />
+        <AuthorLeaderboardTable
+          authors={leaderboard}
+          loading={loadingLeaderboard}
+          error={errorLeaderboard}
+          onRetry={() =>
+            fetchLeaderboard({
+              subject_area: selectedArea,
+              period: selectedPeriod,
+              page: currentPage,
+              limit: limit,
+            })
+          }
+        />
 
-        {leaderboard.length > 0 && leaderboardTotalPages > 1 && <AdminPagination totalItems={totalLeaderboard} currentPage={currentPage} limit={limit} onPageChange={setCurrentPage} entityName={t("author.tacGia")} />}
-      </Container>
-    </div>;
+        {leaderboard.length > 0 && leaderboardTotalPages > 1 && (
+          <div className="mt-6">
+            <AdminPagination
+              totalItems={totalLeaderboard}
+              currentPage={currentPage}
+              limit={limit}
+              onPageChange={setCurrentPage}
+              entityName={t("author.tacGia")}
+            />
+          </div>
+        )}
+      </PageContainer>
+  );
 }

@@ -126,7 +126,7 @@ export default function GeographyArticleList({
       <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <div>
           <h3 className="font-display fw-bold text-main mb-1" style={{
-          fontSize: '1.25rem'
+          fontSize: '16px'
         }}>{t("zone.danhSachBaiBaoKhoaHocTai")} {countryName}
           </h3>
           {!loading && articles.length > 0 && <p className="text-muted-custom mb-0 text-xs font-display">{t("zone.hienThiBaiBaoThu")} <span className="fw-semibold text-main">{(page - 1) * 10 + 1}</span> - <span className="fw-semibold text-main">{Math.min(page * 10, total)}</span> {t("zone.trongTongSo")} <span className="fw-semibold text-main">{total}</span> {t("zone.baiBao")}</p>}
@@ -137,7 +137,7 @@ export default function GeographyArticleList({
       border: '1px solid var(--border)'
     }}>
           <Table responsive hover className="m-0 bg-transparent text-main border-0 geography-table" style={{
-        fontSize: '0.85rem'
+        fontSize: '14px'
       }}>
             <thead>
               <tr style={{
@@ -176,7 +176,7 @@ export default function GeographyArticleList({
             <Icon icon="lucide:file-x" width="24" height="24" />
           </div>
           <h5 className="text-main font-weight-bold mb-1 font-display" style={{
-        fontSize: '1rem'
+        fontSize: '16px'
       }}>{t("zone.khongCoBaiBaoNao")}</h5>
           <p className="text-muted-custom mb-0 text-xs max-w-md font-display">{t("zone.hienTaiChuaCoBaiBaoKhoaHocNaoT")}</p>
         </div> : <>
@@ -186,7 +186,7 @@ export default function GeographyArticleList({
         border: '1px solid var(--border)'
       }}>
             <Table responsive hover className="m-0 bg-transparent text-main border-0 geography-table" style={{
-          fontSize: '0.85rem'
+          fontSize: '14px'
         }}>
               <thead>
                 <tr style={{
@@ -226,7 +226,7 @@ export default function GeographyArticleList({
                 {articles.map((article, index) => {              const topicStyle = getTopicStyle(article.topic_name);
               return <tr key={article.article_id} onClick={() => onDetailClick(article.article_id)} className="align-middle geography-article-row">
                       <td className="text-muted-custom ps-3 font-display" style={{
-                  fontSize: '0.8rem'
+                  fontSize: '13px'
                 }}>
                         {(page - 1) * 10 + index + 1}
                       </td>
@@ -259,7 +259,7 @@ export default function GeographyArticleList({
                 }}>
                         {article.doi ? <div className="d-flex align-items-center gap-1 font-display">
                             <span className="text-muted-custom text-xs text-truncate" style={{
-                      fontSize: '0.75rem'
+                      fontSize: '13px'
                     }}>
                               {article.doi}
                             </span>
@@ -302,7 +302,7 @@ export default function GeographyArticleList({
                         <span className="text-muted-custom text-xs font-display">#{(page - 1) * 10 + index + 1}</span>
                         <div className="d-flex gap-1.5 align-items-center">
                           <span className="geography-topic-badge" style={{
-                      fontSize: '0.65rem',
+                      fontSize: '13px',
                       padding: '0.15rem 0.45rem',
                       backgroundColor: topicStyle.bg,
                       color: topicStyle.color,
@@ -311,7 +311,7 @@ export default function GeographyArticleList({
                             {article.topic_name || t("article.chuaPhanLoai")}
                           </span>
                           {article.is_open_access && <span className="geography-oa-badge" style={{
-                      fontSize: '0.65rem',
+                      fontSize: '13px',
                       padding: '0.15rem 0.45rem'
                     }}>
                               OA
@@ -321,7 +321,7 @@ export default function GeographyArticleList({
 
                       <h6 className="geography-article-title mb-2" style={{
                   lineHeight: '1.4',
-                  fontSize: '0.9rem'
+                  fontSize: '14px'
                 }}>
                         <LatexText text={article.title} />
                       </h6>
@@ -329,17 +329,17 @@ export default function GeographyArticleList({
                       <div className="pt-2 border-top border-light d-flex align-items-center justify-content-between flex-wrap gap-2">
                         <div>
                           <div className="text-primary text-xs font-weight-semibold font-display" style={{
-                      fontSize: '0.75rem'
+                      fontSize: '13px'
                     }}>
                             {article.journal_name}
                           </div>
                           <div className="text-muted-custom text-xs font-display mt-0.5" style={{
-                      fontSize: '0.7rem'
+                      fontSize: '13px'
                     }}>{t("article.nam2")}{article.publication_year} {article.doi ? ` · DOI: ${article.doi}` : ''}
                           </div>
                         </div>
                         <span className="geography-link-accent" style={{
-                    fontSize: '0.75rem'
+                    fontSize: '13px'
                   }}>{t("article.chiTiet1")}<Icon icon="lucide:arrow-right" width="12" />
                         </span>
                       </div>

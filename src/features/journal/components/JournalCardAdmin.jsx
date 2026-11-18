@@ -1,59 +1,81 @@
 import { useTranslation } from "react-i18next";
-import { Col, Button } from 'react-bootstrap';
+import { Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
-import { EntityCard } from '../../../shared/components/Card';
+import { Card } from '../../../shared/ui/card';
+import { Badge } from '../../../shared/ui/badge';
+import { Button } from '../../../shared/ui/button';
 
-/**
- * Component JournalCardAdmin - Hiển thị thông tin tạp chí dưới dạng thẻ khối độc lập dành cho Admin.
- * Thỏa mãn tiêu chuẩn: Ứng dụng token class cấu trúc .journal-dark-card từ Design System.
- */
-export default function JournalCardAdmin({
-  journal
-}) {
-  const {
-    t
-  } = useTranslation();
+export default function JournalCardAdmin({ journal }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+  if (!journal) return null;
+
   const id = journal.id || journal.journal_id;
   const title = journal.title || journal.display_name;
-  return <Col xs={12} sm={6} lg={4}>
-      <EntityCard className="h-100" title={title} subtitle={<div className="text-muted-custom small d-flex align-items-center gap-1">
-            <Icon icon="lucide:building" width="14" />
-            <span className="text-truncate">{journal.publisher || t("journal.chuaCoNhaXuatBan")}</span>
-          </div>} actions={<div className="d-flex gap-2">
-            <span className="badge bg-dark text-white px-2 py-1 text-uppercase small">
+  const isActive = journal.status === 'Active' || journal.status === 'Published';
+
+  return (
+    <Col xs={12} sm={6} lg={4}>
+      <Card className="flex h-full flex-col justify-between p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-primary/50 hover:shadow-card">
+        <div>
+          {/* Header row: category and status */}
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <Badge variant="outline" className="text-xs uppercase font-semibold">
               {journal.subjectCategory || 'General'}
-            </span>
-            <span className={`badge px-2 py-1 ${journal.status === 'Active' ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}`}>
+            </Badge>
+            <Badge variant={isActive ? 'success' : 'warning'} className="text-xs">
               {journal.status || 'Draft'}
-            </span>
-          </div>} meta={<div className="bg-light p-3 rounded-3 mt-4" style={{
-      backgroundColor: 'var(--bg-chip)'
-    }}>
-            <div className="d-flex justify-content-between mb-2 small">
-              <span className="text-muted-custom">{t("journal.maSoIssn")}</span>
-              <span className="fw-medium text-main font-monospace">{journal.issn || '—'}</span>
+            </Badge>
+          </div>
+
+          {/* Title */}
+          <h3 className="m-0 mb-1 text-base font-semibold leading-snug text-foreground line-clamp-2">
+            {title}
+          </h3>
+
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-3 truncate">
+            <Icon icon="lucide:building" width="14" className="shrink-0" aria-hidden="true" />
+            <span className="truncate">{journal.publisher || t("journal.chuaCoNhaXuatBan")}</span>
+          </div>
+
+          {/* Metadata box */}
+          <div className="p-2.5 rounded-control border border-border bg-surface-muted/50 mb-3 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">{t("journal.maSoIssn")}</span>
+              <span className="font-semibold text-foreground font-mono">{journal.issn || '—'}</span>
             </div>
-            <div className="d-flex justify-content-between small">
-              <span className="text-muted-custom">{t("journal.tongBienTap")}</span>
-              <span className="fw-medium text-main text-truncate" style={{
-          maxWidth: '150px'
-        }}>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">{t("journal.tongBienTap")}</span>
+              <span className="font-semibold text-foreground truncate max-w-[150px]" title={journal.editorInChief}>
                 {journal.editorInChief || t("admin.chuaChiDinh")}
               </span>
             </div>
-          </div>} footer={<div className="d-flex gap-2 w-100 pt-3 border-top mt-auto" style={{
-      borderColor: 'var(--border)'
-    }}>
-            <Button variant="light" className="w-50 text-main btn-custom-sm d-flex align-items-center justify-content-center gap-1" onClick={() => navigate('/admin/journals/repository')}>
-              <Icon icon="lucide:layers" width="14" />
-              <span>{t("journal.khoDuLieu")}</span>
-            </Button>
-            <Button variant="outline-dark" className="w-50 text-main btn-custom-sm d-flex align-items-center justify-content-center gap-1" onClick={() => navigate(`/admin/journals/${id}/edit`)}>
-              <Icon icon="lucide:edit-3" width="14" />
-              <span>{t("journal.suaDoi")}</span>
-            </Button>
-          </div>} />
-    </Col>;
+          </div>
+        </div>
+
+        {/* Footer actions */}
+        <div className="flex items-center gap-2 pt-3 border-t border-border mt-auto">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => navigate('/admin/journals/repository')}
+          >
+            <Icon icon="lucide:layers" width="14" aria-hidden="true" />
+            <span>{t("journal.khoDuLieu")}</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-xs"
+            onClick={() => navigate(`/admin/journals/${id}/edit`)}
+          >
+            <Icon icon="lucide:edit-3" width="14" aria-hidden="true" />
+            <span>{t("journal.suaDoi")}</span>
+          </Button>
+        </div>
+      </Card>
+    </Col>
+  );
 }

@@ -7,8 +7,9 @@ import { t } from "i18next";
  */
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Button, Modal, Dropdown } from 'react-bootstrap';
+import { Container, Modal, Dropdown } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
+import { Button } from '../../../shared/ui/button';
 
 // Layout
 import Header from '../../landing/components/Header';
@@ -215,10 +216,10 @@ const ArticleDetailPane = ({
                 {authorLabel}{index < visibleAuthors.length - 1 ? ', ' : ''}
               </span>;
       }) : <span className="text-muted-custom">{t("article.dangCapNhatTacGia")}</span>}
-        {hiddenAuthorCount > 0 && !showAllAuthors && <Button variant="link" onClick={() => setShowAllAuthors(true)} className="article-detail-author-toggle p-0 ms-1">
+        {hiddenAuthorCount > 0 && !showAllAuthors && <Button variant="link" size="sm" onClick={() => setShowAllAuthors(true)} className="article-detail-author-toggle p-0 ms-1 h-auto text-xs">
             +{hiddenAuthorCount} authors
           </Button>}
-        {showAllAuthors && (article?.authors?.length || 0) > 3 && <Button variant="link" onClick={() => setShowAllAuthors(false)} className="article-detail-author-toggle p-0 ms-1">
+        {showAllAuthors && (article?.authors?.length || 0) > 3 && <Button variant="link" size="sm" onClick={() => setShowAllAuthors(false)} className="article-detail-author-toggle p-0 ms-1 h-auto text-xs">
             Show less
           </Button>}
       </div>
@@ -290,18 +291,18 @@ const ArticleDetailPane = ({
       <div className="detail-pane-divider mb-4" />
 
       <section className="article-section-connected">
-        <h3 className="section-title-connected mb-2 font-display">{t("article.abstract")}</h3>
+        <h3 className="section-title-connected mb-2 font-display text-base font-semibold">{t("article.abstract")}</h3>
         {(article.abstract || 'No abstract is available for this article.').split('\n').filter(Boolean).map((paragraph, index) => (
-           <LatexText key={index} text={paragraph} as="p" className="abstract-text-connected font-display" />
+           <LatexText key={index} text={paragraph} as="p" className="abstract-text-connected font-display text-sm leading-relaxed" />
         ))}
       </section>
 
       {(article.keywords || []).length > 0 && <section className="article-section-connected mt-4">
-          <h3 className="section-title-connected mb-2 font-display">{t("article.keywords")}</h3>
+          <h3 className="section-title-connected mb-2 font-display text-base font-semibold">{t("article.keywords")}</h3>
           <div className="d-flex gap-1.5 flex-wrap">
             {article.keywords.map(keyword => {
           const label = keyword.display_name || keyword.name || keyword.keyword;
-          return <span key={keyword.keyword_id || label} onClick={() => navigate(`/keywords/${keyword.keyword_id || ''}`)} className="geography-topic-badge" style={{
+          return <span key={keyword.keyword_id || label} onClick={() => navigate(`/keywords/${keyword.keyword_id || ''}`)} className="geography-topic-badge text-xs" style={{
             cursor: 'pointer'
           }}>
                   {label}
@@ -311,7 +312,7 @@ const ArticleDetailPane = ({
         </section>}
 
       <section className="article-connected-references mt-4">
-        <h3 className="section-title-connected mb-2 font-display">{t("article.references")} ({references.length})</h3>
+        <h3 className="section-title-connected mb-2 font-display text-base font-semibold">{t("article.references")} ({references.length})</h3>
         {references.length > 0 ? <div className="d-flex flex-column gap-2">
             {paginatedReferences.map((referenceUrl, index) => {
           const absoluteIndex = (referencePage - 1) * referencesPerPage + index;
@@ -323,41 +324,28 @@ const ArticleDetailPane = ({
             {references.length > referencesPerPage && <div className="d-flex align-items-center justify-content-between mt-2 pt-2 border-top">
                 <span className="text-xs text-muted-custom">{t("article.page")} {referencePage}/{referenceTotalPages}</span>
                 <div className="d-flex gap-1">
-                  <button disabled={referencePage <= 1} onClick={() => setReferencePage(page => Math.max(1, page - 1))} className="btn btn-xs btn-outline-secondary py-0 px-2 font-display" style={{
-              fontSize: '0.7rem'
-            }}>{t("article.truoc")}</button>
-                  <button disabled={referencePage >= referenceTotalPages} onClick={() => setReferencePage(page => Math.min(referenceTotalPages, page + 1))} className="btn btn-xs btn-outline-secondary py-0 px-2 font-display" style={{
-              fontSize: '0.7rem'
-            }}>{t("article.next")}</button>
+                  <button disabled={referencePage <= 1} onClick={() => setReferencePage(page => Math.max(1, page - 1))} className="btn btn-xs btn-outline-secondary py-0 px-2 font-display text-xs">{t("article.truoc")}</button>
+                  <button disabled={referencePage >= referenceTotalPages} onClick={() => setReferencePage(page => Math.min(referenceTotalPages, page + 1))} className="btn btn-xs btn-outline-secondary py-0 px-2 font-display text-xs">{t("article.next")}</button>
                 </div>
               </div>}
           </div> : <span className="text-xs text-muted-custom font-display">{t("article.khongCoTaiLieuThamKhaoChiTiet")}</span>}
       </section>
       
       <Modal show={showCitationsModal} onHide={() => setShowCitationsModal(false)} centered>
-        <Modal.Header closeButton><Modal.Title className="font-display fw-bold">{t("article.citationsCitedBy")}</Modal.Title></Modal.Header>
+        <Modal.Header closeButton><Modal.Title className="font-display font-semibold text-base">{t("article.citationsCitedBy")}</Modal.Title></Modal.Header>
         <Modal.Body>
-          <div className="article-modal-stat-box">
-            <div className="text-muted-custom text-xs fw-bold text-uppercase mb-1">{t("article.tongLuotTrichDan")}</div>
-            <div className="font-display fw-bold" style={{
-            fontSize: '2rem',
-            color: 'var(--text-main)'
-          }}>{(article?.citations ?? 0).toLocaleString('en-US')}</div>
+          <div className="article-modal-stat-box p-3 rounded-lg border border-border bg-surface-muted mb-3">
+            <div className="text-muted-custom text-xs font-semibold text-uppercase mb-1">{t("article.tongLuotTrichDan")}</div>
+            <div className="font-display font-bold text-base text-text-main">{(article?.citations ?? 0).toLocaleString('en-US')}</div>
           </div>
-          <p className="text-muted-custom mb-3" style={{
-          lineHeight: 1.7
-        }}><strong style={{
-            color: 'var(--text-main)'
-          }}>Citations</strong>{t("article.laSoLuongBaiBaoHoacCongTrinhKh")}</p>
-          <div className="d-grid gap-2 font-display" style={{
-          fontSize: '0.94rem'
-        }}>
+          <p className="text-muted-custom text-sm mb-3 leading-relaxed"><strong className="text-text-main">Citations</strong>{t("article.laSoLuongBaiBaoHoacCongTrinhKh")}</p>
+          <div className="grid gap-2 text-sm">
             <div><strong>DOI:</strong>{t("article.maDinhDanhCoDinhCuaBaiBao")}</div>
             <div><strong>References:</strong>{t("article.danhSachTaiLieuMaBaiBaoNayTric")}</div>
             <div><strong>Citations / Cited by:</strong>{t("article.soCongTrinhKhacTrichDanLaiBaiB")}</div>
           </div>
         </Modal.Body>
-        <Modal.Footer><Button variant="outline-secondary" onClick={() => setShowCitationsModal(false)} className="font-display">{t("article.dong")}</Button></Modal.Footer>
+        <Modal.Footer><Button variant="outline" size="sm" onClick={() => setShowCitationsModal(false)}>{t("article.dong")}</Button></Modal.Footer>
       </Modal>
 
       <AuthRequiredModal show={showLoginModal} onHide={() => setShowLoginModal(false)} />

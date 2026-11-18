@@ -41,7 +41,7 @@ export default function AuthorRankBadge({ rank }) {
         height: '30px',
         background: currentConfig.bg,
         color: currentConfig.color,
-        fontSize: '0.8rem',
+        fontSize: '13px',
         fontWeight: 700,
         boxShadow: rankNum <= 3 ? '0 4px 10px rgba(0,0,0,0.1)' : 'none',
         fontFamily: 'var(--font-display)'

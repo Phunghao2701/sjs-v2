@@ -5,7 +5,8 @@ import { Form, Row, Col, Card } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { useJournalManagement } from '../../journal/hooks/useJournalManagement';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../shared/ui/button';
+import { PageHeader } from '../../../shared/ui/page-layout';
 export default function EditJournalPage() {
   const { t: _t } = useTranslation();
   const {
@@ -179,20 +180,16 @@ export default function EditJournalPage() {
       alert(t("admin.loiCapNhatTapChi") + " " + errorMsg);
     }
   };
-  return <div className="d-flex flex-column gap-3 text-start">
-      <div>
-        <div className="admin-breadcrumb mb-2">
-          <span className="cursor-pointer text-muted-custom" onClick={() => navigate(`${basePath}/journals`)}>
-            Journals
-          </span>
-          <Icon icon="lucide:chevron-right" className="mx-1" />
-          <span className="admin-breadcrumb__current">Edit Journal</span>
-        </div>
-        <h2 className="font-display fw-bold text-main mb-1">Edit Journal</h2>
-        <p className="text-muted-custom small mb-0">
-          Modify general information, editorial settings, and visibility for your journal.
-        </p>
-      </div>
+  return (
+    <div className="d-flex flex-column gap-4 text-start">
+      <PageHeader
+        breadcrumbs={[
+          { label: 'Journals', to: `${basePath}/journals` },
+          { label: 'Edit Journal' }
+        ]}
+        title="Edit Journal"
+        description="Modify general information, editorial settings, and visibility for your journal."
+      />
 
       <Form onSubmit={handleSubmit} className="mt-2">
         <Row className="g-4">
@@ -249,7 +246,7 @@ export default function EditJournalPage() {
                     <small className="text-muted-custom">Visible in main index</small>
                   </div>
                   <Form.Check type="switch" id="visibility-switch" className="admin-toggle-switch" checked={formData.visibility === 'Public'} onChange={handleToggleVisibility} style={{
-                  fontSize: '1.2rem',
+                  fontSize: '16px',
                   cursor: 'pointer'
                 }} />
                 </div>
@@ -310,13 +307,14 @@ export default function EditJournalPage() {
         <div className="d-flex justify-content-end gap-3 mt-4 pt-3 border-top" style={{
         borderColor: 'var(--border)'
       }}>
-          <PrimaryButton type="button" variant="outline" className="py-2.5 px-4" onClick={() => navigate(`${basePath}/journals`)}>
+          <Button type="button" variant="outline" className="py-2 px-4" onClick={() => navigate(`${basePath}/journals`)}>
             Cancel Changes
-          </PrimaryButton>
-          <PrimaryButton type="submit" className="py-2.5 px-4">
+          </Button>
+          <Button type="submit" className="py-2 px-4">
             Update Journal
-          </PrimaryButton>
+          </Button>
         </div>
       </Form>
-    </div>;
+    </div>
+  );
 }

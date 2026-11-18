@@ -48,7 +48,7 @@ export default function ArticleHeaderCard({
       <div className="d-flex flex-wrap gap-2 mb-3">
         {article.is_open_access && <Badge className="py-1.5 px-2.5 text-xs font-semibold" style={{
         borderRadius: '6px',
-        fontSize: '0.75rem',
+        fontSize: '13px',
         backgroundColor: 'rgba(47, 198, 70, 0.12)',
         color: 'var(--q1-color)',
         border: '1px solid rgba(47, 198, 70, 0.3)'
@@ -56,14 +56,14 @@ export default function ArticleHeaderCard({
             Open Access
           </Badge>}
         {article.publication_year && <span className="text-muted-custom border-top border-light" style={{
-        fontSize: '0.9rem'
+        fontSize: '14px'
       }}>{t("article.namXuatBan")}{article.publication_year}
           </span>}
       </div>
 
       {/* Title */}
       <h1 className="font-display text-main mb-3" style={{
-      fontSize: '2rem',
+      fontSize: '16px',
       lineHeight: '1.3',
       fontWeight: 700
     }}>
@@ -92,7 +92,7 @@ export default function ArticleHeaderCard({
 
       {/* Journal Link */}
       {article.journal_name && <div className="d-flex align-items-center gap-2 text-muted-custom pt-3 border-top border-light" style={{
-      fontSize: '0.9rem'
+      fontSize: '14px'
     }}>
           <Icon icon="lucide:book-open" style={{
         color: 'var(--primary)'

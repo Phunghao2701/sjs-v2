@@ -1,12 +1,12 @@
-import React from 'react';
 import './LoadingSkeleton.css';
+import { Skeleton, SkeletonStatus } from '../../../../shared/ui/skeleton';
 
 const LoadingSkeleton = ({ height = '300px', width = '100%', borderRadius = '8px', message }) => {
   return (
-    <div className="skeleton-container" style={{ height, width, borderRadius }}>
-      <div className="skeleton-pulse"></div>
+    <SkeletonStatus label={message || 'Loading analytics'} className="skeleton-container" style={{ height, width, borderRadius }}>
+      <Skeleton className="skeleton-pulse h-full w-full" />
       {message && <p className="skeleton-message">{message}</p>}
-    </div>
+    </SkeletonStatus>
   );
 };
 

@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useState } from 'react';
 import { Modal, Form, Row, Col } from 'react-bootstrap';
 import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
-import PrimaryButton from '../../../../shared/components/Button/PrimaryButton';
+import { Button } from '../../../../shared/ui/button';
 
 /**
  * Component CreateVolumeModal - Cửa sổ Modal bật lên để Admin tạo Tập (Volume) mới.
@@ -156,12 +156,12 @@ export default function CreateVolumeModal({
 
         </Modal.Body>
         <Modal.Footer className="border-top-0 pt-0">
-          <PrimaryButton variant="outline" onClick={handleClose} className="px-3">
+          <Button variant="outline" size="sm" onClick={handleClose} className="px-3">
             Cancel
-          </PrimaryButton>
-          <PrimaryButton type="submit" className="px-3">
+          </Button>
+          <Button type="submit" size="sm" className="px-3">
             Create Volume
-          </PrimaryButton>
+          </Button>
         </Modal.Footer>
       </Form>
     </Modal>;

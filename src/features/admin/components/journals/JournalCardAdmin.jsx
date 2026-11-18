@@ -48,14 +48,14 @@ export default function JournalCardAdmin({
 
           <div className="bg-light p-3 rounded-3 mb-3" style={{
           backgroundColor: 'var(--bg-chip)',
-          fontSize: '0.8rem'
+          fontSize: '13px'
         }}>
             <Row className="g-2">
               <Col xs={6} className="border-end border-bottom pb-1.5" style={{
               borderColor: 'var(--border)'
             }}>
                 <span className="text-muted-custom text-xs d-block text-uppercase fw-semibold" style={{
-                fontSize: '0.65rem'
+                fontSize: '13px'
               }}>Publisher</span>
                 <span className="text-main fw-bold text-truncate d-block">{journal.publisher || 'Trending System'}</span>
               </Col>
@@ -63,7 +63,7 @@ export default function JournalCardAdmin({
               borderColor: 'var(--border)'
             }}>
                 <span className="text-muted-custom text-xs d-block text-uppercase fw-semibold" style={{
-                fontSize: '0.65rem'
+                fontSize: '13px'
               }}>Type</span>
                 <span className="text-main fw-bold d-block">{journal.type || 'Journal'}</span>
               </Col>
@@ -71,13 +71,13 @@ export default function JournalCardAdmin({
               borderColor: 'var(--border)'
             }}>
                 <span className="text-muted-custom text-xs d-block text-uppercase fw-semibold" style={{
-                fontSize: '0.65rem'
+                fontSize: '13px'
               }}>Coverage</span>
                 <span className="text-main fw-bold d-block">{journal.coverage || '1980-2026'}</span>
               </Col>
               <Col xs={6} className="ps-3 pt-1.5">
                 <span className="text-muted-custom text-xs d-block text-uppercase fw-semibold" style={{
-                fontSize: '0.65rem'
+                fontSize: '13px'
               }}>Region</span>
                 <span className="text-main fw-bold text-truncate d-block">{journal.country || 'Vietnam'}</span>
               </Col>
@@ -107,12 +107,12 @@ export default function JournalCardAdmin({
             </div>
             <div className="text-truncate">
               <span className="fw-bold text-main d-block text-truncate" style={{
-              fontSize: '0.85rem'
+              fontSize: '14px'
             }}>
                 {journal.publisher || t("admin.chuaChiDinh")}
               </span>
               <span className="text-muted-custom text-xs text-uppercase fw-semibold" style={{
-              fontSize: '0.65rem',
+              fontSize: '13px',
               letterSpacing: '0.02em'
             }}>
                 Publisher
@@ -126,7 +126,7 @@ export default function JournalCardAdmin({
             <div className="d-flex align-items-center gap-1.5">
               <span className={statusClass} />
               <span className="fw-bold text-uppercase text-main" style={{
-              fontSize: '0.75rem'
+              fontSize: '13px'
             }}>
                 {journal.status || 'Draft'}
               </span>

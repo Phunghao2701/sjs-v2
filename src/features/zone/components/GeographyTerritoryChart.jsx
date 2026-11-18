@@ -59,17 +59,17 @@ export default function GeographyTerritoryChart({
       {/* Header */}
       <div className="d-flex align-items-center justify-content-between mb-4">
         <div>
-          <h3 className="font-display fw-bold text-main mb-0" style={{ fontSize: '1.1rem' }}>
+          <h3 className="font-display fw-bold text-main mb-0" style={{ fontSize: '16px' }}>
             {t("zone.top10QuocGiaCoSanLuongArticleCa", "Top 10 Countries by Article Output")}
           </h3>
-          <p className="text-muted-custom mb-0 mt-1" style={{ fontSize: '0.8rem' }}>
+          <p className="text-muted-custom mb-0 mt-1" style={{ fontSize: '13px' }}>
             {t("zone.phanBoSoLuongBaiBaoKhoaHocXuat")}
           </p>
         </div>
         <span
           className="px-2 py-1 rounded text-muted-custom"
           style={{
-            fontSize: '0.75rem',
+            fontSize: '13px',
             backgroundColor: 'var(--bg-chip)',
             fontWeight: 500,
             alignSelf: 'flex-start'
@@ -92,7 +92,7 @@ export default function GeographyTerritoryChart({
       ) : top10.length === 0 ? (
         <div
           className="d-flex align-items-center justify-content-center flex-grow-1 text-muted-custom py-5"
-          style={{ minHeight: '380px', fontSize: '0.9rem' }}
+          style={{ minHeight: '380px', fontSize: '14px' }}
         >
           {t("topic.khongCoDuLieu")}
         </div>
@@ -149,12 +149,12 @@ export default function GeographyTerritoryChart({
                     <div className="d-flex flex-column min-w-0">
                       <span
                         className="text-main fw-bold font-display text-truncate"
-                        style={{ fontSize: '0.82rem' }}
+                        style={{ fontSize: '14px' }}
                         title={item.name}
                       >
                         {item.name || item.code}
                       </span>
-                      <span className="text-muted-custom font-display text-xs" style={{ fontSize: '0.68rem' }}>
+                      <span className="text-muted-custom font-display text-xs" style={{ fontSize: '13px' }}>
                         {item.code || item.iso_code || '—'}
                       </span>
                     </div>
@@ -183,7 +183,7 @@ export default function GeographyTerritoryChart({
                       {/* Value Label INSIDE the Horizontal Bar */}
                       <span
                         className="fw-bold font-display text-white text-nowrap bar-value-inside"
-                        style={{ fontSize: '0.78rem', letterSpacing: '0.01em' }}
+                        style={{ fontSize: '13px', letterSpacing: '0.01em' }}
                       >
                         {val > 0 ? val.toLocaleString() : '0'}
                       </span>

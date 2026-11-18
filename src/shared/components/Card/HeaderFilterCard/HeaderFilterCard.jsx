@@ -1,22 +1,9 @@
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: shared\components\Card\HeaderFilterCard\HeaderFilterCard.jsx
- */
-import './HeaderFilterCard.css';
+import { cn } from '../../../../lib/utils';
+import { Badge } from '../../../ui/badge';
 
 /**
  * Shared header/filter card for data pages that need a title, count badge,
- * and right-side filter/search controls.
- *
- * @param {Object} props - Component props
- * @param {string} props.title - Toolbar title, e.g. "All Contributors"
- * @param {number|string} [props.count] - Optional total count shown in the badge
- * @param {string} [props.singularLabel='Item'] - Label when count equals 1
- * @param {string} [props.pluralLabel='Items'] - Label when count is not 1
- * @param {React.ReactNode} props.children - Filter/search/action controls
- * @param {string} [props.className] - Additional wrapper classes
- * @returns {JSX.Element}
+ * and filter/search controls, normalized with shared tokens and primitives.
  */
 export default function HeaderFilterCard({
   title,
@@ -31,17 +18,17 @@ export default function HeaderFilterCard({
   const label = normalizedCount === 1 ? singularLabel : pluralLabel;
 
   return (
-    <div className={`header-filter-card ${className}`.trim()}>
-      <div className="header-filter-card__summary">
-        <span className="header-filter-card__title">{title}</span>
+    <div className={cn('flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6 pb-4 border-b border-border', className)}>
+      <div className="flex items-center gap-2.5 flex-wrap">
+        <h2 className="m-0 text-base font-semibold text-foreground">{title}</h2>
         {hasCount && (
-          <span className="header-filter-card__count">
+          <Badge variant="default" className="text-xs font-semibold">
             {count} {label}
-          </span>
+          </Badge>
         )}
       </div>
 
-      {children && <div className="header-filter-card__controls">{children}</div>}
+      {children && <div className="flex flex-wrap items-center gap-2">{children}</div>}
     </div>
   );
 }

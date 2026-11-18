@@ -132,7 +132,7 @@ export default function AddToProjectModal({
       backgroundColor: 'var(--bg-card)'
     }}>
         <Modal.Title className="font-display fw-bold text-main d-flex align-items-center gap-2" style={{
-        fontSize: '1.25rem'
+        fontSize: '16px'
       }}>
           <Icon icon="lucide:folder-plus" className="text-primary" width="22" />{t("journal.themTapChiVaoDuAn")}</Modal.Title>
       </Modal.Header>
@@ -147,7 +147,7 @@ export default function AddToProjectModal({
 
           <Form.Group className="mb-4">
             <Form.Label className="fw-semibold mb-2" style={{
-            fontSize: '0.9rem'
+            fontSize: '14px'
           }}>{t("journal.phuongThuc")}</Form.Label>
             <div className="d-flex gap-3">
               <Form.Check type="radio" label={t("journal.chonDuAnDaCo")} name="projectMode" id="modeSelect" checked={mode === 'select'} onChange={() => setMode('select')} className="custom-radio" />
@@ -157,13 +157,13 @@ export default function AddToProjectModal({
 
           {mode === 'select' ? <Form.Group className="mb-3">
               <Form.Label className="fw-semibold mb-2" style={{
-            fontSize: '0.9rem'
+            fontSize: '14px'
           }}>{t("journal.chonDuAnCuaBan")}</Form.Label>
               {loading ? <div className="d-flex align-items-center gap-2 py-2 text-muted-custom">
                   <Spinner animation="border" size="sm" />
                   <span>{t("journal.dangTaiDanhSachDuAn")}</span>
                 </div> : projects.length === 0 ? <div className="text-muted-custom py-2" style={{
-            fontSize: '0.9rem'
+            fontSize: '14px'
           }}>{t("journal.banChuaCoDuAnNaoVuiLongChonTao")}</div> : <Form.Select value={selectedProjectId} onChange={e => setSelectedProjectId(e.target.value)} className="journal-dark-input" style={{
             backgroundColor: 'var(--bg-main)',
             color: 'var(--text-main)',
@@ -178,7 +178,7 @@ export default function AddToProjectModal({
                 </Form.Select>}
             </Form.Group> : <Form.Group className="mb-3">
               <Form.Label className="fw-semibold mb-2" style={{
-            fontSize: '0.9rem'
+            fontSize: '14px'
           }}>{t("journal.tenDuAnMoi")}</Form.Label>
               <Form.Control type="text" placeholder={t("journal.nhapTieuDeDuAnNghienCuu")} value={newProjectTitle} onChange={e => setNewProjectTitle(e.target.value)} className="journal-dark-input" style={{
             backgroundColor: 'var(--bg-main)',

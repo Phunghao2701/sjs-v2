@@ -121,7 +121,7 @@ export default function SessionExpiredModal() {
         <h4
           className="font-display fw-bold mb-2"
           style={{
-            fontSize: '1.35rem',
+            fontSize: '16px',
             letterSpacing: '-0.02em',
             color: 'var(--text-main, #0f172a)',
           }}
@@ -133,7 +133,7 @@ export default function SessionExpiredModal() {
         <p
           className="mb-4 text-muted"
           style={{
-            fontSize: '0.925rem',
+            fontSize: '15px',
             lineHeight: '1.6',
             maxWidth: '360px',
             margin: '0 auto',
@@ -150,7 +150,7 @@ export default function SessionExpiredModal() {
             icon="lucide:log-in"
             className="w-100 py-2 px-4 fw-semibold shadow-sm d-flex align-items-center justify-content-center gap-2"
             style={{
-              fontSize: '1rem',
+              fontSize: '16px',
               borderRadius: '10px',
               maxWidth: '280px',
             }}
