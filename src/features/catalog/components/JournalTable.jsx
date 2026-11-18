@@ -73,12 +73,12 @@ export default function JournalTable({
     <div className="table-responsive">
       <Table hover className="catalog-table align-middle mb-0 text-start w-full">
           <thead>
-            <tr className="border-b border-border bg-surface-muted/60 text-[12px] text-muted-foreground font-semibold">
-              <th className="px-4 py-3 text-start">Journal & ISSN</th>
-              <th className="px-3 py-3 text-start">Publisher & Region</th>
-              <th className="px-3 py-3 text-center">Quartile</th>
-              <th className="px-3 py-3 text-center">SJR Metric</th>
-              <th className="px-4 py-3 text-center">Access</th>
+            <tr className="border-b border-border bg-surface-muted/60 text-[12px] text-muted-foreground font-semibold normal-case">
+              <th className="px-4 py-3 text-start text-[12px] font-semibold normal-case">Journal & ISSN</th>
+              <th className="px-3 py-3 text-start text-[12px] font-semibold normal-case">Publisher & Region</th>
+              <th className="px-3 py-3 text-center text-[12px] font-semibold normal-case">Quartile</th>
+              <th className="px-3 py-3 text-center text-[12px] font-semibold normal-case">SJR Metric</th>
+              <th className="px-4 py-3 text-center text-[12px] font-semibold normal-case">Access</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">

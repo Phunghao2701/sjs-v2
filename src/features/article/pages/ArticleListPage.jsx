@@ -40,16 +40,6 @@ export default function ArticleListPage() {
         <PageHeader
           title={t("article.khoLuuTruBaiBaoKhoaHoc", "Scientific Articles Repository")}
           description={t("article.duyetQuaTimKiemVaLocHangNghinB", "Search, filter, and discover millions of high-impact scientific publications.")}
-          actions={
-            <div className="flex items-center gap-3">
-              <div className="text-end">
-                <div className="text-xs text-muted-foreground">{t("article.tongKetQua", "Total Papers")}</div>
-                <div className="text-sm font-bold text-foreground">
-                  {total ? total.toLocaleString() : '219M+'} papers
-                </div>
-              </div>
-            </div>
-          }
         >
           {(filters.selectedVolume || filters.selectedIssue) && (
             <div className="flex flex-wrap items-center gap-2 mt-2">

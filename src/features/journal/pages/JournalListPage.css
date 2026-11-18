@@ -106,7 +106,7 @@
 .journal-table-index-col { width: 60px; }
 .journal-table-action-col { width: 120px; }
 .journal-table thead { background: var(--bg-section); border-bottom: 1px solid var(--border); }
-.journal-table th { color: var(--text-muted); font-size: 13px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.journal-table th { color: var(--text-muted); font-size: 12px !important; font-weight: 600 !important; letter-spacing: normal !important; text-transform: none !important; }
 .journal-table-row { cursor: pointer; transition: background-color .2s ease; }
 .journal-table-row:hover { background: var(--bg-section); }
 .journal-index { color: var(--text-muted); font-size: 14px; font-weight: 650; }

@@ -424,10 +424,10 @@
   background: var(--bg-chip) !important;
   border-bottom: 1px solid var(--border) !important;
   color: var(--text-muted) !important;
-  font-size: 13px;
+  font-size: 12px !important;
   font-weight: 600 !important;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: normal !important;
+  text-transform: none !important;
   white-space: nowrap;
 }
 
