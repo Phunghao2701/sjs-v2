@@ -90,7 +90,7 @@ export default function SearchableKeywordInput({
           }
         }}
         className={`w-full min-h-[44px] px-3 py-1.5 rounded-control border border-border bg-surface text-sm flex flex-wrap items-center gap-1.5 transition-all select-none focus:outline-none focus-visible:outline-none focus:border-primary focus-visible:border-primary ${
-          disabled ? 'opacity-50 cursor-not-allowed bg-surface-muted' : 'cursor-pointer hover:border-primary/50'
+          disabled ? 'opacity-50 cursor-not-allowed bg-surface-muted' : 'cursor-pointer'
         } ${isOpen ? 'border-primary' : ''}`}
         onClick={(e) => {
           if (!disabled && !e.target.closest('button')) {

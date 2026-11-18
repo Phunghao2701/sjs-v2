@@ -42,11 +42,6 @@ export default function AuthorProfileHero({ author, metrics }) {
 
         {/* Center: Identity details */}
         <div className="ap-hero-center">
-          <div className="ap-hero-eyebrow">
-            <Icon icon="lucide:award" width="13" />
-            <span>Academic Researcher Profile</span>
-          </div>
-
           <h1 className="ap-hero-name">{author.full_name}</h1>
           <div className="ap-hero-position">{author.position}</div>
 

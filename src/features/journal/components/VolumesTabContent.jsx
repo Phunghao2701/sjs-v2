@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
  * File: features\journal\components\VolumesTabContent.jsx
  */
 import { useState } from 'react';
-import { Spinner, Button } from 'react-bootstrap';
+import { Spinner, Button } from '../../../shared/ui/button';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { Skeleton } from '../../../shared/ui/skeleton';

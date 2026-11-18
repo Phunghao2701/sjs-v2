@@ -12,7 +12,6 @@ import { useAuthStore } from '../../../app/store/authStore';
 import { isAuthenticated as checkAuthSession } from '../../../shared/utils/auth';
 import { Alert } from '../../../shared/ui/alert';
 import { Button } from '../../../shared/ui/button';
-import { Badge } from '../../../shared/ui/badge';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
 import './GeographyPage.css';
 
@@ -117,16 +116,6 @@ export default function GeographyPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Workspace", to: "/dashboard" },
-          { label: t("zone.phanBoDiaLy", "Geography") }
-        ]}
-        badge={
-          <Badge variant="info" className="gap-1.5 py-1 px-2.5 text-xs font-semibold">
-            <Icon icon="lucide:globe" width="14" />
-            <span>Worldwide Output</span>
-          </Badge>
-        }
         title={t("zone.phanBoTapChiTheoQuocGia", "Geographic Distribution of Publications")}
         description={t("zone.xemThongKeSoLuongAnPhamKhoaHoc", "Explore worldwide scientific publication volume, top-producing nations, and country rankings.")}
         actions={

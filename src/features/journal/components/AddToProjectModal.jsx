@@ -1,206 +1,207 @@
 import { useTranslation } from "react-i18next";
-import { t } from "i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\journal\components\AddToProjectModal.jsx
- */
 import { useState, useEffect } from 'react';
-import { Modal, Form, Spinner, Alert } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { Modal } from '../../../shared/ui/modal';
+import { Button, Spinner } from '../../../shared/ui/button';
+import { Alert } from '../../../shared/ui/alert';
+import { Input } from '../../../shared/ui/input';
 import { getProjectsApi, createProjectApi, getProjectByIdApi, updateProjectApi } from '../../project/api/project.api';
+
 export default function AddToProjectModal({
   show,
   onHide,
   journalId,
   onConfirm
 }) {
-  const { t: _t } = useTranslation();
+  const { t } = useTranslation();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  // Selection mode: 'select' (choose existing) or 'create' (create new)
-  const [mode, setMode] = useState('select');
+  const [mode, setMode] = useState('select'); // 'select' | 'create'
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [newProjectTitle, setNewProjectTitle] = useState('');
-  const fetchProjects = async () => {
-    setLoading(true);
+
+  useEffect(() => {
+    if (show) {
+      setError(null);
+      setSuccess(false);
+      setSelectedProjectId('');
+      setNewProjectTitle('');
+      setMode('select');
+      fetchUserProjects();
+    }
+  }, [show]);
+
+  const fetchUserProjects = async () => {
     try {
+      setLoading(true);
       const res = await getProjectsApi();
-      if (res.data?.success && res.data?.data) {
-        setProjects(res.data.data);
+      const list = res.data?.data?.items || res.data?.data || res.data || [];
+      const validList = Array.isArray(list) ? list : [];
+      setProjects(validList);
+      if (validList.length > 0) {
+        setSelectedProjectId(validList[0].project_id || '');
       } else {
-        setProjects([]);
+        setMode('create');
       }
-    } catch (err) {
-      console.error('Error fetching projects:', err);
-      setError(t("journal.khongTheTaiDanhSachDuAnVuiLong"));
+    } catch {
+      setError(t("journal.khongTheTaiDanhSachDuAn", "Không thể tải danh sách dự án"));
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch projects on show and reset form state
-  useEffect(() => {
-    if (!show) return;
-    setError(null);
-    setSuccess(false);
-    setMode('select');
-    setSelectedProjectId('');
-    setNewProjectTitle('');
-    fetchProjects();
-  }, [show]);
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSubmitting(true);
+
     try {
+      let targetProjectId = selectedProjectId;
+
       if (mode === 'create') {
         if (!newProjectTitle.trim()) {
-          setError(t("journal.vuiLongNhapTenDuAnMoi"));
+          setError(t("journal.vuiLongNhapTenDuAn", "Vui lòng nhập tên dự án"));
           setSubmitting(false);
           return;
         }
-
-        // Create new project with current journal ID
-        const res = await createProjectApi({
+        const createRes = await createProjectApi({
           title: newProjectTitle.trim(),
-          journal_ids: [parseInt(journalId, 10)]
+          description: `Project containing journal #${journalId}`,
         });
-        if (res.data?.success) {
-          setSuccess(true);
-          setTimeout(() => {
-            onHide();
-            if (onConfirm) onConfirm(res.data.data.project_id); // triggers callback to refresh detail page if necessary
-          }, 1500);
-        } else {
-          setError(res.data?.message || t("journal.taoDuAnMoiThatBai"));
-        }
-      } else {
-        if (!selectedProjectId) {
-          setError(t("journal.vuiLongChonMotDuAn"));
-          setSubmitting(false);
-          return;
-        }
-
-        // Fetch details of selected project to append journal
-        const detailsRes = await getProjectByIdApi(selectedProjectId);
-        if (!detailsRes.data?.success || !detailsRes.data?.data) {
-          throw new Error(t("journal.khongTheLayChiTietDuAnDeCapNha"));
-        }
-        const project = detailsRes.data.data;
-        const currentJournalIds = project.journals?.map(j => j.journal_id) || [];
-        const numericJournalId = parseInt(journalId, 10);
-        if (currentJournalIds.includes(numericJournalId)) {
-          setError(t("journal.tapChiNayDaTonTaiTrongDuAnDaCh"));
-          setSubmitting(false);
-          return;
-        }
-
-        // Call update API
-        const updateRes = await updateProjectApi(selectedProjectId, {
-          title: project.title,
-          subject_area: project.subject_area?.subject_area_id || null,
-          subject_category_ids: project.subject_categories?.map(c => c.subject_category_id) || [],
-          journal_ids: [...currentJournalIds, numericJournalId]
-        });
-        if (updateRes.data?.success) {
-          setSuccess(true);
-          setTimeout(() => {
-            onHide();
-            if (onConfirm) onConfirm(selectedProjectId);
-          }, 1500);
-        } else {
-          setError(updateRes.data?.message || t("journal.themTapChiVaoDuAnThatBai"));
-        }
+        const createdProject = createRes.data?.data || createRes.data;
+        targetProjectId = createdProject?.project_id || createdProject?.id;
       }
+
+      if (!targetProjectId) {
+        throw new Error(t("journal.khongXacDinhDuocDuAn", "Không xác định được dự án"));
+      }
+
+      const pRes = await getProjectByIdApi(targetProjectId);
+      const pData = pRes.data?.data || pRes.data;
+      const currentJournals = Array.isArray(pData?.journal_ids)
+        ? pData.journal_ids
+        : [];
+
+      if (!currentJournals.includes(Number(journalId))) {
+        await updateProjectApi(targetProjectId, {
+          journal_ids: [...currentJournals, Number(journalId)],
+        });
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        if (onConfirm) onConfirm(targetProjectId);
+        onHide();
+      }, 1000);
     } catch (err) {
-      console.error('Error adding to project:', err);
-      setError(err.response?.data?.message || err.message || t("journal.daCoLoiXayRa"));
+      setError(err?.response?.data?.message || err.message || t("journal.coLoiXayRaKhiLuuVaoDuAn", "Có lỗi xảy ra khi lưu vào dự án"));
     } finally {
       setSubmitting(false);
     }
   };
-  return <Modal show={show} onHide={onHide} centered contentClassName="border-0 text-start text-main rounded-3 shadow" style={{
-    backdropFilter: 'blur(4px)'
-  }}>
-      <Modal.Header closeButton className="border-0 pb-0" style={{
-      backgroundColor: 'var(--bg-card)'
-    }}>
-        <Modal.Title className="font-display fw-bold text-main d-flex align-items-center gap-2" style={{
-        fontSize: '16px'
-      }}>
-          <Icon icon="lucide:folder-plus" className="text-primary" width="22" />{t("journal.themTapChiVaoDuAn")}</Modal.Title>
+
+  return (
+    <Modal show={show} onHide={onHide} size="md">
+      <Modal.Header closeButton className="border-0 pb-0">
+        <Modal.Title className="flex items-center gap-2 text-base font-semibold text-foreground">
+          <Icon icon="lucide:folder-plus" className="text-primary h-5 w-5" />
+          <span>{t("journal.themTapChiVaoDuAn", "Thêm tạp chí vào dự án")}</span>
+        </Modal.Title>
       </Modal.Header>
 
-      <Form onSubmit={handleSubmit}>
-        <Modal.Body className="py-4" style={{
-        backgroundColor: 'var(--bg-card)',
-        color: 'var(--text-main)'
-      }}>
+      <form onSubmit={handleSubmit}>
+        <Modal.Body className="py-4 space-y-4">
           {error && <Alert variant="danger">{error}</Alert>}
-          {success && <Alert variant="success">{t("journal.daThemTapChiVaoDuAnThanhCong")}</Alert>}
+          {success && <Alert variant="success">{t("journal.daThemTapChiVaoDuAnThanhCong", "Đã thêm tạp chí vào dự án thành công!")}</Alert>}
 
-          <Form.Group className="mb-4">
-            <Form.Label className="fw-semibold mb-2" style={{
-            fontSize: '14px'
-          }}>{t("journal.phuongThuc")}</Form.Label>
-            <div className="d-flex gap-3">
-              <Form.Check type="radio" label={t("journal.chonDuAnDaCo")} name="projectMode" id="modeSelect" checked={mode === 'select'} onChange={() => setMode('select')} className="custom-radio" />
-              <Form.Check type="radio" label={t("journal.taoDuAnMoi")} name="projectMode" id="modeCreate" checked={mode === 'create'} onChange={() => setMode('create')} className="custom-radio" />
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground uppercase mb-2">
+              {t("journal.phuongThuc", "Phương thức")}
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="radio"
+                  name="projectMode"
+                  id="modeSelect"
+                  checked={mode === 'select'}
+                  onChange={() => setMode('select')}
+                  className="accent-primary"
+                />
+                <span>{t("journal.chonDuAnDaCo", "Chọn dự án đã có")}</span>
+              </label>
+              <label className="flex items-center gap-2 text-sm text-foreground cursor-pointer">
+                <input
+                  type="radio"
+                  name="projectMode"
+                  id="modeCreate"
+                  checked={mode === 'create'}
+                  onChange={() => setMode('create')}
+                  className="accent-primary"
+                />
+                <span>{t("journal.taoDuAnMoi", "Tạo dự án mới")}</span>
+              </label>
             </div>
-          </Form.Group>
+          </div>
 
-          {mode === 'select' ? <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold mb-2" style={{
-            fontSize: '14px'
-          }}>{t("journal.chonDuAnCuaBan")}</Form.Label>
-              {loading ? <div className="d-flex align-items-center gap-2 py-2 text-muted-custom">
-                  <Spinner animation="border" size="sm" />
-                  <span>{t("journal.dangTaiDanhSachDuAn")}</span>
-                </div> : projects.length === 0 ? <div className="text-muted-custom py-2" style={{
-            fontSize: '14px'
-          }}>{t("journal.banChuaCoDuAnNaoVuiLongChonTao")}</div> : <Form.Select value={selectedProjectId} onChange={e => setSelectedProjectId(e.target.value)} className="journal-dark-input" style={{
-            backgroundColor: 'var(--bg-main)',
-            color: 'var(--text-main)',
-            borderColor: 'var(--border)',
-            borderRadius: '8px',
-            padding: '0.6rem 1rem'
-          }}>
-                  <option value="">{t("journal.chonDuAn")}</option>
-                  {projects.map(p => <option key={p.project_id} value={p.project_id}>
+          {mode === 'select' ? (
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
+                {t("journal.chonDuAnCuaBan", "Chọn dự án của bạn")}
+              </label>
+              {loading ? (
+                <div className="flex items-center gap-2 py-2 text-muted-foreground text-sm">
+                  <Spinner className="size-4" />
+                  <span>{t("journal.dangTaiDanhSachDuAn", "Đang tải danh sách dự án...")}</span>
+                </div>
+              ) : projects.length === 0 ? (
+                <div className="text-muted-foreground text-sm py-2">
+                  {t("journal.banChuaCoDuAnNaoVuiLongChonTao", "Bạn chưa có dự án nào, vui lòng chọn Tạo dự án mới.")}
+                </div>
+              ) : (
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:outline-none focus:border-primary"
+                >
+                  <option value="">{t("journal.chonDuAn", "Chọn dự án")}</option>
+                  {projects.map((p) => (
+                    <option key={p.project_id} value={p.project_id}>
                       {p.title}
-                    </option>)}
-                </Form.Select>}
-            </Form.Group> : <Form.Group className="mb-3">
-              <Form.Label className="fw-semibold mb-2" style={{
-            fontSize: '14px'
-          }}>{t("journal.tenDuAnMoi")}</Form.Label>
-              <Form.Control type="text" placeholder={t("journal.nhapTieuDeDuAnNghienCuu")} value={newProjectTitle} onChange={e => setNewProjectTitle(e.target.value)} className="journal-dark-input" style={{
-            backgroundColor: 'var(--bg-main)',
-            color: 'var(--text-main)',
-            borderColor: 'var(--border)',
-            borderRadius: '8px',
-            padding: '0.6rem 1rem'
-          }} required />
-            </Form.Group>}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase mb-1.5">
+                {t("journal.tenDuAnMoi", "Tên dự án mới")}
+              </label>
+              <Input
+                type="text"
+                placeholder={t("journal.nhapTieuDeDuAnNghienCuu", "Nhập tiêu đề dự án nghiên cứu...")}
+                value={newProjectTitle}
+                onChange={(e) => setNewProjectTitle(e.target.value)}
+                required
+              />
+            </div>
+          )}
         </Modal.Body>
 
-        <Modal.Footer className="border-0 pt-0" style={{
-        backgroundColor: 'var(--bg-card)',
-        gap: '8px'
-      }}>
-          <PrimaryButton variant="outline" onClick={onHide} disabled={submitting}>{t("admin.huy")}</PrimaryButton>
-
-          <PrimaryButton type="submit" disabled={submitting || mode === 'select' && projects.length === 0}>
-            {submitting && <Spinner animation="border" size="sm" />}
-            <span>{t("auth.xacNhan")}</span>
-          </PrimaryButton>
+        <Modal.Footer className="border-0 pt-0 gap-2 flex items-center justify-end">
+          <Button type="button" variant="outline" size="sm" onClick={onHide} disabled={submitting}>
+            {t("admin.huy", "Hủy")}
+          </Button>
+          <Button type="submit" size="sm" disabled={submitting || loading || (mode === 'select' && !selectedProjectId) || (mode === 'create' && !newProjectTitle.trim())} isLoading={submitting}>
+            {submitting ? t("journal.dangLuu", "Đang lưu...") : t("journal.xacNhan", "Xác nhận")}
+          </Button>
         </Modal.Footer>
-      </Form>
-    </Modal>;
+      </form>
+    </Modal>
+  );
 }

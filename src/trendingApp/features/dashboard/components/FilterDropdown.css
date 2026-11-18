@@ -25,10 +25,6 @@
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.filter-dropdown-trigger:hover {
-  border-color: var(--color-neutral-300);
-}
-
 .filter-dropdown-trigger.active {
   border-color: var(--color-primary-orange);
   box-shadow: 0 0 0 3px var(--color-primary-orange-light);

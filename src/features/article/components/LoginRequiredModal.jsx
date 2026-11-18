@@ -1,62 +1,51 @@
 import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\article\components\LoginRequiredModal.jsx
- */
-import { Modal, Button } from 'react-bootstrap';
-import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
-export default function LoginRequiredModal({
-  show,
-  onHide
-}) {
-  const {
-    t
-  } = useTranslation();
+import { Icon } from '@iconify/react';
+import { Modal } from '../../../shared/ui/modal';
+import { Button } from '../../../shared/ui/button';
+
+export default function LoginRequiredModal({ show, onHide }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
   const handleLogin = () => {
     onHide();
     navigate('/login');
   };
+
   const handleRegister = () => {
     onHide();
     navigate('/register');
   };
-  return <Modal show={show} onHide={onHide} centered contentClassName="border-0 shadow-lg" style={{
-    backdropFilter: 'blur(4px)'
-  }}>
-      <div className="p-4 text-center rounded-3 bg-white" style={{
-      border: '1px solid var(--border)'
-    }}>
+
+  return (
+    <Modal show={show} onHide={onHide} size="sm" className="text-center p-6">
+      <div className="flex flex-col items-center">
         {/* Header Icon */}
-        <div className="d-inline-flex align-items-center justify-content-center mb-3" style={{
-        width: '64px',
-        height: '64px',
-        borderRadius: '50%',
-        backgroundColor: 'var(--primary-light)',
-        border: '1px solid rgba(0, 113, 188, 0.2)'
-      }}>
-          <Icon icon="lucide:lock" className="text-primary" width="30" />
+        <div className="flex items-center justify-center size-14 rounded-full bg-primary-subtle border border-primary/20 mb-3">
+          <Icon icon="lucide:lock" className="text-primary" width="28" height="28" />
         </div>
 
         {/* Modal Title */}
-        <h4 className="font-display fw-bold text-main mb-2">{t("article.dangNhapDeLuuBaiBao")}</h4>
-        
-        {/* Modal Content */}
-        <p className="text-muted-custom text-sm mb-4 leading-relaxed" style={{
-        fontSize: '14px'
-      }}>{t("article.banCanDangNhapTaiKhoanResearch")}</p>
+        <h3 className="text-base font-bold text-foreground mb-1.5">
+          {t("article.dangNhapDeLuuBaiBao", "Đăng nhập để lưu bài báo")}
+        </h3>
 
-        {/* Buttons Grid */}
-        <div className="d-flex flex-column gap-2">
-          <PrimaryButton className="w-100" onClick={handleLogin}>{t("article.dangNhapNgay")}</PrimaryButton>
-          
-          <PrimaryButton variant="outline" className="w-100" onClick={handleRegister}>{t("article.dangKyTaiKhoan")}</PrimaryButton>
+        {/* Modal Description */}
+        <p className="text-xs text-muted-foreground leading-relaxed max-w-xs mb-5">
+          {t("article.banCanDangNhapDeSuDungTinhNangLuu", "Bạn cần đăng nhập để sử dụng tính năng lưu bài báo vào danh sách yêu thích cá nhân.")}
+        </p>
 
-          <Button variant="link" className="w-full text-muted-custom hover:text-dark text-xs mt-1 p-0 text-decoration-none font-semibold" onClick={onHide}>{t("article.dongCuaSo")}</Button>
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2.5 w-full">
+          <Button variant="outline" size="sm" onClick={handleRegister} className="w-full sm:w-auto">
+            {t("common.dangKy", "Đăng ký")}
+          </Button>
+          <Button size="sm" onClick={handleLogin} className="w-full sm:w-auto">
+            {t("signIn", "Đăng nhập")}
+          </Button>
         </div>
       </div>
-    </Modal>;
+    </Modal>
+  );
 }

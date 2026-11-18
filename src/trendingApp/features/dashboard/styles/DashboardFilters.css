@@ -72,10 +72,6 @@
   min-width: 150px;
 }
 
-.dashboard-filter-select:hover {
-  border-color: var(--color-neutral-300);
-}
-
 .dashboard-filter-select:focus-visible {
   border-color: var(--color-primary-orange);
   box-shadow: 0 0 0 2px var(--color-primary-orange-light);

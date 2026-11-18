@@ -1,23 +1,20 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState, useEffect } from 'react';
-import { Form, Row, Col, Card } from 'react-bootstrap';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Icon } from '@iconify/react';
 import { useJournalManagement } from '../../journal/hooks/useJournalManagement';
 import { Button } from '../../../shared/ui/button';
+import { Card } from '../../../shared/ui/card';
 import { PageHeader } from '../../../shared/ui/page-layout';
+
 export default function EditJournalPage() {
   const { t: _t } = useTranslation();
-  const {
-    id
-  } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const {
-    updateJournal
-  } = useJournalManagement();
+  const { updateJournal } = useJournalManagement();
   const isPreview = window.location.pathname.startsWith('/admin-preview');
   const basePath = isPreview ? '/admin-preview' : '/admin';
+
   const [formData, setFormData] = useState({
     title: '',
     issn: '',
@@ -37,6 +34,7 @@ export default function EditJournalPage() {
     regionZoneId: 2
   });
   const [loadingDeps, setLoadingDeps] = useState(false);
+
   useEffect(() => {
     const loadDependencies = async () => {
       setLoadingDeps(true);
@@ -50,86 +48,49 @@ export default function EditJournalPage() {
           getCountryStatsApi,
           getRegionStatsApi
         } = await import('../../zone/api/zone.api');
-        const [pubRes, countryRes, regionRes, areaRes, catRes] = await Promise.all([getPublishersApi({
-          page: 1,
-          limit: 100
-        }), getCountryStatsApi({
-          limit: 1
-        }), getRegionStatsApi({
-          limit: 1
-        }), getSubjectAreasApi({
-          page: 1,
-          limit: 5000
-        }), getSubjectCategoriesApi({
-          page: 1,
-          limit: 5000
-        })]);
-        const pubItems = pubRes.data?.data?.items || pubRes.data?.data || [];
-        setPublishers(pubItems);
-        const areaItems = areaRes.data?.data?.items || areaRes.data?.data || [];
-        setSubjectAreas(areaItems);
-        const catItems = catRes.data?.data?.items || catRes.data?.data || [];
-        setSubjectCategories(catItems);
-        const countryItems = countryRes.data?.data?.items || countryRes.data?.data || [];
-        const regionItems = regionRes.data?.data?.items || regionRes.data?.data || [];
+        const [pubRes, countryRes, regionRes, areaRes, catRes] = await Promise.all([
+          getPublishersApi({ page: 1, limit: 100 }),
+          getCountryStatsApi({ limit: 1 }),
+          getRegionStatsApi({ limit: 1 }),
+          getSubjectAreasApi({ page: 1, limit: 100 }),
+          getSubjectCategoriesApi({ page: 1, limit: 100 })
+        ]);
+        const pubs = pubRes.data?.data?.items || pubRes.data?.data || pubRes.data || [];
+        setPublishers(pubs);
+        const countries = countryRes.data?.data?.items || countryRes.data?.data || [];
+        const regions = regionRes.data?.data?.items || regionRes.data?.data || [];
         setZones({
-          countryZoneId: countryItems[0]?.zone_id || 1,
-          regionZoneId: regionItems[0]?.zone_id || 2
+          countryZoneId: countries[0]?.zone_id || countries[0]?.id || 1,
+          regionZoneId: regions[0]?.zone_id || regions[0]?.id || 2
         });
-      } catch (err) {
-        console.error('Failed to load publishers, zones or subjects', err);
+        const areas = areaRes.data?.data?.items || areaRes.data?.data || areaRes.data || [];
+        const cats = catRes.data?.data?.items || catRes.data?.data || catRes.data || [];
+        setSubjectAreas(areas);
+        setSubjectCategories(cats);
+      } catch (e) {
+        console.error("Error loading dependencies for EditJournalPage:", e);
       } finally {
         setLoadingDeps(false);
       }
     };
     loadDependencies();
   }, []);
-  useEffect(() => {
-    const loadJournalDetail = async () => {
-      try {
-        const { getJournalByIdApi } = await import('../../journal/api/journalApi');
-        const res = await getJournalByIdApi(id);
-        const journal = res.data?.data || res.data;
-        if (journal) {
-          setFormData({
-            title: journal.display_name || journal.title || '',
-            issn: journal.issn || '',
-            onlineIssn: journal.onlineIssn || '',
-            aimScope: journal.coverage || journal.description || journal.aimScope || '',
-            visibility: journal.is_open_access ? 'Public' : (journal.visibility || 'Public'),
-            publisher: journal.publisher_id || '',
-            subjectCategory: journal.subjectCategory || '',
-            subjectArea: journal.subjectArea || ''
-          });
-        }
-      } catch (err) {
-        console.error('Failed to load journal detail for editing', err);
-      }
-    };
-    if (id) loadJournalDetail();
-  }, [id]);
-  const handleChange = e => {
-    const {
-      name,
-      value
-    } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
+
   const handleToggleVisibility = () => {
     setFormData(prev => ({
       ...prev,
       visibility: prev.visibility === 'Public' ? 'Private' : 'Public'
     }));
   };
+
   const validateForm = () => {
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = t("admin.tenTapChiKhongDuocDeTrong");
@@ -139,7 +100,8 @@ export default function EditJournalPage() {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  const handleSubmit = async e => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
@@ -180,8 +142,9 @@ export default function EditJournalPage() {
       alert(t("admin.loiCapNhatTapChi") + " " + errorMsg);
     }
   };
+
   return (
-    <div className="d-flex flex-column gap-4 text-start">
+    <div className="flex flex-col gap-4 text-left">
       <PageHeader
         breadcrumbs={[
           { label: 'Journals', to: `${basePath}/journals` },
@@ -191,130 +154,198 @@ export default function EditJournalPage() {
         description="Modify general information, editorial settings, and visibility for your journal."
       />
 
-      <Form onSubmit={handleSubmit} className="mt-2">
-        <Row className="g-4">
+      <form onSubmit={handleSubmit} className="mt-2">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column */}
-          <Col xs={12} lg={8}>
-            <Card className="border p-4 shadow-none bg-white rounded-3">
-              <h5 className="font-display fw-bold text-main border-bottom pb-2.5 mb-4">
+          <div className="lg:col-span-8">
+            <Card className="p-6 bg-surface border border-border rounded-xl shadow-2xs">
+              <h5 className="font-display font-bold text-foreground border-b border-border pb-3 mb-4 text-base">
                 General Information
               </h5>
 
               {/* Journal Title */}
-              <Form.Group className="mb-4">
-                <Form.Label className="fw-medium small text-main">Journal Title <span className="text-danger">*</span></Form.Label>
-                <Form.Control type="text" name="title" value={formData.title} onChange={handleChange} isInvalid={!!errors.title} placeholder={t("admin.egJournalOfComputerScience")} />
-                <Form.Control.Feedback type="invalid">{errors.title}</Form.Control.Feedback>
-              </Form.Group>
+              <div className="mb-4">
+                <label className="font-medium text-xs text-foreground block mb-1.5">
+                  Journal Title <span className="text-destructive">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  placeholder={t("admin.egJournalOfComputerScience")}
+                  className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary ${
+                    errors.title ? 'border-destructive' : 'border-border'
+                  }`}
+                />
+                {errors.title && <p className="text-destructive text-xs mt-1">{errors.title}</p>}
+              </div>
 
               {/* ISSN inputs */}
-              <Row className="g-3 mb-4">
-                <Col xs={12} sm={6}>
-                  <Form.Group>
-                    <Form.Label className="fw-medium small text-main">Print ISSN <span className="text-danger">*</span></Form.Label>
-                    <Form.Control type="text" name="issn" value={formData.issn} onChange={handleChange} isInvalid={!!errors.issn} placeholder={t("admin.eg15493636")} />
-                    <Form.Control.Feedback type="invalid">{errors.issn}</Form.Control.Feedback>
-                  </Form.Group>
-                </Col>
-                <Col xs={12} sm={6}>
-                  <Form.Group>
-                    <Form.Label className="fw-medium small text-main">Online ISSN</Form.Label>
-                    <Form.Control type="text" name="onlineIssn" value={formData.onlineIssn} onChange={handleChange} placeholder={t("admin.eg1937478x")} />
-                  </Form.Group>
-                </Col>
-              </Row>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="font-medium text-xs text-foreground block mb-1.5">
+                    Print ISSN <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="issn"
+                    value={formData.issn}
+                    onChange={handleChange}
+                    placeholder={t("admin.eg15493636")}
+                    className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary ${
+                      errors.issn ? 'border-destructive' : 'border-border'
+                    }`}
+                  />
+                  {errors.issn && <p className="text-destructive text-xs mt-1">{errors.issn}</p>}
+                </div>
+                <div>
+                  <label className="font-medium text-xs text-foreground block mb-1.5">
+                    Online ISSN
+                  </label>
+                  <input
+                    type="text"
+                    name="onlineIssn"
+                    value={formData.onlineIssn}
+                    onChange={handleChange}
+                    placeholder={t("admin.eg1937478x")}
+                    className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+                  />
+                </div>
+              </div>
 
               {/* Aim & Scope */}
-              <Form.Group className="mb-0">
-                <Form.Label className="fw-medium small text-main">Aim and Scope</Form.Label>
-                <Form.Control as="textarea" rows={6} name="aimScope" value={formData.aimScope} onChange={handleChange} placeholder={t("admin.describeTheEditorialAimsScopes")} />
-              </Form.Group>
+              <div>
+                <label className="font-medium text-xs text-foreground block mb-1.5">
+                  Aim and Scope
+                </label>
+                <textarea
+                  rows={6}
+                  name="aimScope"
+                  value={formData.aimScope}
+                  onChange={handleChange}
+                  placeholder={t("admin.describeTheEditorialAimsScopes")}
+                  className="w-full p-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary resize-y"
+                />
+              </div>
             </Card>
-          </Col>
+          </div>
 
           {/* Right Column */}
-          <Col xs={12} lg={4}>
-            <div className="d-flex flex-column gap-4">
-              {/* Visibility Card */}
-              <Card className="border p-4 shadow-none bg-white rounded-3">
-                <h5 className="font-display fw-bold text-main border-bottom pb-2.5 mb-3">
-                  Visibility
-                </h5>
-                <div className="d-flex align-items-center justify-content-between py-2">
-                  <div>
-                    <div className="fw-bold text-main small mb-0.5">Publicly Listed</div>
-                    <small className="text-muted-custom">Visible in main index</small>
-                  </div>
-                  <Form.Check type="switch" id="visibility-switch" className="admin-toggle-switch" checked={formData.visibility === 'Public'} onChange={handleToggleVisibility} style={{
-                  fontSize: '16px',
-                  cursor: 'pointer'
-                }} />
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            {/* Visibility Card */}
+            <Card className="p-6 bg-surface border border-border rounded-xl shadow-2xs">
+              <h5 className="font-display font-bold text-foreground border-b border-border pb-3 mb-3 text-base">
+                Visibility
+              </h5>
+              <div className="flex items-center justify-between py-2">
+                <div>
+                  <div className="font-bold text-foreground text-sm mb-0.5">Publicly Listed</div>
+                  <small className="text-muted-foreground text-xs">Visible in main index</small>
                 </div>
-              </Card>
+                <input
+                  type="checkbox"
+                  id="visibility-switch"
+                  checked={formData.visibility === 'Public'}
+                  onChange={handleToggleVisibility}
+                  className="rounded border-border text-primary focus:ring-0 cursor-pointer size-4"
+                />
+              </div>
+            </Card>
 
-              {/* Editorial Board Card */}
-              <Card className="border p-4 shadow-none bg-white rounded-3">
-                <h5 className="font-display fw-bold text-main border-bottom pb-2.5 mb-4">
-                  Editorial Board
-                </h5>
+            {/* Editorial Board Card */}
+            <Card className="p-6 bg-surface border border-border rounded-xl shadow-2xs">
+              <h5 className="font-display font-bold text-foreground border-b border-border pb-3 mb-4 text-base">
+                Editorial Board
+              </h5>
 
-                {/* Publisher Select Dropdown */}
-                <Form.Group className="mb-4">
-                  <Form.Label className="fw-medium small text-main">{t("admin.nhaXuatBanPublisher")}<span className="text-danger">*</span></Form.Label>
-                  <Form.Select name="publisher" value={formData.publisher} onChange={handleChange} isInvalid={!!errors.publisher} style={{
-                  cursor: 'pointer'
-                }}>
-                    {loadingDeps ? <option>{t("admin.dangTaiDanhSachNhaXuatBan")}</option> : publishers.length === 0 ? <option value="">{t("admin.khongCoNhaXuatBanNao")}</option> : publishers.map(pub => <option key={pub.publisher_id || pub.id} value={pub.publisher_id || pub.id}>
-                          {pub.display_name}
-                        </option>)}
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">{errors.publisher}</Form.Control.Feedback>
-                </Form.Group>
+              {/* Publisher Select Dropdown */}
+              <div className="mb-4">
+                <label className="font-medium text-xs text-foreground block mb-1.5">
+                  {t("admin.nhaXuatBanPublisher")}<span className="text-destructive">*</span>
+                </label>
+                <select
+                  name="publisher"
+                  value={formData.publisher}
+                  onChange={handleChange}
+                  className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer ${
+                    errors.publisher ? 'border-destructive' : 'border-border'
+                  }`}
+                >
+                  {loadingDeps ? (
+                    <option>{t("admin.dangTaiDanhSachNhaXuatBan")}</option>
+                  ) : publishers.length === 0 ? (
+                    <option value="">{t("admin.khongCoNhaXuatBanNao")}</option>
+                  ) : (
+                    publishers.map(pub => (
+                      <option key={pub.publisher_id || pub.id} value={pub.publisher_id || pub.id}>
+                        {pub.display_name}
+                      </option>
+                    ))
+                  )}
+                </select>
+                {errors.publisher && <p className="text-destructive text-xs mt-1">{errors.publisher}</p>}
+              </div>
 
-                {/* Category Selector */}
-                <Form.Group className="mb-4">
-                  <Form.Label className="fw-medium small text-main">Broad Category <span className="text-danger">*</span></Form.Label>
-                  <Form.Select name="subjectCategory" value={formData.subjectCategory} onChange={handleChange} isInvalid={!!errors.subjectCategory} style={{
-                  cursor: 'pointer'
-                }}>
-                    <option value="">-- Choose category --</option>
-                    {Array.from(new Map(subjectCategories.map(cat => [cat.display_name || cat.name, cat])).values()).map(cat => <option key={cat.subject_category_id || cat.id || cat.display_name} value={cat.display_name || cat.name}>
-                        {cat.display_name || cat.name}
-                      </option>)}
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">{errors.subjectCategory}</Form.Control.Feedback>
-                </Form.Group>
+              {/* Category Selector */}
+              <div className="mb-4">
+                <label className="font-medium text-xs text-foreground block mb-1.5">
+                  Broad Category <span className="text-destructive">*</span>
+                </label>
+                <select
+                  name="subjectCategory"
+                  value={formData.subjectCategory}
+                  onChange={handleChange}
+                  className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer ${
+                    errors.subjectCategory ? 'border-destructive' : 'border-border'
+                  }`}
+                >
+                  <option value="">-- Choose category --</option>
+                  {Array.from(new Map(subjectCategories.map(cat => [cat.display_name || cat.name, cat])).values()).map(cat => (
+                    <option key={cat.subject_category_id || cat.id || cat.display_name} value={cat.display_name || cat.name}>
+                      {cat.display_name || cat.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.subjectCategory && <p className="text-destructive text-xs mt-1">{errors.subjectCategory}</p>}
+              </div>
 
-                {/* Specific Research Area */}
-                <Form.Group className="mb-0">
-                  <Form.Label className="fw-medium small text-main">Specific Research Area <span className="text-danger">*</span></Form.Label>
-                  <Form.Select name="subjectArea" value={formData.subjectArea} onChange={handleChange} isInvalid={!!errors.subjectArea} style={{
-                  cursor: 'pointer'
-                }}>
-                    <option value="">-- Choose area --</option>
-                    {Array.from(new Map(subjectAreas.map(area => [area.display_name || area.name, area])).values()).map(area => <option key={area.subject_area_id || area.id || area.display_name} value={area.display_name || area.name}>
-                        {area.display_name || area.name}
-                      </option>)}
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">{errors.subjectArea}</Form.Control.Feedback>
-                </Form.Group>
-              </Card>
-            </div>
-          </Col>
-        </Row>
+              {/* Specific Research Area */}
+              <div>
+                <label className="font-medium text-xs text-foreground block mb-1.5">
+                  Specific Research Area <span className="text-destructive">*</span>
+                </label>
+                <select
+                  name="subjectArea"
+                  value={formData.subjectArea}
+                  onChange={handleChange}
+                  className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer ${
+                    errors.subjectArea ? 'border-destructive' : 'border-border'
+                  }`}
+                >
+                  <option value="">-- Choose area --</option>
+                  {Array.from(new Map(subjectAreas.map(area => [area.display_name || area.name, area])).values()).map(area => (
+                    <option key={area.subject_area_id || area.id || area.display_name} value={area.display_name || area.name}>
+                      {area.display_name || area.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.subjectArea && <p className="text-destructive text-xs mt-1">{errors.subjectArea}</p>}
+              </div>
+            </Card>
+          </div>
+        </div>
 
         {/* Form Actions Footer */}
-        <div className="d-flex justify-content-end gap-3 mt-4 pt-3 border-top" style={{
-        borderColor: 'var(--border)'
-      }}>
-          <Button type="button" variant="outline" className="py-2 px-4" onClick={() => navigate(`${basePath}/journals`)}>
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
+          <Button type="button" variant="outline" className="py-2 px-5" onClick={() => navigate(`${basePath}/journals`)}>
             Cancel Changes
           </Button>
-          <Button type="submit" className="py-2 px-4">
+          <Button type="submit" className="py-2 px-5">
             Update Journal
           </Button>
         </div>
-      </Form>
+      </form>
     </div>
   );
 }

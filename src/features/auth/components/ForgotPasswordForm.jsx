@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState } from 'react';
-import { Form } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import InputField from '../../../shared/components/InputField';
 import Icon from '../../../shared/components/Icon';
@@ -40,7 +39,7 @@ export default function ForgotPasswordForm({
     }
     onSubmit(email.trim());
   };
-  return <Form onSubmit={handleSubmit} noValidate>
+  return <form onSubmit={handleSubmit} noValidate>
       {/* Server API Error Banner */}
       <FormErrorMessage message={apiError} />
 
@@ -62,5 +61,5 @@ export default function ForgotPasswordForm({
           <span>{t("auth.quayLaiDangNhap")}</span>
         </Link>
       </div>
-    </Form>;
+    </form>;
 }

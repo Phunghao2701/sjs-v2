@@ -424,21 +424,18 @@
 }
 
 .insight-accent-growth {
-  border-left: 3px solid #0071BC;
 }
 .insight-accent-growth .insight-icon-container {
   color: #0071BC;
 }
 
 .insight-accent-warning {
-  border-left: 3px solid #1f2937;
 }
 .insight-accent-warning .insight-icon-container {
   color: #1f2937;
 }
 
 .insight-accent-innovation {
-  border-left: 3px solid #64748b;
 }
 .insight-accent-innovation .insight-icon-container {
   color: #64748b;

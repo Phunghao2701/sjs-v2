@@ -6,7 +6,8 @@ import { useTranslation } from "react-i18next";
 *
 * File: features/article/components/KeywordTopicCard.jsx
 */
-import { Card, Badge } from 'react-bootstrap';
+import { Card } from '../../../shared/ui/card';
+import { Badge } from '../../../shared/ui/badge';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { normalizeKeywords } from '../utils/articleFormatters';

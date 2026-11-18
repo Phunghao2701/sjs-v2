@@ -4,19 +4,16 @@
  * File: features\landing\components\HowToUse.jsx
  */
 import { useTranslation } from 'react-i18next';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 
 /**
  * Reusable StepItem component
  */
 function StepItem({ number, title, description }) {
   return (
-    <div className="d-flex flex-column align-items-center text-center px-3 position-relative z-3 group">
+    <div className="flex flex-col items-center text-center px-3 relative z-10 group">
       {/* Circle Number Badge */}
       <div 
-        className="d-flex align-items-center justify-content-center text-white font-display mb-4"
+        className="flex items-center justify-center text-white font-display mb-4"
         style={{
           width: '56px',
           height: '56px',
@@ -60,15 +57,15 @@ export default function HowToUse() {
   return (
     <section 
       id="how-to-use" 
-      className="py-5"
+      className="py-12"
       style={{ backgroundColor: 'var(--bg-section)', borderTop: '1px solid var(--border)' }}
     >
-      <Container className="py-5 position-relative">
+      <div className="container mx-auto px-4 py-12 relative">
         
         {/* Section Header */}
-        <div className="text-center mb-5 reveal-on-scroll">
+        <div className="text-center mb-12 reveal-on-scroll">
           <div 
-            className="d-inline-flex align-items-center gap-2 mb-2 text-uppercase font-bold tracking-wider" 
+            className="inline-flex items-center gap-2 mb-2 uppercase font-bold tracking-wider" 
             style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: 700, letterSpacing: '0.1em' }}
           >
             <span style={{ width: '24px', height: '1px', backgroundColor: 'var(--primary)' }} />
@@ -89,10 +86,10 @@ export default function HowToUse() {
         </div>
 
         {/* Steps container */}
-        <div className="position-relative">
+        <div className="relative">
           {/* Horizontal dotted connector line (hidden on mobile, visible on desktop) */}
           <div 
-            className="position-absolute d-none d-lg-block w-75 pointer-events-none"
+            className="absolute hidden lg:block w-3/4 pointer-events-none"
             style={{
               top: '28px',
               left: '12.5%',
@@ -103,20 +100,20 @@ export default function HowToUse() {
           />
           
           {/* Steps layout grid */}
-          <Row className="gy-5 gy-lg-0 justify-content-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-center">
             {steps.map((step, idx) => (
-              <Col xs={12} sm={6} lg={3} key={step.number} className={`reveal-scale delay-${(idx + 1) * 100}`}>
+              <div key={step.number} className={`reveal-scale delay-${(idx + 1) * 100}`}>
                 <StepItem
                   number={step.number}
                   title={t(step.titleKey)}
                   description={t(step.descKey)}
                 />
-              </Col>
+              </div>
             ))}
-          </Row>
+          </div>
         </div>
 
-      </Container>
+      </div>
     </section>
   );
 }

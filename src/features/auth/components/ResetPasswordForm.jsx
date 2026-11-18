@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState } from 'react';
-import { Form } from 'react-bootstrap';
 import PasswordInput from './PasswordInput';
 import SubmitButton from './SubmitButton';
 import FormErrorMessage from './FormErrorMessage';
@@ -68,7 +67,7 @@ export default function ResetPasswordForm({
     if (!newPassValid || !confirmPassValid) return;
     onSubmit(formData.new_password);
   };
-  return <Form onSubmit={handleSubmit} noValidate>
+  return <form onSubmit={handleSubmit} noValidate>
       {/* Server API Error Banner */}
       <FormErrorMessage message={apiError} />
 
@@ -82,5 +81,5 @@ export default function ResetPasswordForm({
       <div className="mt-4">
         <SubmitButton isLoading={isLoading} loadingText={t("auth.dangCapNhat")} label={t("auth.capNhatMatKhau")} />
       </div>
-    </Form>;
+    </form>;
 }

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 *
 * File: features\article\components\AuthorsCard.jsx
 */
-import { Card } from 'react-bootstrap';
+import { Card } from '../../../shared/ui/card';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { getInitials, normalizeAuthors } from '../utils/articleFormatters';

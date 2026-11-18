@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { useState } from 'react';
-import { Modal, Button, Form, ListGroup } from 'react-bootstrap';
+import { Modal } from '../../../shared/ui/modal';
+import { Button } from '../../../shared/ui/button';
+import { Input } from '../../../shared/ui/input';
 import { Icon } from '@iconify/react';
 import { useJournalManagement } from '../../hooks/useJournalManagement';
 
@@ -11,9 +13,7 @@ export default function SwitchJournalModal({
   show,
   handleClose
 }) {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const {
     journals,
     currentJournal,
@@ -23,44 +23,60 @@ export default function SwitchJournalModal({
 
   // Thực hiện bộ lọc tìm kiếm tạp chí nhanh ngay trên Modal
   const matchedJournals = journals.filter(j => (j.title || j.display_name || '').toLowerCase().includes(searchTerm.toLowerCase()) || (j.issn || '').includes(searchTerm));
-  return <Modal show={show} onHide={handleClose} centered className="text-main">
-      <Modal.Header closeButton className="border-bottom-0 pb-0">
-        <Modal.Title className="font-display fw-bold h5 text-main">{t("journal.chuyenDoiTapChiQuanLy")}</Modal.Title>
+
+  return (
+    <Modal show={show} onHide={handleClose} centered className="text-foreground">
+      <Modal.Header closeButton className="border-b-0 pb-0">
+        <Modal.Title className="font-display font-bold text-lg text-foreground">{t("journal.chuyenDoiTapChiQuanLy")}</Modal.Title>
       </Modal.Header>
       <Modal.Body className="py-3">
         {/* Ô nhập từ khóa lọc nhanh */}
-        <Form.Group className="mb-3">
-          <Form.Control type="text" placeholder={t("journal.timTheoTenTapChiHoacMaIssn")} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} style={{
-          backgroundColor: 'var(--bg-chip)',
-          borderColor: 'var(--border)'
-        }} />
-        </Form.Group>
+        <div className="mb-3">
+          <Input 
+            type="text" 
+            placeholder={t("journal.timTheoTenTapChiHoacMaIssn")} 
+            value={searchTerm} 
+            onChange={e => setSearchTerm(e.target.value)} 
+          />
+        </div>
 
         {/* Danh sách kết quả hiển thị */}
-        <ListGroup className="overflow-y-auto" style={{
-        maxHeight: '280px'
-      }}>
+        <div className="overflow-y-auto max-h-[280px] divide-y divide-border border border-border rounded-lg">
           {matchedJournals.map(j => {
-          const isCurrent = j.id === currentJournal?.id;
-          return <ListGroup.Item key={j.id} action disabled={isCurrent} // Khóa bấm nếu chính là tạp chí đang mở sẵn rồi
-          onClick={() => {
-            setCurrentJournal(j.id);
-            setSearchTerm('');
-            handleClose();
-          }} className="d-flex justify-content-between align-items-center py-2.5 text-start">
-                <div className="text-truncate pe-2">
-                  <div className="fw-semibold text-main text-truncate">{j.title}</div>
-                  <small className="text-muted-custom font-monospace">ISSN: {j.issn}</small>
+            const isCurrent = j.id === currentJournal?.id;
+            return (
+              <button
+                key={j.id}
+                type="button"
+                disabled={isCurrent}
+                onClick={() => {
+                  setCurrentJournal(j.id);
+                  setSearchTerm('');
+                  handleClose();
+                }}
+                className={`w-full flex items-center justify-between p-3 text-left transition-colors ${
+                  isCurrent 
+                    ? 'bg-muted/40 cursor-default opacity-80' 
+                    : 'hover:bg-muted/50 cursor-pointer'
+                }`}
+              >
+                <div className="truncate pr-2">
+                  <div className="font-semibold text-foreground truncate text-sm">{j.title}</div>
+                  <small className="text-muted-foreground font-mono text-xs">ISSN: {j.issn}</small>
                 </div>
-                {isCurrent && <span className="badge bg-dark-solid text-white text-xs py-1 px-1.5 rounded d-flex align-items-center gap-0.5 flex-shrink-0">
-                    <Icon icon="lucide:check" width="10" /> Active
-                  </span>}
-              </ListGroup.Item>;
-        })}
-        </ListGroup>
+                {isCurrent && (
+                  <span className="bg-primary text-primary-foreground text-xs py-1 px-2 rounded-md flex items-center gap-1 shrink-0">
+                    <Icon icon="lucide:check" width="12" /> Active
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </Modal.Body>
-      <Modal.Footer className="border-top-0 pt-0">
-        <Button variant="light" size="sm" onClick={handleClose} className="btn-custom-sm text-main">{t("journal.dongLai")}</Button>
+      <Modal.Footer className="border-t-0 pt-0">
+        <Button variant="outline" size="sm" onClick={handleClose}>{t("journal.dongLai")}</Button>
       </Modal.Footer>
-    </Modal>;
+    </Modal>
+  );
 }

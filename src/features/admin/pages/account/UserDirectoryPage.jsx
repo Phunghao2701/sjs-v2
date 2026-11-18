@@ -1,12 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from 'react';
-import { Row, Col, Card, ProgressBar } from 'react-bootstrap';
 import Pagination from '../../../../shared/components/Pagination';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../../../../shared/components/Icon';
 import { Button } from '../../../../shared/ui/button';
 import { Alert } from '../../../../shared/ui/alert';
 import { PageHeader } from '../../../../shared/ui/page-layout';
+import { Card } from '../../../../shared/ui/card';
 import UserTable from '../../components/account/UserTable';
 import UserFilterBar from '../../components/account/UserFilterBar';
 import { getAdminUsers } from '../../api/adminUsers.api';
@@ -60,59 +60,86 @@ const normalizeUser = (user = {}) => {
   };
 };
 
+/**
+ * UserDirectoryPage Component
+ * Admin user directory page with API integration, filters, search, and pagination.
+ */
 export default function UserDirectoryPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const [search, setSearch] = useState('');
-  const [selectedRole, setSelectedRole] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [totalItems, setTotalItems] = useState(0);
+
+  const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [selectedRole, setSelectedRole] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    let isMounted = true;
-    const fetchUsers = async () => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [search]);
+
+  useEffect(() => {
+    let ignore = false;
+
+    const fetchUsersData = async () => {
+      setLoading(true);
+      setError('');
       try {
-        setLoading(true);
-        setError('');
-        const response = await getAdminUsers({
+        const params = {
           page: currentPage,
           limit: ITEMS_PER_PAGE,
-          search: search || undefined,
-          role: selectedRole === 'all' ? undefined : selectedRole,
-          status: selectedStatus === 'all' ? undefined : selectedStatus.toUpperCase(),
-          sortBy: 'email',
-          sortOrder: 'asc',
-        });
-        const payload = response.data?.data;
+        };
+
+        if (debouncedSearch.trim()) {
+          params.q = debouncedSearch.trim();
+        }
+        if (selectedRole !== 'all') {
+          params.role = selectedRole.toUpperCase();
+        }
+        if (selectedStatus !== 'all') {
+          params.status = selectedStatus.toUpperCase();
+        }
+
+        const response = await getAdminUsers(params);
+        if (ignore) return;
+
+        const payload = response.data?.data || response.data || {};
         const rawUsers = extractUsers(payload);
-        if (!isMounted) return;
-        setUsers(rawUsers.map(normalizeUser));
-        setTotalItems(extractTotal(response.data, rawUsers.length));
-      } catch (apiError) {
-        if (!isMounted) return;
+        const normalized = rawUsers.map(normalizeUser);
+        const total = extractTotal(payload, normalized.length);
+
+        setUsers(normalized);
+        setTotalItems(total);
+      } catch (err) {
+        if (ignore) return;
         setUsers([]);
         setTotalItems(0);
-        setError(getApiErrorMessage(apiError, t));
+        setError(getApiErrorMessage(err, t));
       } finally {
-        if (isMounted) setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
     };
 
-    fetchUsers();
+    fetchUsersData();
+
     return () => {
-      isMounted = false;
+      ignore = true;
     };
-  }, [currentPage, search, selectedRole, selectedStatus, t]);
+  }, [currentPage, debouncedSearch, selectedRole, selectedStatus, t]);
 
   const handleSearchChange = (value) => {
     setSearch(value);
-    setCurrentPage(1);
   };
 
   const handleRoleChange = (role) => {
@@ -125,15 +152,15 @@ export default function UserDirectoryPage() {
     setCurrentPage(1);
   };
 
-  const handlePageChange = (newPage) => {
-    setCurrentPage(newPage);
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   const activeUsersCount = users.filter((u) => u.status === 'Active').length;
   const activePercentage = users.length > 0 ? Math.round((activeUsersCount / users.length) * 100) : 0;
 
   return (
-    <div className="d-flex flex-column gap-4 text-start">
+    <div className="flex flex-col gap-4 text-left">
       <PageHeader
         breadcrumbs={[
           { label: 'Platform Directory' },
@@ -182,58 +209,51 @@ export default function UserDirectoryPage() {
         entityName="users"
       />
 
-      <Row className="g-3 mt-1">
-        <Col xs={12} md={6}>
-          <Card className="admin-card h-100">
-            <Card.Body className="p-4 d-flex flex-column justify-content-between">
-              <div>
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                  <span className="text-muted-custom small fw-semibold">Account State Ratio</span>
-                  <span className="badge bg-light text-main border text-xs">{activePercentage}% Active</span>
-                </div>
-                <h4 className="font-display fw-bold text-main mb-1 text-base">User Activity Distribution</h4>
-                <p className="text-muted-custom text-xs mb-3">
-                  Ratio of active accounts versus invited or inactive participants currently loaded in the directory.
-                </p>
-              </div>
-              <div>
-                <ProgressBar
-                  now={activePercentage}
-                  style={{ height: '6px' }}
-                  className="mb-2 bg-light"
-                />
-                <div className="d-flex justify-content-between text-xs text-muted-custom">
-                  <span>Active: {activeUsersCount}</span>
-                  <span>Loaded: {users.length}</span>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+        <Card className="admin-card p-4 flex flex-col justify-between h-full bg-surface border border-border shadow-2xs">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-muted-foreground text-xs font-semibold">Account State Ratio</span>
+              <span className="px-2 py-0.5 rounded text-xs font-semibold bg-muted text-foreground border border-border">{activePercentage}% Active</span>
+            </div>
+            <h4 className="font-display font-bold text-foreground mb-1 text-base">User Activity Distribution</h4>
+            <p className="text-muted-foreground text-xs mb-3">
+              Ratio of active accounts versus invited or inactive participants currently loaded in the directory.
+            </p>
+          </div>
+          <div>
+            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden mb-2">
+              <div
+                className="bg-primary h-full transition-all duration-300"
+                style={{ width: `${activePercentage}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Active: {activeUsersCount}</span>
+              <span>Loaded: {users.length}</span>
+            </div>
+          </div>
+        </Card>
 
-        <Col xs={12} md={6}>
-          <Card className="admin-card h-100">
-            <Card.Body className="p-4 d-flex flex-column justify-content-between">
-              <div>
-                <div className="d-flex align-items-center justify-content-between mb-2">
-                  <span className="text-muted-custom small fw-semibold">Access Governance</span>
-                  <span className="badge bg-light text-main border text-xs">Security Policy</span>
-                </div>
-                <h4 className="font-display fw-bold text-main mb-1 text-base">Role Privileges</h4>
-                <p className="text-muted-custom text-xs mb-0">
-                  Role assignments determine workspace abilities, API export limits, and project management scope.
-                </p>
-              </div>
-              <div className="d-flex gap-2 flex-wrap mt-3">
-                <span className="badge bg-light text-main border text-xs">Researcher</span>
-                <span className="badge bg-light text-main border text-xs">Lecturer</span>
-                <span className="badge bg-light text-main border text-xs">Student</span>
-                <span className="badge bg-light text-main border text-xs">Administrator</span>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+        <Card className="admin-card p-4 flex flex-col justify-between h-full bg-surface border border-border shadow-2xs">
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-muted-foreground text-xs font-semibold">Access Governance</span>
+              <span className="px-2 py-0.5 rounded text-xs font-semibold bg-muted text-foreground border border-border">Security Policy</span>
+            </div>
+            <h4 className="font-display font-bold text-foreground mb-1 text-base">Role Privileges</h4>
+            <p className="text-muted-foreground text-xs mb-0">
+              Role assignments determine workspace abilities, API export limits, and project management scope.
+            </p>
+          </div>
+          <div className="flex gap-2 flex-wrap mt-3">
+            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-muted text-foreground border border-border">Researcher</span>
+            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-muted text-foreground border border-border">Lecturer</span>
+            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-muted text-foreground border border-border">Student</span>
+            <span className="px-2 py-0.5 rounded text-xs font-semibold bg-muted text-foreground border border-border">Administrator</span>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

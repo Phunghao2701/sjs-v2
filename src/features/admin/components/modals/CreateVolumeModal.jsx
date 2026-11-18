@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { useState } from 'react';
-import { Modal, Form, Row, Col } from 'react-bootstrap';
+import { Modal } from '../../../../shared/ui/modal';
 import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
 import { Button } from '../../../../shared/ui/button';
+import { Input } from '../../../../shared/ui/input';
 
 /**
  * Component CreateVolumeModal - Cửa sổ Modal bật lên để Admin tạo Tập (Volume) mới.
@@ -12,12 +13,8 @@ export default function CreateVolumeModal({
   show,
   handleClose
 }) {
-  const {
-    t
-  } = useTranslation();
-  const {
-    createVolume
-  } = useJournalManagement();
+  const { t } = useTranslation();
+  const { createVolume } = useJournalManagement();
 
   // Trạng thái quản lý dữ liệu nhập vào của Form
   const [formData, setFormData] = useState({
@@ -33,10 +30,7 @@ export default function CreateVolumeModal({
 
   /** Xử lý cập nhật text liên tục khi gõ */
   const handleChange = e => {
-    const {
-      name,
-      value
-    } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -64,6 +58,7 @@ export default function CreateVolumeModal({
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   /** Xử lý lưu mảng dữ liệu cục bộ */
   const handleSubmit = e => {
     e.preventDefault();
@@ -88,74 +83,106 @@ export default function CreateVolumeModal({
     });
     handleClose();
   };
-  return <Modal show={show} onHide={handleClose} centered backdrop="static" className="text-main">
-      <Modal.Header closeButton className="border-bottom-0 pb-0">
-        <Modal.Title className="font-display fw-bold h5 text-main">Create New Volume</Modal.Title>
+
+  return (
+    <Modal show={show} onHide={handleClose} centered className="text-foreground">
+      <Modal.Header closeButton className="border-b-0 pb-0">
+        <Modal.Title className="font-display font-bold text-lg text-foreground">Create New Volume</Modal.Title>
       </Modal.Header>
 
-      <Form onSubmit={handleSubmit}>
-        <Modal.Body className="py-3 text-start">
-          
+      <form onSubmit={handleSubmit}>
+        <Modal.Body className="py-3 text-left space-y-3">
           {/* Row 1: Volume Number & Publication Year */}
-          <Row className="g-3 mb-3">
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">Volume Number <span className="text-danger">*</span></Form.Label>
-                <Form.Control type="text" name="volumeNumber" value={formData.volumeNumber} onChange={handleChange} isInvalid={!!errors.volumeNumber} placeholder={t("admin.egVolume15")} />
-                <Form.Control.Feedback type="invalid">{errors.volumeNumber}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                Volume Number <span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="text"
+                name="volumeNumber"
+                value={formData.volumeNumber}
+                onChange={handleChange}
+                invalid={!!errors.volumeNumber}
+                placeholder={t("admin.egVolume15")}
+              />
+              {errors.volumeNumber && <p className="text-destructive text-xs mt-1">{errors.volumeNumber}</p>}
+            </div>
 
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">Publication Year <span className="text-danger">*</span></Form.Label>
-                <Form.Select name="publicationYear" value={formData.publicationYear} onChange={handleChange} isInvalid={!!errors.publicationYear} style={{
-                cursor: 'pointer'
-              }}>
-                  <option value="2026">2026</option>
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                  <option value="2023">2023</option>
-                  <option value="2022">2022</option>
-                  <option value="2021">2021</option>
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">{errors.publicationYear}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                Publication Year <span className="text-destructive">*</span>
+              </label>
+              <select
+                name="publicationYear"
+                value={formData.publicationYear}
+                onChange={handleChange}
+                className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer ${
+                  errors.publicationYear ? 'border-destructive' : 'border-border'
+                }`}
+              >
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+              </select>
+              {errors.publicationYear && <p className="text-destructive text-xs mt-1">{errors.publicationYear}</p>}
+            </div>
+          </div>
 
           {/* Row 2: Frequency & Total Expected Issues */}
-          <Row className="g-3 mb-3">
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">Frequency</Form.Label>
-                <Form.Select name="frequency" value={formData.frequency} onChange={handleChange} style={{
-                cursor: 'pointer'
-              }}>
-                  <option value="Quarterly">Quarterly</option>
-                  <option value="Bi-annual">Bi-annual</option>
-                  <option value="Annual">Annual</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                Frequency
+              </label>
+              <select
+                name="frequency"
+                value={formData.frequency}
+                onChange={handleChange}
+                className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer"
+              >
+                <option value="Quarterly">Quarterly</option>
+                <option value="Bi-annual">Bi-annual</option>
+                <option value="Annual">Annual</option>
+              </select>
+            </div>
 
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">Total Expected Issues <span className="text-danger">*</span></Form.Label>
-                <Form.Control type="number" name="totalExpectedIssues" value={formData.totalExpectedIssues} onChange={handleChange} isInvalid={!!errors.totalExpectedIssues} placeholder={t("admin.eg4")} />
-                <Form.Control.Feedback type="invalid">{errors.totalExpectedIssues}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                Total Expected Issues <span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="number"
+                name="totalExpectedIssues"
+                value={formData.totalExpectedIssues}
+                onChange={handleChange}
+                invalid={!!errors.totalExpectedIssues}
+                placeholder={t("admin.eg4")}
+              />
+              {errors.totalExpectedIssues && <p className="text-destructive text-xs mt-1">{errors.totalExpectedIssues}</p>}
+            </div>
+          </div>
 
           {/* Row 3: Description / Internal Notes */}
-          <Form.Group className="mb-0">
-            <Form.Label className="fw-medium small text-main">Description / Internal Notes</Form.Label>
-            <Form.Control as="textarea" rows={4} name="description" value={formData.description} onChange={handleChange} placeholder={t("admin.enterAdministrativeNotesOrVolu")} />
-          </Form.Group>
-
+          <div>
+            <label className="font-medium text-xs text-foreground block mb-1">
+              Description / Internal Notes
+            </label>
+            <textarea
+              rows={4}
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder={t("admin.enterAdministrativeNotesOrVolu")}
+              className="w-full p-3 rounded-lg border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+            />
+          </div>
         </Modal.Body>
-        <Modal.Footer className="border-top-0 pt-0">
+
+        <Modal.Footer className="border-t-0 pt-0">
           <Button variant="outline" size="sm" onClick={handleClose} className="px-3">
             Cancel
           </Button>
@@ -163,6 +190,7 @@ export default function CreateVolumeModal({
             Create Volume
           </Button>
         </Modal.Footer>
-      </Form>
-    </Modal>;
+      </form>
+    </Modal>
+  );
 }

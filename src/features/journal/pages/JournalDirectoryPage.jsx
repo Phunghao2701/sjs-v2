@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
-import { Container, Row } from "react-bootstrap";
+import { Container } from "../../../shared/ui/layout-grid";
 import { useJournalManagement } from "../hooks/useJournalManagement";
 import JournalFilterBar from "../components/JournalFilterBar";
 import JournalTableAdmin from "../components/JournalTableAdmin";
@@ -69,9 +69,9 @@ export default function JournalDirectoryPage() {
     <div className="glass-card p-0 border-0 shadow-none">
           <JournalTableAdmin journals={filteredJournals} page={page} limit={limit} />
         </div>) : (/* CHẾ ĐỘ XEM LƯỚI THẺ DÀNH CHO ADMIN */
-    <Row className="g-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {filteredJournals.map(j => <JournalCardAdmin key={j.id || j.journal_id} journal={j} />)}
-        </Row>)}
+        </div>)}
 
       {/* MODAL THÊM TẠP CHÍ MỚI DÀNH CHO ADMIN */}
       <AddJournalModal show={showAddModal} handleClose={() => setShowAddModal(false)} />

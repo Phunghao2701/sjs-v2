@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Dropdown } from 'react-bootstrap';
+import { Dropdown } from '../../../shared/ui/dropdown-menu';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { useCatalogSearch } from '../hooks/useCatalogSearch';
@@ -63,20 +63,8 @@ export default function CatalogSearchPage() {
     <PageContainer className="space-y-6">
       {/* 1. Standard Page Header */}
       <PageHeader
-        breadcrumbs={[
-          { label: 'Workspace', to: '/dashboard' },
-          { label: 'Journal Catalog' }
-        ]}
         title={t("catalog.danhMucTimKiem", "Journal Catalog & Search")}
         description={t("catalog.timKiemJournalLocTheoLinhVucXe", "Search international scientific journals, Scimago quartile rankings, and citation metrics.")}
-        badge={
-          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-1 text-xs text-muted-foreground shadow-2xs">
-            <span className="size-2 rounded-full bg-success" />
-            <span>Indexed Database:</span>
-            <strong className="text-foreground">{total ? Number(total).toLocaleString() : '270,000+'}</strong>
-            <span>journals</span>
-          </div>
-        }
       />
 
       {/* 2. Unified Container: Filter + Toolbar + Table + Pagination */}
@@ -131,7 +119,7 @@ export default function CatalogSearchPage() {
             <Dropdown.Toggle
               variant="light"
               id="sort-dropdown"
-              className="h-8 px-3 rounded-control border border-border bg-surface text-foreground text-xs font-medium flex items-center gap-1.5 shadow-2xs hover:border-primary/40"
+              className="h-8 px-3 rounded-control border border-border bg-surface text-foreground text-xs font-medium flex items-center gap-1.5 shadow-2xs"
             >
               <Icon icon="lucide:arrow-up-down" width="13" className="text-muted-foreground" />
               <span>

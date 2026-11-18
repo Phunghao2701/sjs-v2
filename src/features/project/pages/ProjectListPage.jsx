@@ -5,7 +5,7 @@ import ROUTES from '../../../app/routes/routePaths';
 import useProjects from '../hooks/useProjects';
 import ProjectCard from '../components/ProjectCard';
 import { Icon } from '@iconify/react';
-import { Modal } from 'react-bootstrap';
+import { Modal } from '../../../shared/ui/modal';
 import { Button } from '../../../shared/ui/button';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { StatePanel } from '../../../shared/ui/state-panel';

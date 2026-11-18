@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link, useParams } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import AuthLayout from '../../../app/layouts/AuthLayout';
 import AuthBanner from '../components/AuthBanner';
@@ -10,12 +10,15 @@ import { toast } from '../../../shared/utils/toast';
 import ROUTES from '../../../app/routes/routePaths';
 import { startHyperdatalabSso } from '../services/hyperdatalabSso';
 import { Alert } from '../../../shared/ui/alert';
+import { useAuthStore } from '../../../app/store/authStore';
+import { getAuthenticatedHomePath, getDefaultLang } from '../../../app/routes/languageRouting';
 const DASHBOARD_PAGE = ROUTES.DASHBOARD;
 export default function LoginPage() {
   const { t } = useTranslation();
 
   const navigate = useNavigate();
   const location = useLocation();
+  const { lang } = useParams();
   const {
     login,
   } = useAuth();
@@ -39,7 +42,11 @@ export default function LoginPage() {
     setError(null);
     try {
       await login(payload.email, payload.password, payload.remember_login);
-      navigate(from, {
+      const signedInUser = useAuthStore.getState().user;
+      const destination = signedInUser?.role === 'ADMINISTRATOR'
+        ? getAuthenticatedHomePath(signedInUser, lang || getDefaultLang())
+        : from;
+      navigate(destination, {
         replace: true
       });
     } catch (err) {

@@ -6,7 +6,6 @@ import { t } from "i18next";
  * File: features\topic\pages\TopicDetailPage.jsx
  */
 import { useEffect, useMemo, useState } from 'react';
-import { Row, Col } from 'react-bootstrap';
 import { StateCard } from '../../../shared/components/Card';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Icon } from '@iconify/react';
@@ -112,32 +111,18 @@ export default function TopicDetailPage() {
       <Header />
 
       <PageContainer className="topic-detail-shell">
-        <Breadcrumbs
-          items={[
-            { label: t("home"), to: "/" },
-            { label: t("topic.baiBao"), to: "/articles" },
-            { label: topic?.display_name || t("topic.chuDeNghienCuu") }
-          ]}
-          className="mb-4"
-        />
-
         <Card className="topic-detail-hero">
           <CardContent className="topic-detail-hero__body">
-            <Row className="g-5 align-items-center">
-              <Col lg={8}>
-                <div className="topic-detail-eyebrow">
-                  <Icon icon="solar:atom-bold-duotone" width="20" />
-                  <span>Research Topic</span>
-                </div>
-
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <div className="lg:col-span-8">
                 <h1 className="topic-detail-title text-base font-semibold">
                   {topic?.display_name || t("topic.dangTaiTopic")}
                 </h1>
 
                 <p className="topic-detail-description text-sm leading-relaxed">{t("topic.khamPhaCacBaiBaoThuocChuDeNayD")}</p>
-              </Col>
+              </div>
 
-              <Col lg={4}>
+              <div className="lg:col-span-4">
                 <div className="topic-detail-summary">
                   <div className="d-flex justify-content-between align-items-center mb-1">
                     <div className="topic-detail-summary__label text-xs">{t("topic.maTopic")}</div>
@@ -159,8 +144,8 @@ export default function TopicDetailPage() {
                     {t("topic.moBoLocBaiBao")}<Icon icon="lucide:arrow-right" width="18" />
                   </Button>
                 </div>
-              </Col>
-            </Row>
+              </div>
+            </div>
           </CardContent>
         </Card>
 

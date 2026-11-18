@@ -308,15 +308,8 @@ export default function useAuthors() {
           throw new Error(response.data?.message || 'Failed to fetch leaderboard');
         }
       } catch (err) {
-        let list = MOCK_LEADERBOARD.map((item, idx) => ({ ...item, final_rank: idx + 1 }));
-        const area = (leaderboardParams.subject_area || '').trim().toLowerCase();
-        if (area) list = list.filter(item => item.subject_area.toLowerCase().includes(area));
-        
-        const page = parseInt(leaderboardParams.page || '1', 10);
-        const limit = parseInt(leaderboardParams.limit || '10', 10);
-        const startIndex = (page - 1) * limit;
-        const total = list.length;
-        return { leaderboard: list.slice(startIndex, startIndex + limit), total, totalPages: Math.max(1, Math.ceil(total / limit)) };
+        console.error('Failed to fetch author leaderboard from API:', err);
+        return { leaderboard: [], total: 0, totalPages: 1 };
       }
     },
     enabled: !!leaderboardParams,

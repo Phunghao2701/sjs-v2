@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Modal } from "react-bootstrap";
+import { Modal } from "../../../shared/ui/modal";
 import { Icon } from "@iconify/react";
 import useAuth from "../../auth/hooks/useAuth";
 import { isAuthenticated as isAuthenticatedUtil } from "../../../shared/utils/auth";

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Card } from 'react-bootstrap';
+import { Card } from '../../../shared/ui/card';
 import { Icon } from '@iconify/react';
 import LatexText from '../../../shared/components/LatexText/LatexText';
 import { Skeleton } from '../../../shared/ui/skeleton';

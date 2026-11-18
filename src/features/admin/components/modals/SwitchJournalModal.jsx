@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from 'react';
-import { Modal, Form, ListGroup } from 'react-bootstrap';
+import { Modal } from '../../../../shared/ui/modal';
 import { Icon } from '@iconify/react';
 import { Button } from '../../../../shared/ui/button';
 import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
@@ -13,9 +13,7 @@ export default function SwitchJournalModal({
   show,
   handleClose
 }) {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const {
     journals,
     currentJournal,
@@ -40,76 +38,86 @@ export default function SwitchJournalModal({
       handleClose();
     }
   };
-  return <Modal show={show} onHide={handleClose} centered className="text-main">
-      <Modal.Header closeButton className="border-bottom-0 pb-0">
+
+  return (
+    <Modal show={show} onHide={handleClose} centered className="text-foreground">
+      <Modal.Header closeButton className="border-b-0 pb-0">
         <div>
-          <Modal.Title className="font-display fw-bold h4 text-main mb-1">Switch Journal</Modal.Title>
-          <small className="text-muted-custom">
+          <Modal.Title className="font-display font-bold text-xl text-foreground mb-1">Switch Journal</Modal.Title>
+          <small className="text-muted-foreground text-sm">
             Select which repository context you wish to manage.
           </small>
         </div>
       </Modal.Header>
       
-      <Modal.Body className="py-3 text-start">
+      <Modal.Body className="py-3 text-left">
         {/* Ô nhập từ khóa lọc nhanh */}
-        <Form.Group className="mb-3">
-          <div className="input-group">
-            <span className="input-group-text bg-light border-end-0">
-              <Icon icon="lucide:search" className="text-muted" width="16" />
+        <div className="mb-3">
+          <div className="relative flex items-center">
+            <span className="absolute left-3 text-muted-foreground pointer-events-none">
+              <Icon icon="lucide:search" width="16" />
             </span>
-            <Form.Control type="text" placeholder={t("admin.filterJournalsByNameOrIssn")} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="border-start-0" style={{
-            backgroundColor: '#ffffff',
-            borderColor: 'var(--border)'
-          }} />
+            <input
+              type="text"
+              placeholder={t("admin.filterJournalsByNameOrIssn")}
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full h-10 pl-9 pr-3 rounded-lg border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-0"
+            />
           </div>
-        </Form.Group>
+        </div>
 
         {/* Danh sách kết quả hiển thị */}
-        <ListGroup className="overflow-y-auto gap-2" style={{
-        maxHeight: '320px',
-        paddingRight: '4px'
-      }}>
+        <div className="overflow-y-auto max-h-[320px] flex flex-col gap-2 pr-1">
           {matchedJournals.map(j => {
-          const isCurrent = j.id === currentJournal?.id;
-          const isTempSelected = j.id === tempSelectedId;
-          return <ListGroup.Item key={j.id} onClick={() => setTempSelectedId(j.id)} className="admin-switch-journal-item rounded-3" style={{
-            border: isTempSelected ? '2px solid var(--primary)' : '1px solid var(--border)',
-            margin: isTempSelected ? '-1px' : '0',
-            backgroundColor: '#ffffff',
-            transition: 'all 0.15s ease',
-            cursor: 'pointer'
-          }}>
-                <div className="admin-switch-journal-item__main">
-                  <div className="admin-switch-journal-item__icon">
+            const isCurrent = j.id === currentJournal?.id;
+            const isTempSelected = j.id === tempSelectedId;
+            return (
+              <div
+                key={j.id}
+                onClick={() => setTempSelectedId(j.id)}
+                className={`admin-switch-journal-item rounded-lg p-3 flex items-center justify-between transition-colors cursor-pointer border ${
+                  isTempSelected ? 'border-primary ring-1 ring-primary bg-primary-subtle/10' : 'border-border bg-surface hover:bg-muted/30'
+                }`}
+              >
+                <div className="admin-switch-journal-item__main flex items-center gap-3">
+                  <div className="admin-switch-journal-item__icon size-9 rounded-lg bg-muted flex items-center justify-center shrink-0 text-muted-foreground">
                     <Icon icon="lucide:book" width="18" />
                   </div>
                   <div className="admin-switch-journal-item__content">
-                    <div className="admin-switch-journal-item__title-row">
-                      <span className="fw-bold text-main">{j.title}</span>
-                      {isCurrent && <span className="badge admin-status-badge admin-status-badge--warning text-uppercase text-xs font-semibold px-2 py-0.5 rounded-pill">
+                    <div className="admin-switch-journal-item__title-row flex items-center gap-2">
+                      <span className="font-bold text-foreground text-sm">{j.title}</span>
+                      {isCurrent && (
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300">
                           Current
-                        </span>}
+                        </span>
+                      )}
                     </div>
-                    <small className="text-muted-custom small d-block mt-0.5">
+                    <small className="text-muted-foreground text-xs block mt-0.5">
                       {j.subjectCategory || 'General Science'} • ISSN: {j.issn}
                     </small>
                   </div>
                 </div>
 
                 <div className="admin-switch-journal-item__side">
-                  <span className={`badge px-2 py-1.5 rounded-pill text-uppercase text-xs ${j.status === 'Active' ? 'admin-status-badge admin-status-badge--accent' : 'admin-status-badge admin-status-badge--muted'}`}>
+                  <span className={`px-2 py-1 rounded-full uppercase text-[10px] font-semibold ${
+                    j.status === 'Active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300' : 'bg-muted text-muted-foreground'
+                  }`}>
                     {j.status || 'Draft'}
                   </span>
                 </div>
-              </ListGroup.Item>;
-        })}
-          {matchedJournals.length === 0 && <div className="text-center py-4 text-muted-custom">
+              </div>
+            );
+          })}
+          {matchedJournals.length === 0 && (
+            <div className="text-center py-4 text-muted-foreground text-sm">
               No journals match your filter criteria.
-            </div>}
-        </ListGroup>
+            </div>
+          )}
+        </div>
       </Modal.Body>
 
-      <Modal.Footer className="border-top-0 pt-0 d-flex justify-content-end align-items-center gap-3">
+      <Modal.Footer className="border-t-0 pt-0 flex justify-end items-center gap-3">
         <Button variant="outline" size="sm" onClick={handleClose}>
           Cancel
         </Button>
@@ -117,5 +125,6 @@ export default function SwitchJournalModal({
           Select Journal
         </Button>
       </Modal.Footer>
-    </Modal>;
+    </Modal>
+  );
 }

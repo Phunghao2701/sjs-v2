@@ -72,17 +72,7 @@ export default function AuthorDetailPage() {
       <Header />
 
       <main className="ap-main-container">
-        {/* 1. BREADCRUMB */}
-        <Breadcrumbs
-          items={[
-            { label: "Trending System", to: "/" },
-            { label: "Tác giả", to: "/authors" },
-            { label: author.full_name }
-          ]}
-          className="mb-4"
-        />
-
-        {/* 2. RESEARCHER HERO */}
+        {/* RESEARCHER HERO */}
         <AuthorProfileHero author={author} metrics={metrics} />
 
         {/* 3. QUICK NAVIGATION (Sticky) */}

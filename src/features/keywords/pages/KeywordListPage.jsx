@@ -55,16 +55,6 @@ export default function KeywordListPage() {
 
       <PageContainer className="keyword-list-shell">
         <PageHeader
-          breadcrumbs={[
-            { label: t("home"), to: "/" },
-            { label: "Keywords" }
-          ]}
-          badge={
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-subtle text-primary text-xs font-semibold">
-              <Icon icon="lucide:tags" width="14" />
-              <span>Research Keywords</span>
-            </div>
-          }
           title={t("keywords.khamPhaKeywords")}
           description={t("keywords.timKiemCacTuKhoaNghienCuuVaMoN")}
           actions={

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from "react-i18next";
-import { Dropdown, Form } from 'react-bootstrap';
+import { Dropdown } from '../../../shared/ui/dropdown-menu';
 import { Icon } from '@iconify/react';
 import { Card } from '../../../shared/ui/card';
 import { Button } from '../../../shared/ui/button';
@@ -190,8 +190,8 @@ export default function FilterPanel({
           id={`catalog-filter-${config.id}`}
           className={`h-9 px-3 text-xs rounded-control border transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs whitespace-nowrap after:!hidden cursor-pointer ${
             config.selectedLabel
-              ? 'border-primary text-primary bg-primary-subtle font-semibold hover:bg-primary-subtle'
-              : 'border-border bg-surface text-foreground font-medium hover:bg-surface-muted'
+              ? 'border-primary text-primary bg-primary-subtle font-semibold'
+              : 'border-border bg-surface text-foreground font-medium'
           }`}
           disabled={config.disabled}
         >
@@ -325,8 +325,8 @@ export default function FilterPanel({
             id="catalog-more-filters"
             className={`h-9 px-3 text-xs rounded-control border transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs whitespace-nowrap after:!hidden cursor-pointer ${
               accessValue === 'open_access' || isOaDiamond
-                ? 'border-primary text-primary bg-primary-subtle font-semibold hover:bg-primary-subtle'
-                : 'border-border bg-surface text-foreground font-medium hover:bg-surface-muted'
+                ? 'border-primary text-primary bg-primary-subtle font-semibold'
+                : 'border-border bg-surface text-foreground font-medium'
             }`}
           >
             <Icon icon="lucide:sliders-horizontal" width="14" className="shrink-0" />
@@ -341,21 +341,21 @@ export default function FilterPanel({
             <div className="space-y-2.5">
               <label className="flex items-center justify-between gap-3 text-xs font-medium text-foreground cursor-pointer hover:bg-surface-muted/50 p-1.5 rounded-control">
                 <span>Only Open Access</span>
-                <Form.Check
-                  type="switch"
+                <input
+                  type="checkbox"
                   checked={accessValue === 'open_access'}
                   onChange={() => onAccessSelect(accessValue === 'open_access' ? 'all' : 'open_access')}
-                  className="m-0"
+                  className="size-4 rounded border-border text-primary accent-primary cursor-pointer"
                 />
               </label>
 
               <label className="flex items-center justify-between gap-3 text-xs font-medium text-foreground cursor-pointer hover:bg-surface-muted/50 p-1.5 rounded-control">
                 <span>Only OA Diamond</span>
-                <Form.Check
-                  type="switch"
+                <input
+                  type="checkbox"
                   checked={isOaDiamond}
                   onChange={() => onOaDiamondToggle && onOaDiamondToggle(!isOaDiamond)}
-                  className="m-0"
+                  className="size-4 rounded border-border text-primary accent-primary cursor-pointer"
                 />
               </label>
             </div>

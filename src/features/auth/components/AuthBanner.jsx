@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { Navbar } from 'react-bootstrap';
 import { useNavigate } from "react-router-dom";
 import Icon from '../../../shared/components/Icon';
 import Logo from '../../../shared/components/Logo';

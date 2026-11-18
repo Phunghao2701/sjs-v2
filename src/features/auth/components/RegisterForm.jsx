@@ -6,7 +6,6 @@ import { t } from "i18next";
  * File: features\auth\components\RegisterForm.jsx
  */
 import { useState } from 'react';
-import { Form, Row, Col } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import ROUTES from '../../../app/routes/routePaths';
 import InputField from '../../../shared/components/InputField';
@@ -17,6 +16,7 @@ import RoleSelect from './RoleSelect';
 import CheckboxField from './CheckboxField';
 import SubmitButton from './SubmitButton';
 import FormErrorMessage from './FormErrorMessage';
+
 export default function RegisterForm({
   onSubmit,
   isLoading,
@@ -30,12 +30,11 @@ export default function RegisterForm({
     password: '',
     date_of_birth: '',
     gender: true,
-    // Default to true (Nam)
     role: 'STUDENT',
-    // Default to STUDENT
     terms: false
   });
   const [errors, setErrors] = useState({});
+
   const validateField = (name, value) => {
     let errorMsg = '';
     switch (name) {
@@ -70,13 +69,13 @@ export default function RegisterForm({
           const selectedDate = new Date(value);
           const today = new Date();
           if (selectedDate > today) {
-            errorMsg = t("auth.ngaySinhKhongDuocTrongTuongLai");
+            errorMsg = t("auth.ngaySinhKhongHopLe");
           }
         }
         break;
       case 'terms':
         if (!value) {
-          errorMsg = t("auth.banPhaiDongYVoiDieuKhoanDeTiep");
+          errorMsg = t("auth.vuiLongDongYYeuCau");
         }
         break;
       default:
@@ -88,39 +87,30 @@ export default function RegisterForm({
     }));
     return !errorMsg;
   };
+
   const handleChange = e => {
-    const {
-      name,
-      value,
-      type,
-      checked
-    } = e.target;
+    const { name, value, type, checked } = e.target;
     const val = type === 'checkbox' ? checked : value;
     setFormData(prev => ({
       ...prev,
       [name]: val
     }));
 
-    // Clear error on change
     setErrors(prev => ({
       ...prev,
       [name]: ''
     }));
   };
+
   const handleBlur = e => {
-    const {
-      name,
-      value,
-      type,
-      checked
-    } = e.target;
+    const { name, value, type, checked } = e.target;
     const val = type === 'checkbox' ? checked : value;
     validateField(name, val);
   };
+
   const handleSubmit = e => {
     e.preventDefault();
 
-    // Validate all fields
     const fieldsToValidate = ['last_name', 'first_name', 'email', 'password', 'date_of_birth', 'terms'];
     let isValid = true;
     fieldsToValidate.forEach(field => {
@@ -131,7 +121,6 @@ export default function RegisterForm({
     });
     if (!isValid) return;
 
-    // Build payload for API (exclude terms)
     const payload = {
       ...formData
     };
@@ -142,29 +131,34 @@ export default function RegisterForm({
       first_name: payload.first_name.trim()
     });
   };
-  const termsLabel = <span className="d-inline-flex flex-wrap align-items-center gap-1">{t("auth.toiDongYVoi")}{' '}
-      <a href="#" className="text-decoration-none" style={{
-      color: 'var(--primary)',
-      fontWeight: 500
-    }} onClick={e => e.preventDefault()}>{t("auth.dieuKhoanDichVu")}</a>{' '}{t("article.va")}{' '}
-      <a href="#" className="text-decoration-none" style={{
-      color: 'var(--primary)',
-      fontWeight: 500
-    }} onClick={e => e.preventDefault()}>{t("auth.chinhSachBaoMat")}</a>
-    </span>;
-  return <Form onSubmit={handleSubmit} noValidate>
+
+  const termsLabel = (
+    <span className="inline-flex flex-wrap items-center gap-1">
+      {t("auth.toiDongYVoi")}{' '}
+      <a href="#" className="text-primary hover:underline font-medium" onClick={e => e.preventDefault()}>
+        {t("auth.dieuKhoanDichVu")}
+      </a>{' '}
+      {t("article.va")}{' '}
+      <a href="#" className="text-primary hover:underline font-medium" onClick={e => e.preventDefault()}>
+        {t("auth.chinhSachBaoMat")}
+      </a>
+    </span>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} noValidate>
       {/* Server API Error Banner */}
       <FormErrorMessage message={apiError} />
 
-      {/* Row: Last Name & First Name (Stacked on mobile, side-by-side on tablet/desktop) */}
-      <Row className="g-3">
-        <Col xs={12} sm={6}>
+      {/* Row: Last Name & First Name */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
           <InputField label={t("auth.ho", "Last Name")} name="last_name" value={formData.last_name} onChange={handleChange} onBlur={handleBlur} placeholder={t("auth.nguyen")} error={errors.last_name} required disabled={isLoading} />
-        </Col>
-        <Col xs={12} sm={6}>
+        </div>
+        <div>
           <InputField label={t("auth.ten", "First Name")} name="first_name" value={formData.first_name} onChange={handleChange} onBlur={handleBlur} placeholder={t("auth.vanA")} error={errors.first_name} required disabled={isLoading} />
-        </Col>
-      </Row>
+        </div>
+      </div>
 
       {/* Email */}
       <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} onBlur={handleBlur} placeholder={t("auth.nameemailcom")} error={errors.email} icon="lucide:mail" required disabled={isLoading} />
@@ -172,15 +166,15 @@ export default function RegisterForm({
       {/* Password */}
       <PasswordInput label={t("auth.matKhau")} name="password" value={formData.password} onChange={handleChange} onBlur={handleBlur} placeholder={t("auth.toiThieu8KyTu")} error={errors.password} required disabled={isLoading} />
 
-      {/* Row: Date of Birth & Gender (Stacked on mobile, side-by-side on tablet/desktop) */}
-      <Row className="g-3">
-        <Col xs={12} sm={6}>
+      {/* Row: Date of Birth & Gender */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
           <DateInput label={t("auth.ngaySinh")} name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} onBlur={handleBlur} error={errors.date_of_birth} required disabled={isLoading} />
-        </Col>
-        <Col xs={12} sm={6}>
+        </div>
+        <div>
           <GenderSelect label={t("auth.gioiTinh")} name="gender" value={formData.gender} onChange={handleChange} error={errors.gender} required disabled={isLoading} />
-        </Col>
-      </Row>
+        </div>
+      </div>
 
       {/* Role Selector */}
       <RoleSelect label={t("auth.vaiTro")} name="role" value={formData.role} onChange={handleChange} error={errors.role} required disabled={isLoading} />
@@ -193,13 +187,9 @@ export default function RegisterForm({
 
       {/* Link Redirect to Login */}
       <div className="text-center mt-4 text-sm font-medium">
-        <span className="text-muted-custom" style={{
-        color: '#94a3b8 !important'
-      }}>{t("auth.daCoTaiKhoan")}</span>{' '}
-        <Link to={ROUTES.LOGIN} className="text-decoration-none transition-all" style={{
-        color: 'var(--primary)',
-        fontWeight: 600
-      }}>{t("signIn")}</Link>
+        <span className="text-muted-foreground">{t("auth.daCoTaiKhoan")}</span>{' '}
+        <Link to={ROUTES.LOGIN} className="text-primary hover:underline font-semibold">{t("signIn")}</Link>
       </div>
-    </Form>;
+    </form>
+  );
 }

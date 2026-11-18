@@ -1,19 +1,13 @@
-import { Card } from 'react-bootstrap';
+import { Card } from '../../../../shared/ui/card';
 import PrimaryButton from '../../../../shared/components/Button/PrimaryButton';
 
 /**
  * PendingRequestCard Component
  * Displays a single authorization upgrade or role request.
- * 
- * @param {Object} props - Props
- * @param {Object} props.request - The request item object
- * @param {function} props.onApprove - Callback for approval action
- * @param {function} props.onDecline - Callback for declination action
  */
 export default function PendingRequestCard({ request, onApprove, onDecline }) {
   const { id, name, roleRequested, institution } = request;
   
-  // Extract initials for mock avatar circle
   const initials = name
     .split(' ')
     .map(n => n[0])
@@ -23,49 +17,38 @@ export default function PendingRequestCard({ request, onApprove, onDecline }) {
 
   return (
     <Card 
-      className="p-3 mb-3 border rounded-3 bg-white"
-      style={{ boxShadow: 'none', transition: 'border-color 0.2s' }}
+      className="p-3 mb-3 border border-border rounded-xl bg-surface shadow-2xs"
     >
       {/* Card Header section: Initials Avatar + Info metadata */}
-      <div className="d-flex align-items-center gap-3 mb-2.5">
-        {/* Mock Circle Avatar with initials */}
+      <div className="flex items-center gap-3 mb-2.5">
         <div 
-          className="rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
-          style={{
-            width: '40px',
-            height: '40px',
-            backgroundColor: '#e0f2fe',
-            color: '#0369a1',
-            fontSize: '14px'
-          }}
+          className="size-10 rounded-full flex items-center justify-center font-bold shrink-0 bg-sky-100 text-sky-800 dark:bg-sky-950/50 dark:text-sky-300 text-sm"
         >
           {initials}
         </div>
         <div className="overflow-hidden">
-          <div className="fw-bold text-main text-truncate" style={{ fontSize: '14px' }}>{name}</div>
-          <div className="text-muted-custom text-truncate" style={{ fontSize: '13px', letterSpacing: '0.02em' }}>{institution}</div>
+          <div className="font-bold text-foreground truncate text-sm">{name}</div>
+          <div className="text-muted-foreground truncate text-xs">{institution}</div>
         </div>
       </div>
 
       {/* Description payload */}
-      <p className="text-muted-custom small mb-3 lh-sm">
-        Requesting <strong className="text-main">{roleRequested}</strong> role for the Platform.
+      <p className="text-muted-foreground text-xs mb-3 leading-relaxed">
+        Requesting <strong className="text-foreground">{roleRequested}</strong> role for the Platform.
       </p>
 
       {/* Action buttons */}
-      <div className="d-flex gap-2">
+      <div className="flex gap-2">
         <PrimaryButton
           onClick={() => onApprove(id)}
-          className="flex-grow-1 py-1.5 text-xs"
-          style={{ fontSize: '13px' }}
+          className="flex-1 py-1.5 text-xs h-8"
         >
           Approve
         </PrimaryButton>
         <PrimaryButton
           onClick={() => onDecline(id)}
           variant="outline"
-          className="flex-grow-1 py-1.5 text-xs"
-          style={{ fontSize: '13px' }}
+          className="flex-1 py-1.5 text-xs h-8"
         >
           Decline
         </PrimaryButton>

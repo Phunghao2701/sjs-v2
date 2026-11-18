@@ -6,11 +6,7 @@
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import Container from "react-bootstrap/Container";
-import Form from "react-bootstrap/Form";
-import InputGroup from "react-bootstrap/InputGroup";
-import Button from "react-bootstrap/Button";
-import Spinner from "react-bootstrap/Spinner";
+import { Button } from "../../../shared/ui/button";
 import Icon from "../../../shared/components/Icon";
 import useSandboxSearch from "../hooks/useSandboxSearch";
 
@@ -79,7 +75,6 @@ const defaultType = {
 };
 
 // Module-level helper: resolve route path for a search item by type.
-// Pure & referentially stable — safe to call from memoized handlers.
 const getItemPath = (item) => typeConfig[item.type]?.path?.(item.id);
 
 export default function Sandbox() {
@@ -95,7 +90,6 @@ export default function Sandbox() {
     handleSearchSubmit,
   } = useSandboxSearch();
 
-  // Stable handler — same reference across renders unless `navigate` changes.
   const handleItemClick = useCallback(
     (item) => {
       const targetPath = getItemPath(item);
@@ -113,11 +107,11 @@ export default function Sandbox() {
   ];
 
   return (
-    <section id="search-sandbox" className="py-5 bg-dark-bg position-relative">
-      <Container style={{ maxWidth: "960px" }}>
+    <section id="search-sandbox" className="py-12 bg-dark-bg relative">
+      <div className="container mx-auto px-4" style={{ maxWidth: "960px" }}>
         {/* Glowing border card container */}
         <div
-          className="p-1 rounded-5 reveal-scale"
+          className="p-1 rounded-3xl reveal-scale"
           style={{
             background:
               "linear-gradient(135deg, var(--primary-light) 0%, rgba(255, 255, 255, 0.5) 50%, var(--primary-light) 100%)",
@@ -126,12 +120,12 @@ export default function Sandbox() {
         >
           {/* Card Body */}
           <div
-            className="rounded-5 py-5 px-4 p-sm-5 text-center position-relative overflow-hidden"
+            className="rounded-3xl py-12 px-4 sm:p-12 text-center relative overflow-hidden"
             style={{ backgroundColor: "var(--bg-card)", zIndex: 1 }}
           >
             {/* Header label */}
             <div
-              className="d-inline-flex align-items-center gap-2 mb-4 text-xs font-bold tracking-wider text-uppercase"
+              className="inline-flex items-center gap-2 mb-4 text-xs font-bold tracking-wider uppercase"
               style={{ fontSize: "13px", color: "var(--primary)" }}
             >
               <Icon
@@ -143,29 +137,28 @@ export default function Sandbox() {
             </div>
 
             {/* Form */}
-            <Form
+            <form
               onSubmit={handleSearchSubmit}
               className="mx-auto mb-4"
               style={{ maxWidth: "720px" }}
             >
-              <InputGroup
-                size="lg"
-                className="rounded-pill overflow-hidden p-1 align-items-center"
+              <div
+                className="flex items-center rounded-full overflow-hidden p-1.5"
                 style={{ backgroundColor: "var(--bg-chip)" }}
               >
                 <span
-                  className="bg-transparent border-0 px-3 d-flex align-items-center justify-content-center"
+                  className="bg-transparent border-0 px-3 flex items-center justify-center shrink-0"
                   style={{ color: "var(--text-muted)" }}
                 >
-                  <Icon icon="lucide:search" className="fs-5" />
+                  <Icon icon="lucide:search" className="text-lg" />
                 </span>
 
-                <Form.Control
+                <input
                   type="text"
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
                   placeholder={t("sandboxPlaceholder")}
-                  className="bg-transparent border-0 shadow-none fs-6 py-2.5"
+                  className="flex-1 bg-transparent border-0 outline-none text-foreground placeholder:text-muted-foreground text-sm sm:text-base py-2.5 px-2 focus:outline-none focus:ring-0 shadow-none"
                   style={{
                     color: "var(--text-main)",
                     backgroundColor: "transparent",
@@ -175,51 +168,45 @@ export default function Sandbox() {
                 <Button
                   type="submit"
                   disabled={isLoading}
-                  className="btn-primary-glow rounded-pill px-4 py-2 text-xs font-bold border-0 d-flex align-items-center gap-2 me-1"
+                  className="btn-primary-glow rounded-full px-5 py-2.5 text-xs font-bold border-0 flex items-center gap-2 mr-1 h-auto shrink-0 text-white"
                   style={{ fontSize: "13px" }}
                 >
                   {isLoading ? (
                     <>
-                      <Spinner
-                        animation="border"
-                        size="sm"
-                        role="status"
-                        aria-hidden="true"
-                      />
+                      <Icon icon="lucide:loader-2" className="animate-spin text-sm" />
                       <span>...</span>
                     </>
                   ) : (
                     <>
                       <span>{t("searchBtn")}</span>
-                      <Icon icon="lucide:arrow-right" className="fs-6" />
+                      <Icon icon="lucide:arrow-right" className="text-sm" />
                     </>
                   )}
                 </Button>
-              </InputGroup>
-            </Form>
+              </div>
+            </form>
 
             {/* Tag suggestions */}
             <div
-              className="d-flex flex-column flex-sm-row align-items-center justify-content-center gap-3 mx-auto"
+              className="flex flex-col sm:flex-row items-center justify-center gap-3 mx-auto"
               style={{ maxWidth: "800px" }}
             >
               <span
-                className="text-muted-custom font-bold tracking-wider text-uppercase d-flex align-items-center gap-1"
+                className="text-muted-custom font-bold tracking-wider uppercase flex items-center gap-1"
                 style={{ fontSize: "13px" }}
               >
                 <Icon icon="lucide:sliders" style={{ fontSize: "13px" }} />
                 <span>{t("tryNowLabel")}</span>
               </span>
-              <div className="d-flex flex-wrap justify-content-center gap-2">
+              <div className="flex flex-wrap justify-center gap-2">
                 {tags.map((tag) => (
                   <button
                     key={tag}
                     type="button"
                     onClick={() => handleTagClick(tag)}
-                    className="px-3 py-1.5 rounded-pill sandbox-tag text-xs font-semibold btn btn-sm"
+                    className="px-3 py-1.5 rounded-full sandbox-tag text-xs font-semibold cursor-pointer border border-transparent transition-all"
                     style={{
                       fontSize: "13px",
-                      transition: "all 0.2s ease",
                     }}
                   >
                     {tag}
@@ -231,7 +218,7 @@ export default function Sandbox() {
             {/* Interactive Mock Results */}
             {isLoading && (
               <div
-                className="mt-4 mx-auto p-4 rounded-4 d-flex align-items-center justify-content-center gap-2 text-muted-custom"
+                className="mt-6 mx-auto p-4 rounded-2xl flex items-center justify-center gap-2 text-muted-custom"
                 style={{
                   maxWidth: "600px",
                   backgroundColor: "var(--bg-chip)",
@@ -240,7 +227,7 @@ export default function Sandbox() {
               >
                 <Icon
                   icon="lucide:database"
-                  className="animate-bounce fs-5"
+                  className="animate-bounce text-lg"
                   style={{ color: "var(--primary)" }}
                 />
                 <span>Analyzing publications databases...</span>
@@ -249,14 +236,14 @@ export default function Sandbox() {
 
             {error && (
               <div
-                className="mt-4 mx-auto p-4 rounded-4 text-start"
+                className="mt-6 mx-auto p-4 rounded-2xl text-left"
                 style={{
                   maxWidth: "600px",
                   backgroundColor: "rgba(220, 53, 69, 0.05)",
                 }}
               >
-                <div className="d-flex align-items-start gap-3 text-danger">
-                  <Icon icon="lucide:alert-circle" className="fs-4 mt-1" />
+                <div className="flex items-start gap-3 text-danger">
+                  <Icon icon="lucide:alert-circle" className="text-xl mt-1 shrink-0" />
                   <div>
                     <h5 className="font-bold text-main text-sm m-0">
                       API Error
@@ -274,7 +261,7 @@ export default function Sandbox() {
 
             {searchResult && (
               <div
-                className="mt-4 mx-auto p-4 rounded-4 text-start"
+                className="mt-6 mx-auto p-4 rounded-2xl text-left"
                 style={{
                   maxWidth: "600px",
                   backgroundColor: "var(--bg-card)",
@@ -282,12 +269,12 @@ export default function Sandbox() {
                 }}
               >
                 <div
-                  className="d-flex align-items-center justify-content-between mb-3 pb-2"
+                  className="flex items-center justify-between mb-3 pb-2"
                   style={{ borderBottom: "1px solid var(--border)" }}
                 >
-                  <div className="d-flex align-items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div
-                      className="rounded-circle animate-pulse"
+                      className="rounded-full animate-pulse"
                       style={{
                         width: "8px",
                         height: "8px",
@@ -297,7 +284,7 @@ export default function Sandbox() {
                       }}
                     />
                     <span
-                      className="font-bold tracking-wider text-uppercase"
+                      className="font-bold tracking-wider uppercase"
                       style={{
                         fontSize: "13px",
                         color: searchResult.isRealData ? "#198754" : "#ffc107",
@@ -331,7 +318,7 @@ export default function Sandbox() {
 
                 {searchResult.items && searchResult.items.length > 0 ? (
                   <div
-                    className="d-flex flex-column gap-2 overflow-y-auto pr-1 custom-scrollbar"
+                    className="flex flex-col gap-2 overflow-y-auto pr-1 custom-scrollbar"
                     style={{ maxHeight: "380px" }}
                   >
                     {searchResult.items.map((item, index) => {
@@ -340,7 +327,7 @@ export default function Sandbox() {
                       return (
                         <div
                           key={item.id || index}
-                          className="d-flex align-items-center justify-content-between p-3 rounded-3 transition-all"
+                          className="flex items-center justify-between p-3 rounded-xl transition-all"
                           style={{
                             backgroundColor: "var(--bg-chip)",
                             transition: "all 0.2s ease",
@@ -362,21 +349,21 @@ export default function Sandbox() {
                           }}
                         >
                           <div
-                            className="d-flex align-items-center gap-3 text-truncate"
+                            className="flex items-center gap-3 truncate"
                             style={{ flex: "1 1 auto", minWidth: 0 }}
                           >
                             <div
-                              className="p-2 rounded-3 d-flex align-items-center justify-content-center"
+                              className="p-2 rounded-lg flex items-center justify-center shrink-0"
                               style={{
                                 color: cfg.textColor,
                                 backgroundColor: cfg.bgColor,
                               }}
                             >
-                              <Icon icon={cfg.icon} className="fs-5" />
+                              <Icon icon={cfg.icon} className="text-lg" />
                             </div>
-                            <div className="d-flex flex-column text-truncate" style={{ minWidth: 0 }}>
+                            <div className="flex flex-col truncate" style={{ minWidth: 0 }}>
                               <span
-                                className="font-medium text-main text-sm text-truncate"
+                                className="font-medium text-main text-sm truncate"
                                 style={{
                                   fontSize: "14px",
                                   maxWidth: "380px",
@@ -386,8 +373,8 @@ export default function Sandbox() {
                               </span>
                               {(item.authors?.length > 0 || item.journal?.name) && (
                                 <span
-                                  className="text-muted-custom text-truncate"
-                                  style={{ fontSize: "13px", maxWidth: "380px" }}
+                                  className="text-muted-custom truncate text-xs"
+                                  style={{ maxWidth: "380px" }}
                                 >
                                   {item.authors?.length > 0 && (
                                     <span>
@@ -396,7 +383,7 @@ export default function Sandbox() {
                                     </span>
                                   )}
                                   {item.authors?.length > 0 && item.journal?.name && <span> • </span>}
-                                  {item.journal?.name && <span className="fst-italic">{item.journal.name}</span>}
+                                  {item.journal?.name && <span className="italic">{item.journal.name}</span>}
                                 </span>
                               )}
                             </div>
@@ -414,7 +401,7 @@ export default function Sandbox() {
                               flexShrink: 0,
                               maxWidth: "140px",
                             }}
-                            className="text-truncate rounded-2"
+                            className="truncate rounded-md ml-2"
                             title={item.subject_area?.name || item.type}
                           >
                             {item.subject_area?.name || t(cfg.labelKey)}
@@ -424,10 +411,10 @@ export default function Sandbox() {
                     })}
                   </div>
                 ) : (
-                  <div className="d-flex flex-column align-items-center justify-content-center py-5 text-center text-muted-custom">
+                  <div className="flex flex-col items-center justify-center py-8 text-center text-muted-custom">
                     <Icon
                       icon="lucide:search-x"
-                      className="fs-1 text-muted-custom mb-2"
+                      className="text-3xl text-muted-custom mb-2"
                     />
                     <p className="text-sm m-0" style={{ fontSize: "14px" }}>
                       {t("noResults")}
@@ -438,7 +425,7 @@ export default function Sandbox() {
             )}
           </div>
         </div>
-      </Container>
+      </div>
     </section>
   );
 }

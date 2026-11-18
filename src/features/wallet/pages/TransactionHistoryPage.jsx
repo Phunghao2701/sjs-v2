@@ -105,14 +105,6 @@ export default function TransactionHistoryPage() {
   };
   const getTxStatus = tx => tx?.status || tx?.transaction_status || tx?.payment_status || 'success';
   return <div className="tx-history-page">
-      <div className="tx-history-breadcrumb">
-        <span>Dashboard</span>
-        <Icon icon="lucide:chevron-right" width={12} />
-        <span>My Wallet</span>
-        <Icon icon="lucide:chevron-right" width={12} />
-        <span>Transaction History</span>
-      </div>
-
       <div className="tx-history-hero">
         <h1 className="tx-history-title">{t("wallet.lichSuBienDongCoin")}</h1>
         <p className="tx-history-subtitle">{t("wallet.xemLaiDanhSachNapTieuVaHoanCoi")}</p>

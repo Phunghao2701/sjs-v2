@@ -136,10 +136,6 @@ export default function TopUpPage() {
 
         {/* ── Hero ── */}
         <div className="topup-hero">
-          <div className="topup-hero__badge">
-            <Icon icon="solar:wallet-bold" width={14} />
-            Trending System Coins
-          </div>
           <h1 className="topup-hero__title">{t("wallet.napCoinVaoTaiKhoan")}</h1>
           <p className="topup-hero__sub">{t("wallet.moKhoaNhungTiemNangNghienCuuVo")}</p>
         </div>

@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from 'react';
-import { Row, Col, Card, Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { Button } from '../../../shared/ui/button';
+import { Card } from '../../../shared/ui/card';
 import { useJournalManagement } from '../../journal/hooks/useJournalManagement';
 import Pagination from '../../../shared/components/Pagination';
 import SwitchJournalModal from '../components/modals/SwitchJournalModal';
@@ -13,9 +13,7 @@ import { PageHeader } from '../../../shared/ui/page-layout';
  * VolumeArchivePage - Màn hình Lưu trữ các Tập (Volume Archive) của Tạp chí đang chọn (Figma Screen Page 10).
  */
 export default function VolumeArchivePage() {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const {
     currentJournal,
@@ -24,34 +22,29 @@ export default function VolumeArchivePage() {
     fetchInitialData
   } = useJournalManagement();
 
-  // Dynamic route base path detection
   const isPreview = window.location.pathname.startsWith('/admin-preview');
   const basePath = isPreview ? '/admin-preview' : '/admin';
 
   // State filters & sort
   const [search, setSearch] = useState('');
   const [frequencyFilter, setFrequencyFilter] = useState('All');
-  const [sortBy, setSortBy] = useState('newest'); // 'newest' | 'oldest'
+  const [sortBy, setSortBy] = useState('newest');
   const [showSwitchModal, setShowSwitchModal] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
-  const [limit, setLimit] = useState(6); // 6 cards per page fits nicely in a 3-column grid
+  const limit = 6;
 
-  // Load initial data
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData]);
 
-  // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [search, frequencyFilter, sortBy]);
 
-  // Filter volumes for current journal
   const currentVolumes = (volumes || []).filter(v => v.journalId === currentJournal?.id);
 
-  // Apply search & filter & sort
   const filteredVolumes = currentVolumes.filter(vol => {
     const volNum = vol.volumeNumber || '';
     const freq = vol.frequency || '';
@@ -66,15 +59,15 @@ export default function VolumeArchivePage() {
     }
   });
 
-  // Calculate paginated volumes
   const paginatedVolumes = filteredVolumes.slice((currentPage - 1) * limit, currentPage * limit);
+
   const handleViewDetails = volumeId => {
-    // Set selected volume in store and navigate to Repository Management
     setSelectedVolume(volumeId);
     navigate(`${basePath}/journals/repository`);
   };
+
   return (
-    <div className="d-flex flex-column gap-4 text-start">
+    <div className="flex flex-col gap-4 text-left">
       <PageHeader
         breadcrumbs={[
           { label: 'Repository', to: `${basePath}/journals/repository` },
@@ -95,154 +88,125 @@ export default function VolumeArchivePage() {
         }
       />
 
-        {/* Filter Bar */}
-        <div className="bg-white p-4 rounded-3 border mb-2 mt-2" style={{
-      borderColor: 'var(--border)'
-    }}>
-          <Row className="align-items-end g-3">
-            {/* Search by Volume number */}
-            <Col xs={12} md={5}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main text-uppercase mb-2" style={{
-              letterSpacing: '0.05em'
-            }}>
-                  Search Volumes
-                </Form.Label>
-                <InputGroup>
-                  <InputGroup.Text style={{
-                backgroundColor: 'var(--bg-chip)',
-                borderColor: 'var(--border)'
-              }}>
-                    <Icon icon="lucide:search" width="16" className="text-muted" />
-                  </InputGroup.Text>
-                  <Form.Control type="text" placeholder={t("admin.searchByVolumeNumberEgVolume1")} value={search} onChange={e => setSearch(e.target.value)} style={{
-                backgroundColor: 'var(--bg-chip)',
-                borderColor: 'var(--border)',
-                fontSize: '14px'
-              }} />
-                </InputGroup>
-              </Form.Group>
-            </Col>
+      {/* Filter Bar */}
+      <div className="bg-surface p-4 rounded-xl border border-border mb-2 mt-2 shadow-2xs">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-4 items-end">
+          {/* Search by Volume number */}
+          <div className="md:col-span-5">
+            <label className="font-semibold text-xs text-foreground uppercase tracking-wider block mb-2">
+              Search Volumes
+            </label>
+            <div className="relative flex items-center">
+              <span className="absolute left-3 text-muted-foreground pointer-events-none">
+                <Icon icon="lucide:search" width="16" />
+              </span>
+              <input
+                type="text"
+                placeholder={t("admin.searchByVolumeNumberEgVolume1")}
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full h-10 pl-9 pr-3 rounded-lg border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+          </div>
 
-            {/* Filter by Frequency */}
-            <Col xs={12} sm={6} md={3.5}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main text-uppercase mb-2" style={{
-              letterSpacing: '0.05em'
-            }}>
-                  Publication Period
-                </Form.Label>
-                <Form.Select value={frequencyFilter} onChange={e => setFrequencyFilter(e.target.value)} style={{
-              backgroundColor: 'var(--bg-chip)',
-              borderColor: 'var(--border)',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>
-                  <option value="All">All Periods</option>
-                  <option value="Quarterly">{t("admin.quarterlyHangQuy")}</option>
-                  <option value="Bi-annual">{t("admin.biannualNuaNam")}</option>
-                  <option value="Annual">{t("admin.annualHangNam")}</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
+          {/* Filter by Frequency */}
+          <div className="md:col-span-3.5">
+            <label className="font-semibold text-xs text-foreground uppercase tracking-wider block mb-2">
+              Publication Period
+            </label>
+            <select
+              value={frequencyFilter}
+              onChange={e => setFrequencyFilter(e.target.value)}
+              className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer"
+            >
+              <option value="All">All Periods</option>
+              <option value="Quarterly">{t("admin.quarterlyHangQuy")}</option>
+              <option value="Bi-annual">{t("admin.biannualNuaNam")}</option>
+              <option value="Annual">{t("admin.annualHangNam")}</option>
+            </select>
+          </div>
 
-            {/* Sort by Year */}
-            <Col xs={12} sm={6} md={3.5}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main text-uppercase mb-2" style={{
-              letterSpacing: '0.05em'
-            }}>
-                  Sort Order
-                </Form.Label>
-                <Form.Select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{
-              backgroundColor: 'var(--bg-chip)',
-              borderColor: 'var(--border)',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>
-                  <option value="newest">Newest to Oldest</option>
-                  <option value="oldest">Oldest to Newest</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
+          {/* Sort by Year */}
+          <div className="md:col-span-3.5">
+            <label className="font-semibold text-xs text-foreground uppercase tracking-wider block mb-2">
+              Sort Order
+            </label>
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer"
+            >
+              <option value="newest">Newest to Oldest</option>
+              <option value="oldest">Oldest to Newest</option>
+            </select>
+          </div>
         </div>
+      </div>
 
-        {/* Volumes Grid */}
-        {filteredVolumes.length === 0 ? <div className="text-center py-5 bg-white rounded-3 border" style={{
-      borderColor: 'var(--border)'
-    }}>
-            <Icon icon="lucide:archive-x" width="48" className="text-muted-custom mb-3" />
-            <p className="text-muted-custom mb-0">No volumes found matching the search criteria.</p>
-          </div> : <div>
-            <Row className="g-4 mb-4">
-              {paginatedVolumes.map(vol => <Col xs={12} md={6} lg={4} key={vol.id}>
-                  <Card className="bg-white h-100 border rounded-3 transition-hover shadow-sm" style={{
-            borderColor: 'var(--border)'
-          }}>
-                    <Card.Body className="d-flex flex-column p-4">
-                      
-                      {/* Top row: Status & Page badge */}
-                      <div className="d-flex justify-content-between align-items-center mb-3">
-                        <span className="badge bg-light text-muted border px-2.5 py-1 text-uppercase text-xs font-semibold">
-                          ARCHIVED
-                        </span>
-                        <div className="d-flex align-items-center gap-1 bg-light px-2.5 py-1 rounded text-muted font-monospace text-xs border" style={{
-                  borderColor: 'var(--border)'
-                }}>
-                          <Icon icon="lucide:book-open" width="12" />
-                          <span>V{vol.volumeNumber ? vol.volumeNumber.replace(/\D/g, '') : '13'}</span>
-                        </div>
-                      </div>
+      {/* Volumes Grid */}
+      {filteredVolumes.length === 0 ? (
+        <div className="text-center py-8 bg-surface rounded-xl border border-border">
+          <Icon icon="lucide:archive-x" width="48" className="text-muted-foreground mx-auto mb-3 opacity-50" />
+          <p className="text-muted-foreground text-sm mb-0">No volumes found matching the search criteria.</p>
+        </div>
+      ) : (
+        <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+            {paginatedVolumes.map(vol => (
+              <Card key={vol.id} className="bg-surface h-full border border-border rounded-xl shadow-2xs flex flex-col p-5">
+                {/* Top row: Status & Page badge */}
+                <div className="flex justify-between items-center mb-3">
+                  <span className="bg-muted text-muted-foreground border border-border px-2.5 py-0.5 uppercase text-[10px] font-semibold rounded">
+                    ARCHIVED
+                  </span>
+                  <div className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono text-xs border border-border">
+                    <Icon icon="lucide:book-open" width="12" />
+                    <span>V{vol.volumeNumber ? vol.volumeNumber.replace(/\D/g, '') : '13'}</span>
+                  </div>
+                </div>
 
-                      {/* Title */}
-                      <Card.Title className="font-display fw-bold text-main mb-4 h5">
-                        {vol.volumeNumber} ({vol.publicationYear})
-                      </Card.Title>
+                {/* Title */}
+                <h4 className="font-display font-bold text-foreground mb-4 text-base">
+                  {vol.volumeNumber} ({vol.publicationYear})
+                </h4>
 
-                      {/* Detail list rows */}
-                      <div className="d-flex flex-column gap-2 mb-4 mt-auto">
-                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{
-                  borderColor: 'var(--border)'
-                }}>
-                          <span className="text-muted-custom small">Total Issues</span>
-                          <span className="fw-bold text-main font-monospace">0{vol.totalIssues || 4}</span>
-                        </div>
-                        <div className="d-flex justify-content-between align-items-center border-bottom pb-2" style={{
-                  borderColor: 'var(--border)'
-                }}>
-                          <span className="text-muted-custom small">Total Articles</span>
-                          <span className="fw-bold text-main font-monospace">{vol.totalArticles || 128}</span>
-                        </div>
-                        <div className="d-flex justify-content-between align-items-center pb-1">
-                          <span className="text-muted-custom small">Period</span>
-                          <span className="fw-bold text-main small font-display">{vol.period || `Jan — Dec ${vol.publicationYear}`}</span>
-                        </div>
-                      </div>
+                {/* Detail list rows */}
+                <div className="flex flex-col gap-2 mb-4 mt-auto">
+                  <div className="flex justify-between items-center border-b border-border pb-2 text-xs">
+                    <span className="text-muted-foreground">Total Issues</span>
+                    <span className="font-bold text-foreground font-mono">0{vol.totalIssues || 4}</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-border pb-2 text-xs">
+                    <span className="text-muted-foreground">Total Articles</span>
+                    <span className="font-bold text-foreground font-mono">{vol.totalArticles || 128}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-1 text-xs">
+                    <span className="text-muted-foreground">Period</span>
+                    <span className="font-bold text-foreground font-display">{vol.period || `Jan — Dec ${vol.publicationYear}`}</span>
+                  </div>
+                </div>
 
-                      {/* Actions */}
-                      <div className="d-flex gap-2 w-100 mt-auto pt-3 border-top" style={{
-                borderColor: 'var(--border)'
-              }}>
-                        <Button variant="outline" size="sm" className="w-100 font-display font-semibold d-flex align-items-center justify-content-center gap-1.5" onClick={() => handleViewDetails(vol.id)}>
-                          <span>View Details</span>
-                        </Button>
-                        <Button variant="outline" size="sm" className="d-flex align-items-center justify-content-center p-2 rounded-2" title="Restore/History" onClick={() => alert(`Showing history for ${vol.volumeNumber}...`)}>
-                          <Icon icon="lucide:history" width="16" />
-                        </Button>
-                      </div>
+                {/* Actions */}
+                <div className="flex gap-2 w-full mt-auto pt-3 border-t border-border">
+                  <Button variant="outline" size="sm" className="w-full font-display font-semibold flex items-center justify-center gap-1.5" onClick={() => handleViewDetails(vol.id)}>
+                    <span>View Details</span>
+                  </Button>
+                  <Button variant="outline" size="sm" className="size-9 p-0 flex items-center justify-center shrink-0" title="Restore/History" onClick={() => alert(`Showing history for ${vol.volumeNumber}...`)}>
+                    <Icon icon="lucide:history" width="16" />
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
 
-                    </Card.Body>
-                  </Card>
-                </Col>)}
-            </Row>
+          {/* Pagination Controls */}
+          <Pagination totalItems={filteredVolumes.length} currentPage={currentPage} limit={limit} onPageChange={setCurrentPage} entityName="volumes" />
+        </div>
+      )}
 
-            {/* Pagination Controls */}
-            <Pagination totalItems={filteredVolumes.length} currentPage={currentPage} limit={limit} onPageChange={setCurrentPage} entityName="volumes" />
-          </div>}
-
-        {/* Switch Journal Modal */}
-        <SwitchJournalModal show={showSwitchModal} handleClose={() => setShowSwitchModal(false)} />
+      {/* Switch Journal Modal */}
+      <SwitchJournalModal show={showSwitchModal} handleClose={() => setShowSwitchModal(false)} />
     </div>
   );
 }

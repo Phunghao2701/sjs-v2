@@ -43,17 +43,6 @@ export default function KeywordArticlesPage() {
       <PageContainer className="keyword-articles-shell">
         {/* Unified Design System PageHeader */}
         <PageHeader
-          breadcrumbs={[
-            { label: t("home"), to: "/" },
-            { label: "Keywords", to: "/keywords" },
-            { label: keyword?.display_name || t("keywords.baiBaoTheoKeyword") }
-          ]}
-          badge={
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-subtle text-primary text-xs font-semibold">
-              <Icon icon="lucide:tag" width="14" />
-              <span>Research Keyword</span>
-            </div>
-          }
           title={
             loadingKeyword ? (
               <Skeleton className="h-7 w-64 rounded" />

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Table, Badge } from 'react-bootstrap';
+import { Table } from '../../../shared/ui/table';
+import { Badge } from '../../../shared/ui/badge';
 import { Icon } from '@iconify/react';
 import { StateCard } from '../../../shared/components/Card';
 

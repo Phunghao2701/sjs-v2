@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
  *
  * File: features\journal\components\JournalMetadataGrid.jsx
  */
-import { Row, Col } from 'react-bootstrap';
+import { Row, Col } from '../../../shared/ui/layout-grid';
 export default function JournalMetadataGrid({
   journal,
   loading

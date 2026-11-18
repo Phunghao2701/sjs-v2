@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { getDefaultLang } from '../../../app/routes/languageRouting';
+import { getDefaultLang, getAuthenticatedHomePath } from '../../../app/routes/languageRouting';
 import { completeHyperdatalabSsoCallback } from '../services/hyperdatalabSso';
+import { useAuthStore } from '../../../app/store/authStore';
 
 function getErrorMessage(error) {
   if (error?.message === 'SSO_CONFIGURATION_MISSING' || error?.message === 'SSO_CONFIGURATION_INVALID') return 'auth.ssoChuaCauHinh';
@@ -20,7 +21,14 @@ export default function SsoCallbackPage() {
     const callbackHref = window.location.href;
     window.history.replaceState({}, document.title, window.location.pathname);
     completeHyperdatalabSsoCallback(callbackHref)
-      .then(({ returnTo }) => { if (!cancelled) navigate(returnTo, { replace: true }); })
+      .then(({ returnTo }) => {
+        if (cancelled) return;
+        const user = useAuthStore.getState().user;
+        const destination = user?.role === 'ADMINISTRATOR'
+          ? getAuthenticatedHomePath(user, getDefaultLang())
+          : returnTo;
+        navigate(destination, { replace: true });
+      })
       .catch((error) => { if (!cancelled) setErrorKey(getErrorMessage(error)); });
     return () => { cancelled = true; };
   }, [navigate]);

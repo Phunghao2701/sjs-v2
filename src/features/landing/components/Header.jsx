@@ -3,22 +3,19 @@
  *
  * File: features\landing\components\Header.jsx
  */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation } from "react-router-dom";
-import Container from "react-bootstrap/Container";
-import Nav from "react-bootstrap/Nav";
-import Navbar from "react-bootstrap/Navbar";
-import Offcanvas from "react-bootstrap/Offcanvas";
-import Dropdown from "react-bootstrap/Dropdown";
-import Button from "react-bootstrap/Button";
+import { Button } from "../../../shared/ui/button";
+import { Dropdown } from "../../../shared/ui/dropdown-menu";
+import { Offcanvas } from "../../../shared/ui/sheet";
 import Icon from "../../../shared/components/Icon";
 import Logo from "../../../shared/components/Logo";
 import useAuth from "../../auth/hooks/useAuth";
 import { useUserStore } from "../../../app/store/userStore";
 import ROUTES from "../../../app/routes/routePaths";
-import { useContext } from 'react';
-import { DashboardShellContext } from '../../../shared/components/DashboardShell';
+import { DashboardShellContext } from "../../../shared/components/DashboardShell";
+
 // Single source of truth for supported languages — shared by desktop & mobile switchers.
 const LANGUAGES = [
   { code: "vi", label: "Tiếng Việt" },
@@ -44,21 +41,19 @@ export default function Header() {
   const language = i18n.language || "vi";
   const currentLanguage =
     LANGUAGES.find((lang) => language.startsWith(lang.code)) || LANGUAGES[0];
-  const [isScrolled, setIsScrolled] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const inDashboardShell = useContext(DashboardShellContext);
+
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 20) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
+      // scroll handling placeholder if needed
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
   if (inDashboardShell) return null;
+
   const navigateWithLang = (path) => {
     if (path.startsWith("/")) {
       const segments = path.split("/").filter(Boolean);
@@ -72,6 +67,7 @@ export default function Header() {
     }
     navigate(path);
   };
+
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
     localStorage.setItem("researchpulse_lang", lang);
@@ -84,12 +80,15 @@ export default function Header() {
     const newPath = "/" + segments.join("/") + location.search + location.hash;
     navigate(newPath);
   };
+
   const handleAuthLogin = () => {
     navigateWithLang(ROUTES.LOGIN);
   };
+
   const handleAuthRegister = () => {
     navigateWithLang(ROUTES.REGISTER);
   };
+
   const navItems = [
     {
       label: t("author.tongQuan"),
@@ -117,25 +116,18 @@ export default function Header() {
       path: ROUTES.AUTHORS,
     },
   ];
+
   const navLinkStyle = {
     borderBottom: "2px solid transparent",
     color: "var(--text-muted)",
     transition: "color 0.18s ease, border-color 0.18s ease",
     fontWeight: 600,
   };
-  const dropdownMenuStyle = {
-    minWidth: "190px",
-    "--bs-dropdown-link-active-bg": "rgba(0, 0, 0, 0.06)",
-    "--bs-dropdown-link-active-color": "var(--text-main)",
-    "--bs-dropdown-link-hover-bg": "rgba(0, 0, 0, 0.04)",
-    "--bs-dropdown-link-hover-color": "var(--text-main)",
-  };
+
   return (
     <>
-      <Navbar
-        expand="md"
-        fixed="top"
-        className="transition-all duration-300 py-3 sticky-scrolled"
+      <header
+        className="fixed top-0 left-0 right-0 z-40 transition-all duration-300 py-3 sticky-scrolled"
         style={{
           borderBottom: "1px solid var(--border)",
           background: "var(--bg-card)",
@@ -143,50 +135,43 @@ export default function Header() {
           boxShadow: "0 4px 20px rgba(0, 0, 0, 0.05)",
         }}
       >
-        <Container>
+        <div className="container mx-auto px-4 flex items-center justify-between">
           {/* Logo Brand */}
-          <Navbar.Brand
+          <div
             onClick={() => navigateWithLang(ROUTES.HOME)}
-            className="d-flex align-items-center text-main font-weight-bold"
+            className="flex items-center text-main font-bold cursor-pointer select-none"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 800,
-              cursor: "pointer",
             }}
           >
             <Logo size={32} />
-          </Navbar.Brand>
+          </div>
 
           {/* Hamburger toggle for mobile */}
-          <Navbar.Toggle
-            aria-controls="basic-navbar-nav"
+          <button
+            type="button"
+            aria-label="Toggle Navigation"
             onClick={() => setShowMobileMenu(true)}
-            className="border-0 bg-transparent text-main p-0"
+            className="md:hidden border-0 bg-transparent text-main p-1 cursor-pointer flex items-center justify-center"
           >
-            <Icon icon="lucide:menu" className="fs-3 text-main" />
-          </Navbar.Toggle>
+            <Icon icon="lucide:menu" className="text-2xl text-main" />
+          </button>
 
           {/* Desktop Navigation Link Items */}
-          <Navbar.Collapse
-            id="basic-navbar-nav"
-            className="d-none d-md-flex justify-content-between align-items-center w-100"
-          >
-            <Nav
-              className="mx-auto align-items-center"
-              style={{
-                gap: "10px",
-              }}
-            >
+          <div className="hidden md:flex items-center justify-between flex-1 ml-6">
+            <nav className="flex items-center gap-2 mx-auto">
               {navItems.map((item) => {
                 const isPrivate =
                   item.path === ROUTES.DASHBOARD ||
                   item.path === ROUTES.PROJECTS;
                 if (isPrivate && !email) return null;
                 return (
-                  <Nav.Link
+                  <button
                     key={item.path}
+                    type="button"
                     onClick={() => navigateWithLang(item.path)}
-                    className="px-2 py-1 text-sm d-flex align-items-center gap-1 bg-transparent"
+                    className="px-3 py-1 text-sm flex items-center gap-1 bg-transparent cursor-pointer border-0"
                     style={navLinkStyle}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.color = "var(--primary)";
@@ -199,44 +184,42 @@ export default function Header() {
                     }}
                   >
                     {item.label}
-                  </Nav.Link>
+                  </button>
                 );
               })}
-            </Nav>
+            </nav>
 
-            <div className="d-flex align-items-center gap-3">
+            <div className="flex items-center gap-3">
               <Dropdown align="end">
                 <Dropdown.Toggle
                   as="button"
                   type="button"
-                  className="border-0 bg-transparent d-inline-flex align-items-center justify-content-center p-0 text-muted-custom"
+                  className="border-0 bg-transparent inline-flex items-center justify-center p-0 text-muted-custom cursor-pointer"
                   style={{
                     width: "32px",
                     height: "32px",
-                    cursor: "pointer",
                   }}
                   aria-label="Mở cài đặt giao diện"
                 >
                   <Icon icon="lucide:settings" width="18" />
                 </Dropdown.Toggle>
-                <Dropdown.Menu
-                  className="border-0 shadow-sm mt-2"
-                  style={dropdownMenuStyle}
-                >
-                  <div className="px-3 py-2 text-xs font-bold text-main border-bottom pb-2 mb-1">
+                <Dropdown.Menu className="border border-border shadow-md mt-2 p-1 min-w-[190px]">
+                  <div className="px-3 py-2 text-xs font-bold text-main border-b border-border pb-2 mb-1">
                     {t("landing.caiDat")}
                   </div>
                   {LANGUAGES.map((lang) => (
                     <Dropdown.Item
                       key={lang.code}
                       onClick={() => changeLanguage(lang.code)}
-                      className={`d-flex align-items-center justify-content-between text-xs py-2 ${language.startsWith(lang.code) ? "text-primary" : "text-dark"}`}
+                      className={`flex items-center justify-between text-xs py-2 px-3 rounded cursor-pointer ${
+                        language.startsWith(lang.code) ? "text-primary font-semibold" : "text-foreground"
+                      }`}
                     >
                       <span>{lang.label}</span>
                       {language.startsWith(lang.code) && (
                         <Icon
                           icon="lucide:check"
-                          className="text-primary text-xs ms-2"
+                          className="text-primary text-xs ml-2"
                         />
                       )}
                     </Dropdown.Item>
@@ -246,112 +229,97 @@ export default function Header() {
 
               {/* User Authentication Display/Buttons */}
               {email ? (
-                <>
-                  <Dropdown align="end">
-                    <Dropdown.Toggle
-                      as="button"
-                      type="button"
-                      className="border-0 bg-transparent d-inline-flex align-items-center justify-content-center p-0 text-muted-custom hover:text-primary"
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        cursor: "pointer",
-                        transition: "color 0.15s ease",
-                      }}
-                      aria-label="Tài khoản người dùng"
-                    >
-                      <Icon icon="lucide:user" width="18" />
-                    </Dropdown.Toggle>
+                <Dropdown align="end">
+                  <Dropdown.Toggle
+                    as="button"
+                    type="button"
+                    className="border-0 bg-transparent inline-flex items-center justify-center p-0 text-muted-custom hover:text-primary cursor-pointer transition-colors"
+                    style={{
+                      width: "32px",
+                      height: "32px",
+                    }}
+                    aria-label="Tài khoản người dùng"
+                  >
+                    <Icon icon="lucide:user" width="18" />
+                  </Dropdown.Toggle>
 
-                    <Dropdown.Menu
-                      className="border-0 shadow-sm mt-2"
-                      style={dropdownMenuStyle}
-                    >
-                      <div className="px-3 py-2 text-xs font-bold text-main border-bottom pb-2 mb-1">
-                        <span>{t("landing.nguoiDung")}</span>
-                        <div
-                          className="text-muted-custom font-normal mt-0.5 text-truncate text-xs"
-                          style={{
-                            color: "var(--text-muted)",
-                          }}
-                        >
-                          {email}
-                        </div>
+                  <Dropdown.Menu className="border border-border shadow-md mt-2 p-1 min-w-[200px]">
+                    <div className="px-3 py-2 text-xs font-bold text-main border-b border-border pb-2 mb-1">
+                      <span>{t("landing.nguoiDung")}</span>
+                      <div
+                        className="text-muted font-normal mt-0.5 truncate text-xs"
+                        style={{
+                          color: "var(--text-muted)",
+                        }}
+                      >
+                        {email}
                       </div>
-                      <Dropdown.Item
-                        onClick={() => navigateWithLang(ROUTES.DASHBOARD)}
-                        className="d-flex align-items-center gap-2 text-xs py-2 text-main"
-                      >
-                        <Icon
-                          icon="lucide:layout-dashboard"
-                          width="14"
-                          className="text-muted-custom"
-                        />
-                        <span>{t("landing.bangDieuKhien")}</span>
-                      </Dropdown.Item>
-                      <Dropdown.Item
-                        onClick={() => navigateWithLang(accountManagementRoute)}
-                        className="d-flex align-items-center gap-2 text-xs py-2 text-main"
-                      >
-                        <Icon
-                          icon="lucide:users"
-                          width="14"
-                          className="text-muted-custom"
-                        />
-                        <span>{t("landing.quanTriTaiKhoan")}</span>
-                      </Dropdown.Item>
-                      <Dropdown.Item
-                        onClick={logout}
-                        className="d-flex align-items-center gap-2 text-xs py-2 text-danger"
-                      >
-                        <Icon icon="lucide:log-out" width="14" />
-                        <span>{t("landing.dangXuat")}</span>
-                      </Dropdown.Item>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </>
+                    </div>
+                    <Dropdown.Item
+                      onClick={() => navigateWithLang(ROUTES.DASHBOARD)}
+                      className="flex items-center gap-2 text-xs py-2 px-3 rounded cursor-pointer text-foreground hover:bg-muted/50"
+                    >
+                      <Icon
+                        icon="lucide:layout-dashboard"
+                        width="14"
+                        className="text-muted-custom"
+                      />
+                      <span>{t("landing.bangDieuKhien")}</span>
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={() => navigateWithLang(accountManagementRoute)}
+                      className="flex items-center gap-2 text-xs py-2 px-3 rounded cursor-pointer text-foreground hover:bg-muted/50"
+                    >
+                      <Icon
+                        icon="lucide:users"
+                        width="14"
+                        className="text-muted-custom"
+                      />
+                      <span>{t("landing.quanTriTaiKhoan")}</span>
+                    </Dropdown.Item>
+                    <Dropdown.Item
+                      onClick={logout}
+                      className="flex items-center gap-2 text-xs py-2 px-3 rounded cursor-pointer text-destructive hover:bg-destructive/10"
+                    >
+                      <Icon icon="lucide:log-out" width="14" />
+                      <span>{t("landing.dangXuat")}</span>
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
               ) : (
-                <>
+                <div className="flex items-center gap-2">
                   <Button
-                    variant="outline-secondary"
-                    className="text-xs rounded-pill px-3"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs rounded-full px-3 h-8"
                     onClick={handleAuthLogin}
                   >
                     {t("signIn")}
                   </Button>
                   <Button
-                    className="btn-primary-glow border-0 text-white text-xs rounded-pill px-3"
+                    size="sm"
+                    className="btn-primary-glow border-0 text-white text-xs rounded-full px-3 h-8"
                     onClick={handleAuthRegister}
                   >
                     {t("signUp")}
                   </Button>
-                </>
+                </div>
               )}
             </div>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+          </div>
+        </div>
+      </header>
 
-      {/* Mobile Menu Drawer (Offcanvas) — width scales down on very narrow screens */}
+      {/* Mobile Menu Drawer (Offcanvas) */}
       <Offcanvas
         show={showMobileMenu}
         onHide={() => setShowMobileMenu(false)}
         placement="end"
-        className="bg-white text-dark border-start border-light"
-        style={{
-          width: "min(280px, 85vw)",
-          maxWidth: "100vw",
-          backgroundColor: "var(--bg-card)",
-          color: "var(--text-main)",
-        }}
+        className="w-[min(280px,85vw)] bg-card text-foreground"
       >
-        <Offcanvas.Header
-          closeButton
-          closeVariant="dark"
-          className="border-bottom border-light py-3"
-        >
+        <Offcanvas.Header className="border-b border-border py-3 px-4">
           <Offcanvas.Title
-            className="d-flex align-items-center text-main"
+            className="flex items-center text-main"
             style={{
               fontFamily: "var(--font-display)",
               fontWeight: 800,
@@ -361,16 +329,14 @@ export default function Header() {
           </Offcanvas.Title>
         </Offcanvas.Header>
 
-        <Offcanvas.Body className="d-flex flex-column py-3">
-          {/* User profile — moved to top, responsive across drawer widths */}
+        <Offcanvas.Body className="flex flex-col py-3 px-4">
+          {/* User profile */}
           {email && (
             <div
-              className="d-flex align-items-center gap-2 gap-sm-3 p-2 rounded-3 user-profile-card"
+              className="flex items-center gap-2 p-2 rounded-lg user-profile-card cursor-pointer transition-colors"
               style={{
                 background: "#f8fafc",
                 border: "1px solid var(--border)",
-                cursor: "pointer",
-                transition: "background 0.15s ease",
               }}
               role="button"
               tabIndex={0}
@@ -385,15 +351,9 @@ export default function Header() {
                   navigateWithLang(accountManagementRoute);
                 }
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.background = "#f1f5f9")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.background = "#f8fafc")
-              }
             >
               <div
-                className="d-flex align-items-center justify-content-center text-white flex-shrink-0"
+                className="flex items-center justify-center text-white shrink-0"
                 style={{
                   width: "36px",
                   height: "36px",
@@ -404,41 +364,38 @@ export default function Header() {
               >
                 <Icon icon="lucide:user" width="16" />
               </div>
-              <div
-                className="d-flex flex-column flex-grow-1"
-                style={{ minWidth: 0 }}
-              >
-                <span className="text-xs text-main font-bold text-truncate">
+              <div className="flex flex-col flex-grow min-w-0">
+                <span className="text-xs text-main font-bold truncate">
                   {t("landing.nguoiDung")}
                 </span>
-                <span
-                  className="text-muted text-truncate text-xs mt-0.5"
-                >
+                <span className="text-muted truncate text-xs mt-0.5">
                   {email}
                 </span>
               </div>
             </div>
           )}
 
-          <div className="d-flex flex-column gap-3 justify-content-between flex-grow-1 mt-3">
-            <Nav className="flex-column gap-3">
+          <div className="flex flex-col gap-3 justify-between flex-grow mt-3">
+            <nav className="flex flex-col gap-1">
               {!!email && (
                 <>
-                  <Nav.Link
+                  <button
+                    type="button"
                     onClick={() => {
                       setShowMobileMenu(false);
                       navigateWithLang(ROUTES.DASHBOARD);
                     }}
-                    className="text-muted-custom hover:text-main py-2 text-sm font-semibold border-bottom border-light"
+                    className="text-left text-muted-custom hover:text-main py-2 text-sm font-semibold border-b border-border bg-transparent border-0 cursor-pointer"
                   >
                     {t("author.tongQuan")}
-                  </Nav.Link>
-                  <Nav.Link
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => {
                       setShowMobileMenu(false);
                       navigateWithLang(ROUTES.PROJECTS);
                     }}
-                    className="text-muted-custom hover:text-main py-2 text-sm font-semibold border-bottom border-light"
+                    className="text-left text-muted-custom hover:text-main py-2 text-sm font-semibold border-b border-border bg-transparent border-0 cursor-pointer"
                     style={{
                       color: cleanPathname.startsWith(ROUTES.PROJECTS)
                         ? "var(--primary)"
@@ -449,24 +406,26 @@ export default function Header() {
                     }}
                   >
                     {t("landing.duAn")}
-                  </Nav.Link>
+                  </button>
                 </>
               )}
-              <Nav.Link
+              <button
+                type="button"
                 onClick={() => {
                   setShowMobileMenu(false);
                   navigateWithLang(ROUTES.CATALOG);
                 }}
-                className="text-muted-custom hover:text-main py-2 text-sm font-semibold border-bottom border-light"
+                className="text-left text-muted-custom hover:text-main py-2 text-sm font-semibold border-b border-border bg-transparent border-0 cursor-pointer"
               >
                 {t("search")}
-              </Nav.Link>
-              <Nav.Link
+              </button>
+              <button
+                type="button"
                 onClick={() => {
                   setShowMobileMenu(false);
                   navigateWithLang(ROUTES.ARTICLES);
                 }}
-                className="text-muted-custom hover:text-main py-2 text-sm font-semibold border-bottom border-light"
+                className="text-left text-muted-custom hover:text-main py-2 text-sm font-semibold border-b border-border bg-transparent border-0 cursor-pointer"
                 style={{
                   color: cleanPathname.startsWith(ROUTES.ARTICLES)
                     ? "var(--primary)"
@@ -477,12 +436,12 @@ export default function Header() {
                 }}
               >
                 {t("articles")}
-              </Nav.Link>
-            </Nav>
+              </button>
+            </nav>
 
-            <div className="d-flex flex-column gap-3 mt-auto">
-              {/* Mobile Language Switcher: title left, dropdown right */}
-              <div className="d-flex align-items-center justify-content-between py-2 border-top border-bottom border-light">
+            <div className="flex flex-col gap-3 mt-auto">
+              {/* Mobile Language Switcher */}
+              <div className="flex items-center justify-between py-2 border-t border-b border-border">
                 <span className="text-xs font-bold text-main">
                   {t("landing.ngonNgu")}
                 </span>
@@ -490,27 +449,25 @@ export default function Header() {
                   <Dropdown.Toggle
                     as="button"
                     type="button"
-                    className="border-0 bg-transparent d-inline-flex align-items-center gap-2 text-xs font-bold p-0 text-main"
-                    style={{ cursor: "pointer" }}
+                    className="border-0 bg-transparent inline-flex items-center gap-2 text-xs font-bold p-0 text-main cursor-pointer"
                   >
                     {currentLanguage.label}
                     <Icon icon="lucide:chevron-down" width="14" />
                   </Dropdown.Toggle>
-                  <Dropdown.Menu
-                    className="border-0 shadow-sm mt-2"
-                    style={dropdownMenuStyle}
-                  >
+                  <Dropdown.Menu className="border border-border shadow-md mt-2 p-1 min-w-[170px]">
                     {LANGUAGES.map((lang) => (
                       <Dropdown.Item
                         key={lang.code}
                         onClick={() => changeLanguage(lang.code)}
-                        className={`d-flex align-items-center justify-content-between text-xs py-2 ${language.startsWith(lang.code) ? "text-primary" : "text-dark"}`}
+                        className={`flex items-center justify-between text-xs py-2 px-3 rounded cursor-pointer ${
+                          language.startsWith(lang.code) ? "text-primary font-semibold" : "text-foreground"
+                        }`}
                       >
                         <span>{lang.label}</span>
                         {language.startsWith(lang.code) && (
                           <Icon
                             icon="lucide:check"
-                            className="text-primary text-xs ms-2"
+                            className="text-primary text-xs ml-2"
                           />
                         )}
                       </Dropdown.Item>
@@ -522,8 +479,8 @@ export default function Header() {
               {/* Mobile Auth options */}
               {email ? (
                 <Button
-                  variant="danger"
-                  className="w-100 rounded-pill py-2 text-xs font-bold"
+                  variant="destructive"
+                  className="w-full rounded-full py-2 text-xs font-bold h-9"
                   onClick={() => {
                     logout();
                     setShowMobileMenu(false);
@@ -534,10 +491,10 @@ export default function Header() {
                     : "Sign Out"}
                 </Button>
               ) : (
-                <div className="d-flex flex-column gap-2">
+                <div className="flex flex-col gap-2">
                   <Button
-                    variant="outline-primary"
-                    className="w-100 rounded-pill py-2.5 text-xs font-bold"
+                    variant="outline"
+                    className="w-full rounded-full py-2.5 text-xs font-bold h-9"
                     onClick={() => {
                       setShowMobileMenu(false);
                       handleAuthLogin();
@@ -546,7 +503,7 @@ export default function Header() {
                     {t("signIn")}
                   </Button>
                   <Button
-                    className="btn-primary-glow w-100 rounded-pill py-2.5 text-xs font-bold border-0 text-white"
+                    className="btn-primary-glow w-full rounded-full py-2.5 text-xs font-bold border-0 text-white h-9"
                     onClick={() => {
                       setShowMobileMenu(false);
                       handleAuthRegister();

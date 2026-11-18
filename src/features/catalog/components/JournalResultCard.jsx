@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
  *
  * File: features\catalog\components\JournalResultCard.jsx
  */
-import { Card, Button, Badge } from 'react-bootstrap';
+import { Card } from '../../../shared/ui/card';
+import { Button } from '../../../shared/ui/button';
+import { Badge } from '../../../shared/ui/badge';
 import { Link, useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 export default function JournalResultCard({

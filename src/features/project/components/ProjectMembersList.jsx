@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
-import { Dropdown } from 'react-bootstrap';
+import { Dropdown } from '../../../shared/ui/dropdown-menu';
 import { useAuthStore } from '../../../app/store/authStore';
 import { useUserStore } from '../../../app/store/userStore';
 import { Button } from '../../../shared/ui/button';

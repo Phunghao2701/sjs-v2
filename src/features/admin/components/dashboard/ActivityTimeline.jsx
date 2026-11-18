@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useState } from 'react';
-import { Modal } from 'react-bootstrap';
+import { Modal } from '../../../../shared/ui/modal';
 import PrimaryButton from '../../../../shared/components/Button/PrimaryButton';
 export default function ActivityTimeline({
   items = [],

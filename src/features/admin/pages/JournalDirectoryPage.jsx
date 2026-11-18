@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Row } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
 import { useJournalManagement } from '../../journal/hooks/useJournalManagement';
 import JournalFilterBar from '../components/journals/JournalFilterBar';
@@ -115,11 +114,11 @@ export default function JournalDirectoryPage() {
           <JournalTableAdmin journals={paginatedJournals} />
         </div>
       ) : (
-        <Row className="g-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {paginatedJournals.map((j) => (
             <JournalCardAdmin key={j.id || j.journal_id} journal={j} />
           ))}
-        </Row>
+        </div>
       )}
 
       {/* Pagination Controls */}

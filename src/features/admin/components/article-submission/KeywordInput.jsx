@@ -1,15 +1,10 @@
 import { useState } from 'react';
-import { Form, Badge } from 'react-bootstrap';
+import { Badge } from '../../../../shared/ui/badge';
 import Icon from '../../../../shared/components/Icon';
 
 /**
  * KeywordInput Component
  * Allows users to add and manage keywords as a tag-list/chip-list.
- * 
- * @param {Object} props - Props
- * @param {Array} props.keywords - Array of string keywords
- * @param {function} props.onChange - Callback triggered on tags list changes
- * @param {string} props.placeholder - Placeholder text when empty
  */
 export default function KeywordInput({
   keywords = [],
@@ -18,14 +13,10 @@ export default function KeywordInput({
 }) {
   const [inputValue, setInputValue] = useState('');
 
-  /**
-   * Add keyword to list from input field.
-   */
   const addKeyword = (value) => {
     const trimmed = value.trim();
     if (!trimmed) return;
 
-    // Check for duplicates
     if (!keywords.includes(trimmed)) {
       const updated = [...keywords, trimmed];
       onChange(updated);
@@ -33,9 +24,6 @@ export default function KeywordInput({
     setInputValue('');
   };
 
-  /**
-   * Key down listener to catch Enter key.
-   */
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -43,22 +31,15 @@ export default function KeywordInput({
     }
   };
 
-  /**
-   * Input change listener to check for commas.
-   */
   const handleInputChange = (e) => {
     const val = e.target.value;
     if (val.endsWith(',')) {
-      // Add keyword if comma is entered
       addKeyword(val.slice(0, -1));
     } else {
       setInputValue(val);
     }
   };
 
-  /**
-   * Remove a specific keyword from list.
-   */
   const removeKeyword = (idxToRemove) => {
     const updated = keywords.filter((_, idx) => idx !== idxToRemove);
     onChange(updated);
@@ -66,31 +47,20 @@ export default function KeywordInput({
 
   return (
     <div 
-      className="d-flex flex-wrap gap-2 align-items-center p-2 rounded-3" 
-      style={{ 
-        backgroundColor: '#f1f5f9', 
-        border: 'none', 
-        minHeight: '46px',
-        padding: '0.45rem 1rem' 
-      }}
+      className="flex flex-wrap gap-2 items-center p-2 rounded-lg bg-muted/40 border border-border min-h-[46px]"
     >
       {/* Render tags */}
       {keywords.map((kw, index) => (
         <Badge 
           key={index} 
-          className="rounded-pill d-flex align-items-center gap-1.5 px-2.5 py-1.5 fw-normal text-xs"
-          style={{
-            backgroundColor: '#ffffff',
-            color: 'var(--text-main)',
-            border: '1px solid #cbd5e1',
-          }}
+          variant="secondary"
+          className="rounded-full flex items-center gap-1.5 px-2.5 py-1 text-xs font-normal bg-surface border border-border text-foreground"
         >
           <span>{kw}</span>
           <Icon 
             icon="lucide:x" 
             width="13" 
-            style={{ cursor: 'pointer' }} 
-            className="text-muted hover-danger"
+            className="cursor-pointer text-muted-foreground hover:text-destructive transition-colors"
             onClick={() => removeKeyword(index)} 
           />
         </Badge>
@@ -104,14 +74,7 @@ export default function KeywordInput({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onBlur={() => addKeyword(inputValue)}
-        className="border-0 bg-transparent flex-grow-1"
-        style={{
-          outline: 'none',
-          fontSize: '14px',
-          color: 'var(--text-main)',
-          minWidth: '120px',
-          padding: '4px'
-        }}
+        className="border-0 bg-transparent flex-1 text-sm text-foreground focus:outline-none focus:ring-0 min-w-[120px] p-1"
       />
     </div>
   );

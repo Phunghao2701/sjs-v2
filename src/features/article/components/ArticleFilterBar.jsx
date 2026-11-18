@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
-import { Dropdown } from 'react-bootstrap';
+import { Dropdown } from '../../../shared/ui/dropdown-menu';
 import { Icon } from '@iconify/react';
 import { Card } from '../../../shared/ui/card';
 import { Button } from '../../../shared/ui/button';
@@ -374,7 +374,7 @@ export default function ArticleFilterBar({
         <Dropdown.Toggle
           as="button"
           id={`article-filter-${config.id}`}
-          className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap after:!hidden cursor-pointer ${
+          className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs whitespace-nowrap after:!hidden cursor-pointer ${
             config.selectedLabel ? 'border-primary text-primary bg-primary-subtle font-semibold' : 'border-border'
           }`}
           disabled={loadingFilters}
@@ -517,7 +517,7 @@ export default function ArticleFilterBar({
           <Dropdown.Toggle
             as="button"
             id="article-access-filters"
-            className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap after:!hidden cursor-pointer ${
+            className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors !inline-flex !flex-row !items-center !gap-1.5 shadow-2xs whitespace-nowrap after:!hidden cursor-pointer ${
               isMoreFiltersActive ? 'border-primary text-primary bg-primary-subtle font-semibold' : 'border-border'
             }`}
           >
@@ -574,7 +574,7 @@ export default function ArticleFilterBar({
           <Dropdown.Toggle
             variant="light"
             id="article-sort-filters"
-            className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors inline-flex items-center gap-1.5 shadow-2xs hover:bg-surface-muted whitespace-nowrap ${
+            className={`h-9 px-3 text-xs rounded-control border bg-surface text-foreground font-medium transition-colors inline-flex items-center gap-1.5 shadow-2xs whitespace-nowrap ${
               currentSortValue !== 'created_at-desc' ? 'border-primary text-primary bg-primary-subtle font-semibold' : 'border-border'
             }`}
           >

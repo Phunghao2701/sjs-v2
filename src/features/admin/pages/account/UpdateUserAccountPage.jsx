@@ -1,17 +1,16 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useEffect, useState } from 'react';
-import { Card } from 'react-bootstrap';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import UserAccountForm from '../../components/account/UserAccountForm';
 import { getAdminUserById, updateAdminUser } from '../../api/adminUsers.api';
-import Icon from '../../../../shared/components/Icon';
 import ROUTES from '../../../../app/routes/routePaths';
 import { Alert } from '../../../../shared/ui/alert';
-import { Button } from '../../../../shared/ui/button';
 import { PageHeader } from '../../../../shared/ui/page-layout';
 import { Skeleton } from '../../../../shared/ui/skeleton';
 import { StatePanel } from '../../../../shared/ui/state-panel';
+import { Card } from '../../../../shared/ui/card';
+
 const getApiErrorMessage = (error, fallback) => {
   if (error.response?.status === 403) {
     return t("admin.backendTuChoiQuyenAdminTokenHi");
@@ -47,14 +46,13 @@ const normalizeUser = (user = {}) => ({
 export default function UpdateUserAccountPage() {
   const { t: _t } = useTranslation();
   const navigate = useNavigate();
-  const {
-    id
-  } = useParams();
+  const { id } = useParams();
   const [userItem, setUserItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadingError, setLoadingError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+
   useEffect(() => {
     let isMounted = true;
     const fetchUser = async () => {
@@ -78,9 +76,6 @@ export default function UpdateUserAccountPage() {
     };
   }, [id]);
 
-  /**
-   * Cập nhật thông tin người dùng qua API thật.
-   */
   const handleFormSubmit = async payload => {
     try {
       setSubmitting(true);
@@ -94,12 +89,13 @@ export default function UpdateUserAccountPage() {
       setSubmitting(false);
     }
   };
+
   if (loading) {
     return (
-      <div className="container-fluid py-4 max-w-[800px] mx-auto space-y-4">
+      <div className="w-full max-w-[800px] mx-auto py-4 space-y-4">
         <Skeleton className="h-8 w-48" />
         <Skeleton className="h-4 w-96" />
-        <Card className="p-5 rounded-4 border bg-white space-y-4">
+        <Card className="p-6 rounded-2xl border border-border bg-surface space-y-4">
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
@@ -107,9 +103,10 @@ export default function UpdateUserAccountPage() {
       </div>
     );
   }
+
   if (!userItem) {
     return (
-      <div className="container-fluid py-6 max-w-[600px] mx-auto">
+      <div className="w-full max-w-[600px] mx-auto py-6">
         <StatePanel
           variant="error"
           title={t("admin.khongTimThayNguoiDung")}
@@ -122,8 +119,9 @@ export default function UpdateUserAccountPage() {
       </div>
     );
   }
+
   return (
-    <div className="container-fluid py-2 space-y-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-6">
       <PageHeader
         breadcrumbs={[
           { label: 'Platform Directory', to: ROUTES.ADMIN_USERS },
@@ -134,8 +132,8 @@ export default function UpdateUserAccountPage() {
         description="Modify profile settings, adjust organizational roles, and update security credentials for this platform contributor."
       />
 
-      <div className="mx-auto" style={{ maxWidth: '800px' }}>
-        <Card className="p-4 p-md-5 rounded-4 border bg-white shadow-sm mb-5">
+      <div className="mx-auto max-w-[800px]">
+        <Card className="p-6 md:p-8 rounded-2xl border border-border bg-surface shadow-2xs mb-6">
           {submitError && (
             <Alert variant="destructive" className="mb-4">
               {submitError}

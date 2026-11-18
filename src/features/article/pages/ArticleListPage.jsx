@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Modal } from 'react-bootstrap';
+import { Modal } from '../../../shared/ui/modal';
 import { Icon } from '@iconify/react';
 import useArticleList from '../hooks/useArticleList';
 import ArticleStatsCards from '../components/ArticleStatsCards';
@@ -35,16 +35,6 @@ export default function ArticleListPage() {
     <PageContainer>
       {/* Unified Design System PageHeader */}
       <PageHeader
-        breadcrumbs={[
-          { label: "Workspace", to: "/dashboard" },
-          { label: t("articles", "Scientific Articles") }
-        ]}
-        badge={
-          <Badge variant="info" className="gap-1.5 py-1 px-2.5 text-xs font-semibold">
-            <Icon icon="lucide:library-big" width="14" height="14" />
-            <span>Trending System Repository</span>
-          </Badge>
-        }
         title={t("article.khoLuuTruBaiBaoKhoaHoc", "Scientific Articles Repository")}
         description={t("article.duyetQuaTimKiemVaLocHangNghinB", "Search, filter, and discover millions of high-impact scientific publications.")}
         actions={

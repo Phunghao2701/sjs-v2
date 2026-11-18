@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState, useEffect } from 'react';
-import { Form, Row, Col } from 'react-bootstrap';
 import Icon from '../../../../shared/components/Icon';
 import PrimaryButton from '../../../../shared/components/Button/PrimaryButton';
 import { SYSTEM_ROLES } from '../../../../shared/constants/systemConstants';
+
 const getUserInitial = (name = '', email = '') => {
   const source = String(name || email || 'U').trim();
   return source.charAt(0).toUpperCase() || 'U';
@@ -13,7 +13,6 @@ const getUserInitial = (name = '', email = '') => {
 /**
  * UserAccountForm Component
  * Unified form for adding new user accounts or updating profile details.
- * Styled in high-fidelity to match the mockup.
  */
 export default function UserAccountForm({
   initialData = {},
@@ -31,7 +30,7 @@ export default function UserAccountForm({
   const [phone, setPhone] = useState('');
   const [institution, setInstitution] = useState('');
   const [role, setRole] = useState(isEdit ? 'RESEARCHER' : '');
-  const [status, setStatus] = useState('Active'); // Active, Inactive
+  const [status, setStatus] = useState('Active');
 
   // Passwords states
   const [currentPassword, setCurrentPassword] = useState('');
@@ -55,56 +54,56 @@ export default function UserAccountForm({
     }
   }, [isEdit, initialData]);
 
-  /**
-   * Handle form submit with client-side validation.
-   */
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
 
-    // Common validations
-    if (!email.trim() || !role) {
-      setError(t("admin.vuiLongDienDayDuCacTruongThong"));
-      return;
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError(t("admin.diaChiEmailKhongHopLe"));
-      return;
-    }
-
-    // Name validations
     if (isEdit) {
       if (!fullName.trim()) {
-        setError(t("admin.hoVaTenLaBatBuoc"));
+        setError(t("admin.vuiLongNhapDayDuHoVaTen"));
         return;
       }
     } else {
       if (!firstName.trim() || !lastName.trim()) {
-        setError(t("admin.hoVaTenLaBatBuoc1"));
+        setError(t("admin.vuiLongNhapDayDuHoVaTen"));
         return;
       }
     }
 
-    // Password validation (only if added or if new password was keyed during edit)
-    if (!isEdit || newPassword || confirmPassword) {
-      if (!isEdit && !newPassword) {
-        setError(t("admin.matKhauLaBatBuoc"));
+    if (!email.trim()) {
+      setError(t("admin.vuiLongNhapDiaChiEmail"));
+      return;
+    }
+
+    if (!role) {
+      setError(t("admin.vuiLongChonVaiTro"));
+      return;
+    }
+
+    if (!isEdit) {
+      if (!newPassword) {
+        setError(t("admin.vuiLongNhapMatKhau"));
         return;
       }
       if (newPassword.length < 8) {
-        setError(t("admin.matKhauPhaiChuaItNhat8KyTu"));
+        setError(t("admin.matKhauPhaiCoItNhat8KyTu"));
         return;
       }
       if (newPassword !== confirmPassword) {
-        setError(t("admin.matKhauXacNhanKhongKhop"));
+        setError(t("admin.xacNhanMatKhauKhongKhop"));
+        return;
+      }
+    } else if (newPassword) {
+      if (newPassword.length < 8) {
+        setError(t("admin.matKhauMoiPhaiCoItNhat8KyTu"));
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        setError(t("admin.xacNhanMatKhauMoiKhongKhop"));
         return;
       }
     }
 
-    // Construct request payload
     const payload = {
       email: email.trim(),
       phone: phone.trim(),
@@ -112,11 +111,12 @@ export default function UserAccountForm({
       role,
       status
     };
+
     if (isEdit) {
-      const names = fullName.trim().split(' ');
-      payload.first_name = names[0] || '';
-      payload.last_name = names.slice(1).join(' ') || '';
       payload.name = fullName.trim();
+      const parts = fullName.trim().split(' ');
+      payload.first_name = parts[0] || '';
+      payload.last_name = parts.slice(1).join(' ') || '';
       if (newPassword) {
         payload.password = newPassword;
       }
@@ -127,217 +127,283 @@ export default function UserAccountForm({
       payload.password = newPassword;
     }
 
-    // Bubble up to parent
     onSubmit(payload);
   };
+
   const displayName = isEdit ? fullName : `${firstName} ${lastName}`.trim();
   const avatarInitial = getUserInitial(displayName, email);
-  return <Form onSubmit={handleSubmit} className="d-flex flex-column gap-4">
-      {error && <div className="alert alert-danger py-2.5 px-3.5 small border-0 rounded-3">
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 text-left">
+      {error && (
+        <div className="bg-destructive/10 text-destructive border border-destructive/20 py-2.5 px-3.5 text-xs rounded-lg font-medium">
           {error}
-        </div>}
+        </div>
+      )}
 
       {/* Profile identity section */}
-      {isEdit && <div className="d-flex align-items-center gap-4 py-3 border-bottom">
-          <div className="rounded-4 d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0" style={{
-        width: '80px',
-        height: '80px',
-        background: 'linear-gradient(135deg, #3393CB 0%, #005A96 100%)',
-        fontSize: '16px',
-        boxShadow: '0 12px 24px rgba(234, 88, 12, 0.18)'
-      }} aria-label={`Avatar chữ cái đầu của ${displayName || email || t("admin.nguoiDung")}`}>
+      {isEdit && (
+        <div className="flex items-center gap-4 py-3 border-b border-border">
+          <div 
+            className="size-20 rounded-2xl flex items-center justify-center text-white font-bold shrink-0 text-xl shadow-md bg-gradient-to-br from-primary to-primary-hover"
+            aria-label={`Avatar chữ cái đầu của ${displayName || email || t("admin.nguoiDung")}`}
+          >
             {avatarInitial}
           </div>
           <div>
-            <div className="fw-bold text-main mb-1" style={{
-          fontSize: '16px'
-        }}>{fullName || t("admin.chuaCoTenNguoiDung")}</div>
-            <div className="text-muted-custom small mb-0">{t("admin.hienThiAvatarBangChuCaiDauCuaN")}</div>
+            <div className="font-bold text-foreground text-base mb-1">{fullName || t("admin.chuaCoTenNguoiDung")}</div>
+            <div className="text-muted-foreground text-xs">{t("admin.hienThiAvatarBangChuCaiDauCuaN")}</div>
           </div>
-        </div>}
+        </div>
+      )}
 
       {/* Section 1: Personal Information */}
       <div>
-        <h6 className="fw-bold d-flex align-items-center gap-2 mb-3.5 tracking-wider text-uppercase" style={{
-        fontSize: '14px',
-        color: '#005A96',
-        letterSpacing: '0.03em'
-      }}>
-          <Icon icon="lucide:user" width="16" style={{
-          color: '#005A96'
-        }} />{t("admin.thongTinCaNhan")}</h6>
+        <h6 className="font-bold flex items-center gap-2 mb-4 tracking-wider uppercase text-xs text-primary">
+          <Icon icon="lucide:user" width="16" />
+          {t("admin.thongTinCaNhan")}
+        </h6>
         
-        <Row className="g-3">
-          {isEdit ?
-        // Full Name input for edit screen
-        <Col xs={12} md={6}>
-              <Form.Group controlId="fullName">
-                <Form.Label className="account-form-label">{t("admin.hoVaTen")}<span className="text-danger">*</span>
-                </Form.Label>
-                <Form.Control type="text" placeholder={t("admin.viDuNguyenVanA")} value={fullName} onChange={e => setFullName(e.target.value)} required className="account-form-input" />
-              </Form.Group>
-            </Col> :
-        // First/Last Name inputs for add screen (mockup 50% each)
-        <>
-              <Col xs={12} md={6}>
-                <Form.Group controlId="firstName">
-                  <Form.Label className="account-form-label">{t("admin.ho")}<span className="text-danger">*</span>
-                  </Form.Label>
-                  <Form.Control type="text" placeholder={t("admin.viDuNguyen")} value={firstName} onChange={e => setFirstName(e.target.value)} required className="account-form-input" />
-                </Form.Group>
-              </Col>
-              <Col xs={12} md={6}>
-                <Form.Group controlId="lastName">
-                  <Form.Label className="account-form-label">{t("admin.ten")}<span className="text-danger">*</span>
-                  </Form.Label>
-                  <Form.Control type="text" placeholder={t("admin.viDuVanA")} value={lastName} onChange={e => setLastName(e.target.value)} required className="account-form-input" />
-                </Form.Group>
-              </Col>
-            </>}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {isEdit ? (
+            <div>
+              <label htmlFor="fullName" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+                {t("admin.hoVaTen")}<span className="text-destructive">*</span>
+              </label>
+              <input
+                id="fullName"
+                type="text"
+                placeholder={t("admin.viDuNguyenVanA")}
+                value={fullName}
+                onChange={e => setFullName(e.target.value)}
+                required
+                className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+          ) : (
+            <>
+              <div>
+                <label htmlFor="firstName" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+                  {t("admin.ho")}<span className="text-destructive">*</span>
+                </label>
+                <input
+                  id="firstName"
+                  type="text"
+                  placeholder={t("admin.viDuNguyen")}
+                  value={firstName}
+                  onChange={e => setFirstName(e.target.value)}
+                  required
+                  className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label htmlFor="lastName" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+                  {t("admin.ten")}<span className="text-destructive">*</span>
+                </label>
+                <input
+                  id="lastName"
+                  type="text"
+                  placeholder={t("admin.viDuVanA")}
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                  required
+                  className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+                />
+              </div>
+            </>
+          )}
 
           {/* Email field */}
-          <Col xs={12} md={6}>
-            <Form.Group controlId="emailAddress">
-              <Form.Label className="account-form-label">{t("admin.diaChiEmail")}<span className="text-danger">*</span>
-              </Form.Label>
-              <Form.Control type="email" placeholder={t("admin.nameuniversityeduvn")} value={email} onChange={e => setEmail(e.target.value)} required className="account-form-input" />
-            </Form.Group>
-          </Col>
+          <div>
+            <label htmlFor="emailAddress" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+              {t("admin.diaChiEmail")}<span className="text-destructive">*</span>
+            </label>
+            <input
+              id="emailAddress"
+              type="email"
+              placeholder={t("admin.nameuniversityeduvn")}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
+              className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+            />
+          </div>
 
           {/* Phone field */}
-          <Col xs={12} md={6}>
-            <Form.Group controlId="phoneNumber">
-              <Form.Label className="account-form-label">{t("admin.soDienThoai")}</Form.Label>
-              <Form.Control type="text" placeholder={t("admin.0901234567")} value={phone} onChange={e => setPhone(e.target.value)} className="account-form-input" />
-            </Form.Group>
-          </Col>
+          <div>
+            <label htmlFor="phoneNumber" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+              {t("admin.soDienThoai")}
+            </label>
+            <input
+              id="phoneNumber"
+              type="text"
+              placeholder={t("admin.0901234567")}
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+            />
+          </div>
 
-          {/* Institution field (Only visible on Edit Profile) */}
-          {isEdit && <Col xs={12} md={6}>
-              <Form.Group controlId="institution">
-                <Form.Label className="account-form-label">{t("admin.donViTruongDaiHoc")}</Form.Label>
-                <Form.Control type="text" placeholder={t("admin.oxfordUniversityPress")} value={institution} onChange={e => setInstitution(e.target.value)} className="account-form-input" />
-              </Form.Group>
-            </Col>}
-        </Row>
+          {/* Institution field */}
+          {isEdit && (
+            <div>
+              <label htmlFor="institution" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+                {t("admin.donViTruongDaiHoc")}
+              </label>
+              <input
+                id="institution"
+                type="text"
+                placeholder={t("admin.oxfordUniversityPress")}
+                value={institution}
+                onChange={e => setInstitution(e.target.value)}
+                className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Section 2: Role & Status */}
-      <div className="py-3 border-top">
-        <h6 className="fw-bold d-flex align-items-center gap-2 mb-3.5 tracking-wider text-uppercase" style={{
-        fontSize: '14px',
-        color: '#005A96',
-        letterSpacing: '0.03em'
-      }}>
-          <Icon icon="lucide:shield" width="16" style={{
-          color: '#005A96'
-        }} />{t("admin.vaiTroTrangThai")}</h6>
+      <div className="pt-4 border-t border-border">
+        <h6 className="font-bold flex items-center gap-2 mb-4 tracking-wider uppercase text-xs text-primary">
+          <Icon icon="lucide:shield" width="16" />
+          {t("admin.vaiTroTrangThai")}
+        </h6>
 
-        <Row className="g-3 align-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
           {/* Role select */}
-          <Col xs={12} md={6}>
-            <Form.Group controlId="platformRole">
-              <Form.Label className="account-form-label">{t("admin.vaiTroTrenNenTang")}<span className="text-danger">*</span>
-              </Form.Label>
-              <Form.Select value={role} onChange={e => setRole(e.target.value)} className="account-form-input" style={{
-              cursor: 'pointer'
-            }} required>
-                <option value="" disabled hidden>{t("admin.chonVaiTro")}</option>
-                {SYSTEM_ROLES.map(r => <option key={r.value} value={r.value}>
-                    {r.label}
-                  </option>)}
-              </Form.Select>
-            </Form.Group>
-          </Col>
+          <div>
+            <label htmlFor="platformRole" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+              {t("admin.vaiTroTrenNenTang")}<span className="text-destructive">*</span>
+            </label>
+            <select
+              id="platformRole"
+              value={role}
+              onChange={e => setRole(e.target.value)}
+              className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer"
+              required
+            >
+              <option value="" disabled hidden>{t("admin.chonVaiTro")}</option>
+              {SYSTEM_ROLES.map(r => (
+                <option key={r.value} value={r.value}>
+                  {r.label}
+                </option>
+              ))}
+            </select>
+          </div>
 
-          {/* Status switch toggle container - mockup high fidelity styling */}
-          <Col xs={12} md={6}>
-            <div className="d-flex align-items-center justify-content-between px-3 rounded-3" style={{
-            height: '46px',
-            backgroundColor: '#f1f5f9',
-            marginTop: '28px' // Align vertical alignment with label spacing
-          }}>
-              <span className="small fw-semibold text-muted-custom" style={{
-              fontSize: '14px'
-            }}>{t("admin.trangThaiTaiKhoan")}</span>
-              <div className="d-flex align-items-center gap-2.5 orange-switch-toggle">
-                <Form.Check type="switch" id="status-toggle" checked={status === 'Active'} onChange={e => setStatus(e.target.checked ? 'Active' : 'Inactive')} />
-                <span className="small fw-bold text-main" style={{
-                fontSize: '14px'
-              }}>{status === 'Active' ? t("admin.hoatDong") : t("admin.voHieuHoa")}</span>
+          {/* Status switch toggle container */}
+          <div>
+            <label className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5 opacity-0 pointer-events-none md:block hidden">
+              Status
+            </label>
+            <div className="flex items-center justify-between px-3 rounded-lg h-10 bg-muted/40 border border-border">
+              <span className="text-xs font-semibold text-muted-foreground">{t("admin.trangThaiTaiKhoan")}</span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="status-toggle"
+                  checked={status === 'Active'}
+                  onChange={e => setStatus(e.target.checked ? 'Active' : 'Inactive')}
+                  className="rounded border-border text-primary focus:ring-0 cursor-pointer"
+                />
+                <label htmlFor="status-toggle" className="text-xs font-bold text-foreground cursor-pointer select-none">
+                  {status === 'Active' ? t("admin.hoatDong") : t("admin.voHieuHoa")}
+                </label>
               </div>
             </div>
-          </Col>
-        </Row>
+          </div>
+        </div>
       </div>
 
       {/* Section 3: Identity & Password */}
-      <div className="py-3 border-top">
-        <h6 className="fw-bold d-flex align-items-center gap-2 mb-3.5 tracking-wider text-uppercase" style={{
-        fontSize: '14px',
-        color: '#005A96',
-        letterSpacing: '0.03em'
-      }}>
-          <Icon icon="lucide:lock" width="16" style={{
-          color: '#005A96'
-        }} />{t("admin.thongTinDangNhap")}</h6>
+      <div className="pt-4 border-t border-border">
+        <h6 className="font-bold flex items-center gap-2 mb-4 tracking-wider uppercase text-xs text-primary">
+          <Icon icon="lucide:lock" width="16" />
+          {t("admin.thongTinDangNhap")}
+        </h6>
         
-        <Row className="g-3">
-          {/* Current Password - Only required for updating existing profile */}
-          {isEdit && <Col xs={12} md={4}>
-              <Form.Group controlId="currentPassword">
-                <Form.Label className="account-form-label">{t("admin.matKhauHienTai")}</Form.Label>
-                <Form.Control type="password" placeholder={t("admin.key")} value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className="account-form-input" />
-              </Form.Group>
-            </Col>}
+        <div className={`grid grid-cols-1 md:grid-cols-${isEdit ? '3' : '2'} gap-4`}>
+          {/* Current Password */}
+          {isEdit && (
+            <div>
+              <label htmlFor="currentPassword" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+                {t("admin.matKhauHienTai")}
+              </label>
+              <input
+                id="currentPassword"
+                type="password"
+                placeholder={t("admin.key")}
+                value={currentPassword}
+                onChange={e => setCurrentPassword(e.target.value)}
+                className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+              />
+            </div>
+          )}
 
           {/* New Password field */}
-          <Col xs={12} md={isEdit ? 4 : 6}>
-            <Form.Group controlId="newPassword">
-              <Form.Label className="account-form-label">
-                {isEdit ? t("admin.matKhauMoi") : t("admin.matKhauMoi1")}
-              </Form.Label>
-              <Form.Control type="password" placeholder={t("admin.key1")} value={newPassword} onChange={e => setNewPassword(e.target.value)} required={!isEdit} className="account-form-input" />
-            </Form.Group>
-          </Col>
+          <div>
+            <label htmlFor="newPassword" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+              {isEdit ? t("admin.matKhauMoi") : t("admin.matKhauMoi1")}
+            </label>
+            <input
+              id="newPassword"
+              type="password"
+              placeholder={t("admin.key1")}
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+              required={!isEdit}
+              className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+            />
+          </div>
 
           {/* Confirm password field */}
-          <Col xs={12} md={isEdit ? 4 : 6}>
-            <Form.Group controlId="confirmPassword">
-              <Form.Label className="account-form-label">
-                {isEdit ? t("admin.xacNhanMatKhau") : t("admin.xacNhanMatKhau1")}
-              </Form.Label>
-              <Form.Control type="password" placeholder={t("admin.key1")} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required={!isEdit} className="account-form-input" />
-            </Form.Group>
-          </Col>
-        </Row>
+          <div>
+            <label htmlFor="confirmPassword" className="account-form-label block text-xs font-bold uppercase tracking-wider text-foreground mb-1.5">
+              {isEdit ? t("admin.xacNhanMatKhau") : t("admin.xacNhanMatKhau1")}
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              placeholder={t("admin.key1")}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              required={!isEdit}
+              className="account-form-input w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+            />
+          </div>
+        </div>
 
-        {/* Password complexity helper note */}
-        <div className="form-text text-muted-custom mt-2.5 small" style={{
-        fontSize: '13px'
-      }}>{t("admin.matKhauPhaiChuaItNhat8KyTuBaoG")}</div>
+        <div className="text-muted-foreground mt-2 text-xs">
+          {t("admin.matKhauPhaiChuaItNhat8KyTuBaoG")}
+        </div>
       </div>
 
       {/* Form Action buttons */}
-      <div className="d-flex justify-content-end gap-3 mt-4 pt-4 border-top">
-        <PrimaryButton type="button" variant="outline" onClick={onCancel} className="px-4 py-2" style={{
-        fontSize: '14px'
-      }}>{t("admin.huy")}</PrimaryButton>
+      <div className="flex justify-end gap-3 pt-4 border-t border-border">
+        <PrimaryButton type="button" variant="outline" onClick={onCancel} className="px-5 py-2">
+          {t("admin.huy")}
+        </PrimaryButton>
         
-        <PrimaryButton type="submit" className="px-4 py-2" style={{
-        fontSize: '14px'
-      }} disabled={submitting}>
-          {submitting ? <>
+        <PrimaryButton type="submit" className="px-5 py-2" disabled={submitting}>
+          {submitting ? (
+            <>
               <Icon icon="lucide:loader-2" width="16" />
               <span>{t("admin.dangXuLy")}</span>
-            </> : isEdit ? <>
+            </>
+          ) : isEdit ? (
+            <>
               <Icon icon="lucide:save" width="16" />
               <span>{t("admin.luuThayDoi")}</span>
-            </> : <>
+            </>
+          ) : (
+            <>
               <Icon icon="lucide:user-plus" width="16" />
               <span>{t("admin.themTaiKhoan")}</span>
-            </>}
+            </>
+          )}
         </PrimaryButton>
       </div>
-    </Form>;
+    </form>
+  );
 }

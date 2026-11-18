@@ -116,12 +116,6 @@ export default function MyWalletPage() {
   };
   const getTxStatus = tx => tx?.status || tx?.transaction_status || tx?.payment_status || 'success';
   return <div className="my-wallet-page">
-      <div className="my-wallet-breadcrumb">
-        <span>Dashboard</span>
-        <Icon icon="lucide:chevron-right" width={12} />
-        <span>My Wallet</span>
-      </div>
-
       <div className="my-wallet-hero">
         <h1 className="my-wallet-title">{t("wallet.tongQuanTaiChinh")}</h1>
         <p className="my-wallet-subtitle">{t("wallet.theoDoiSoDuKiemTraLichSuBienDo")}</p>

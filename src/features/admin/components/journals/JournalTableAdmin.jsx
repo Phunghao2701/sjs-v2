@@ -1,8 +1,9 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
-import { Table, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../../../shared/ui/table';
+import { Button } from '../../../../shared/ui/button';
 import { StateCard } from '../../../../shared/components/Card';
 
 /**
@@ -15,95 +16,122 @@ export default function JournalTableAdmin({
 }) {
   const { t: _t } = useTranslation();
   const navigate = useNavigate();
+
   if (!journals || journals.length === 0) {
     return <StateCard variant="neutral" icon="lucide:search-x" title={t("admin.khongTimThayTapChiNao")} description={t("admin.hayThuThayDoiTuKhoaTimKiemHoac")} className="my-4 border-dashed" />;
   }
+
   const isPreview = window.location.pathname.startsWith('/admin-preview');
   const basePath = isPreview ? '/admin-preview' : '/admin';
-  return <div className="journal-table-shell table-responsive shadow-sm rounded-3 overflow-hidden">
-      <Table hover className="journal-table align-middle mb-0 text-start bg-white">
-        <thead className="table-light">
-          <tr>
-            <th className="py-3.5 ps-4 text-muted-custom">JOURNAL TITLE & CATEGORY</th>
-            <th className="py-3.5 text-muted-custom">ISSN</th>
-            <th className="py-3.5 text-muted-custom">PUBLISHER</th>
-            <th className="py-3.5 text-muted-custom">LAST UPDATED</th>
-            <th className="py-3.5 text-muted-custom">STATUS</th>
-            <th className="py-3.5 pe-4 text-end text-muted-custom" style={{
-            width: '120px'
-          }}>ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody>
+
+  return (
+    <div className="border border-border rounded-lg overflow-hidden bg-surface shadow-2xs">
+      <Table className="w-full text-left">
+        <TableHeader className="bg-muted/40">
+          <TableRow>
+            <TableHead className="py-3.5 pl-4 text-xs font-semibold text-muted-foreground uppercase">JOURNAL TITLE & CATEGORY</TableHead>
+            <TableHead className="py-3.5 text-xs font-semibold text-muted-foreground uppercase">ISSN</TableHead>
+            <TableHead className="py-3.5 text-xs font-semibold text-muted-foreground uppercase">PUBLISHER</TableHead>
+            <TableHead className="py-3.5 text-xs font-semibold text-muted-foreground uppercase">LAST UPDATED</TableHead>
+            <TableHead className="py-3.5 text-xs font-semibold text-muted-foreground uppercase">STATUS</TableHead>
+            <TableHead className="py-3.5 pr-4 text-right text-xs font-semibold text-muted-foreground uppercase w-[120px]">ACTIONS</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {journals.map(journal => {
-          const id = journal.id || journal.journal_id;
-          return <tr key={id} className="journal-table-row transition-hover admin-clickable-row" onClick={() => navigate(`${basePath}/journals/repository`)} tabIndex={0} onKeyDown={event => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              navigate(`${basePath}/journals/repository`);
-            }
-          }}>
-                <td className="py-3 ps-4">
-                  <button type="button" className="admin-link-button fw-bold text-main line-clamp-1 p-0 text-start" onClick={event => {
-                event.stopPropagation();
-                navigate(`${basePath}/journals/repository`);
-              }}>
+            const id = journal.id || journal.journal_id;
+            return (
+              <TableRow
+                key={id}
+                className="cursor-pointer hover:bg-muted/30 transition-colors"
+                onClick={() => navigate(`${basePath}/journals/repository`)}
+                tabIndex={0}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    navigate(`${basePath}/journals/repository`);
+                  }
+                }}
+              >
+                <TableCell className="py-3 pl-4">
+                  <button
+                    type="button"
+                    className="font-bold text-foreground hover:text-primary transition-colors line-clamp-1 p-0 text-left border-0 bg-transparent cursor-pointer"
+                    onClick={event => {
+                      event.stopPropagation();
+                      navigate(`${basePath}/journals/repository`);
+                    }}
+                  >
                     {journal.title || journal.display_name}
                   </button>
-                  <div className="text-muted-custom small mt-0.5">
+                  <div className="text-muted-foreground text-xs mt-0.5">
                     {journal.subjectCategory || 'General Category'} • Quarterly
                   </div>
-                </td>
+                </TableCell>
 
-                <td className="font-monospace small text-main">
+                <TableCell className="font-mono text-xs text-foreground">
                   {journal.issn || '—'}
-                </td>
+                </TableCell>
 
-                <td className="py-3">
-                  <div className="d-flex align-items-center gap-2">
-                    <div className="rounded-circle d-inline-flex align-items-center justify-content-center text-muted-custom" style={{
-                  width: '32px',
-                  height: '32px',
-                  backgroundColor: 'var(--bg-chip)',
-                  border: '1px solid var(--border)',
-                  flexShrink: 0
-                }} aria-hidden="true">
+                <TableCell className="py-3">
+                  <div className="flex items-center gap-2">
+                    <div className="size-8 rounded-full bg-muted border border-border flex items-center justify-center text-muted-foreground shrink-0" aria-hidden="true">
                       <Icon icon="lucide:building-2" width="15" />
                     </div>
-                    <span className="text-main fw-semibold">{journal.publisher || t("admin.chuaChiDinh")}</span>
+                    <span className="text-foreground font-semibold text-sm">{journal.publisher || t("admin.chuaChiDinh")}</span>
                   </div>
-                </td>
+                </TableCell>
 
-                <td className="text-muted-custom small font-monospace">
+                <TableCell className="text-muted-foreground text-xs font-mono">
                   {journal.lastUpdated || '—'}
-                </td>
+                </TableCell>
 
-                <td>
-                  <span className={`badge px-2.5 py-1.5 rounded-pill text-uppercase text-xs font-semibold ${journal.status === 'Active' || journal.status === 'Published' ? 'admin-status-badge admin-status-badge--accent' : journal.status === 'Under Review' || journal.status === 'Draft' ? 'admin-status-badge admin-status-badge--warning' : 'admin-status-badge admin-status-badge--muted'}`}>
+                <TableCell>
+                  <span className={`px-2.5 py-1 rounded-full uppercase text-[10px] font-semibold ${
+                    journal.status === 'Active' || journal.status === 'Published'
+                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
+                      : journal.status === 'Under Review' || journal.status === 'Draft'
+                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300'
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
                     {journal.status || 'Draft'}
                   </span>
-                </td>
+                </TableCell>
 
-                <td className="pe-4 text-end">
-                  <div className="d-flex justify-content-end gap-2">
-                    <Button variant="light" size="sm" className="btn-custom-sm d-inline-flex align-items-center justify-content-center p-2 rounded-2 border" onClick={event => {
-                  event.stopPropagation();
-                  navigate(`${basePath}/journals/repository`);
-                }} title={t("admin.quanLyRepoVolumeIssue")}>
-                      <Icon icon="lucide:eye" width="16" className="text-dark" />
+                <TableCell className="pr-4 text-right">
+                  <div className="flex justify-end gap-1.5">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="size-8 p-0"
+                      onClick={event => {
+                        event.stopPropagation();
+                        navigate(`${basePath}/journals/repository`);
+                      }}
+                      title={t("admin.quanLyRepoVolumeIssue")}
+                    >
+                      <Icon icon="lucide:eye" width="15" />
                     </Button>
 
-                    <Button variant="outline-dark" size="sm" className="btn-custom-sm d-inline-flex align-items-center justify-content-center p-2 rounded-2" onClick={event => {
-                  event.stopPropagation();
-                  navigate(`${basePath}/journals/${id}/edit`);
-                }} title={t("admin.chinhSuaThongTinTapChi")}>
-                      <Icon icon="lucide:edit-2" width="16" />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="size-8 p-0"
+                      onClick={event => {
+                        event.stopPropagation();
+                        navigate(`${basePath}/journals/${id}/edit`);
+                      }}
+                      title={t("admin.chinhSuaThongTinTapChi")}
+                    >
+                      <Icon icon="lucide:edit-2" width="15" />
                     </Button>
                   </div>
-                </td>
-              </tr>;
-        })}
-        </tbody>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
       </Table>
-    </div>;
+    </div>
+  );
 }

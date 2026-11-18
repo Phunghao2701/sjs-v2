@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Table } from 'react-bootstrap';
+import { Table } from '../../../shared/ui/table';
 import { Icon } from '@iconify/react';
 import ArticleTableRow from './ArticleTableRow';
 import LatexText from '../../../shared/components/LatexText/LatexText';

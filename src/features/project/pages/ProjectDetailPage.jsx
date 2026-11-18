@@ -12,7 +12,7 @@ import ManageKeywordsModal from '../../keyword/components/ManageKeywordsModal';
 import ProjectMembersList from '../components/ProjectMembersList';
 import InviteMemberModal from '../components/InviteMemberModal';
 import { Icon } from '@iconify/react';
-import { Modal } from 'react-bootstrap';
+import { Modal } from '../../../shared/ui/modal';
 import { Button } from '../../../shared/ui/button';
 import { Badge } from '../../../shared/ui/badge';
 import { Alert } from '../../../shared/ui/alert';

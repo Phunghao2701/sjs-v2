@@ -1,106 +1,87 @@
 import { useTranslation } from "react-i18next";
-/**
-* File source thuộc hệ thống FE ResearchPulse.
-*
-* File: features\article\components\ArticleStatisticsCard.jsx
-*/
-import { Card, Row, Col } from 'react-bootstrap';
+import { Card } from '../../../shared/ui/card';
 import { Icon } from '@iconify/react';
-export default function ArticleStatisticsCard({
-  article
-}) {
-  const {
-    t
-  } = useTranslation();
+
+export default function ArticleStatisticsCard({ article }) {
+  const { t } = useTranslation();
   if (!article) return null;
-  const safeValue = value => value !== undefined && value !== null && String(value).trim() !== '' ? value : '—';
+
+  const safeValue = (value) =>
+    value !== undefined && value !== null && String(value).trim() !== '' ? value : '—';
+
   const citations = article.citations ?? article.citations_count ?? '—';
   const publicationYear = safeValue(article.publication_year);
   const volume = safeValue(article.volume_number || article.volume);
   const issue = safeValue(article.issue_number || article.issue);
   const pages = safeValue(article.pages);
   const doi = safeValue(article.doi);
-  const metricCards = [{
-    label: t("admin.namXuatBan"),
-    value: publicationYear,
-    icon: 'lucide:calendar-days'
-  }, {
-    label: t("article.truyCapMo"),
-    value: article.is_open_access ? t("article.co") : t("article.khong"),
-    icon: 'lucide:unlock'
-  }, {
-    label: 'Volume',
-    value: volume,
-    icon: 'lucide:layers'
-  }, {
-    label: 'Issue',
-    value: issue,
-    icon: 'lucide:book-copy'
-  }];
-  return <Card className="journal-dark-card border-0 p-4" style={{
-    backgroundColor: 'var(--bg-card)',
-    border: '1px solid var(--border)',
-    borderRadius: '16px',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.02)'
-  }}>
-      <h5 className="font-display font-weight-bold text-main mb-3 d-flex align-items-center gap-2 border-bottom border-light pb-2">
-        <Icon icon="lucide:bar-chart-3" style={{
-        color: 'var(--primary)'
-      }} width="20" />{t("article.thongKeBaiBaoMetrics")}</h5>
 
-      <div className="d-flex flex-column gap-3">
-        <div className="p-3 rounded-3 text-center" style={{
-        backgroundColor: 'var(--bg-section)'
-      }}>
-          <div className="text-muted-custom text-xs font-semibold mb-1 uppercase tracking-wider" style={{
-          fontSize: '13px'
-        }}>{t("article.soLuotTrichDanCitations")}</div>
-          <div className="d-flex align-items-center justify-content-center text-main gap-1.5 fs-3" style={{
-          fontWeight: 700
-        }}>
+  const metricCards = [
+    {
+      label: t("admin.namXuatBan", "Năm xuất bản"),
+      value: publicationYear,
+      icon: 'lucide:calendar',
+    },
+    {
+      label: t("article.tapVolume", "Tập"),
+      value: volume,
+      icon: 'lucide:book',
+    },
+    {
+      label: t("article.soIssue", "Số"),
+      value: issue,
+      icon: 'lucide:bookmark',
+    },
+  ];
+
+  return (
+    <Card className="p-4 mb-4 border border-border bg-surface rounded-card shadow-card">
+      <div className="flex items-center gap-2 mb-3">
+        <Icon icon="lucide:bar-chart-2" className="text-primary h-5 w-5" />
+        <h3 className="text-sm font-semibold text-foreground m-0">
+          {t("article.thongKeBaiBao", "Thống kê bài báo")}
+        </h3>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="text-center p-3 rounded-lg border border-border bg-surface-muted/50">
+          <div className="text-muted-foreground text-xs font-semibold mb-1 uppercase tracking-wider">
+            {t("article.soLuotTrichDanCitations", "Số lượt trích dẫn")}
+          </div>
+          <div className="flex items-center justify-center text-foreground gap-1.5 text-2xl font-bold">
             <Icon icon="lucide:quote" />
             <span>{citations}</span>
           </div>
         </div>
 
-        <Row className="g-2 text-sm text-main">
-          {metricCards.map(metric => <Col xs={6} key={metric.label}>
-              <div className="py-1 pe-2 rounded-3 border h-100 d-flex flex-column justify-content-center" style={{
-            borderColor: 'var(--border)',
-            backgroundColor: 'var(--bg-card)',
-            paddingLeft: '1rem'
-          }}>
-                <div className="text-muted-custom text-xxs font-semibold uppercase" style={{
-              fontSize: '13px'
-            }}>
-                  {metric.label}
-                </div>
-                <div className="font-weight-bold mt-1 text-xs d-flex align-items-center gap-1" style={{
-              fontWeight: 700
-            }}>
-                  <Icon icon={metric.icon} style={{
-                color: 'var(--primary)'
-              }} />
-                  <span>{metric.value}</span>
-                </div>
+        <div className="grid grid-cols-2 gap-2 text-sm text-foreground">
+          {metricCards.map((metric) => (
+            <div
+              key={metric.label}
+              className="p-2.5 rounded-lg border border-border bg-surface flex flex-col justify-center"
+            >
+              <div className="text-muted-foreground text-xs font-semibold uppercase">
+                {metric.label}
               </div>
-            </Col>)}
-        </Row>
+              <div className="font-bold mt-1 text-xs flex items-center gap-1.5 text-foreground">
+                <Icon icon={metric.icon} className="text-primary" />
+                <span>{metric.value}</span>
+              </div>
+            </div>
+          ))}
+        </div>
 
-        <div className="border-top border-light pt-3 mt-1">
-          <div className="justify-content-between align-items-start text-xs mb-2 gap-3">
-            <span className="text-muted-custom">DOI:</span>
-            <span className="text-main font-semibold text-end" style={{
-            fontWeight: 600
-          }}> {doi}</span>
+        <div className="border-t border-border pt-3 mt-1 space-y-2">
+          <div className="flex justify-between items-start text-xs gap-3">
+            <span className="text-muted-foreground">DOI:</span>
+            <span className="text-foreground font-semibold text-right break-all">{doi}</span>
           </div>
-          <div className="d-flex justify-content-between align-items-center text-xs">
-            <span className="text-muted-custom">{t("article.soTrangPages")}</span>
-            <span className="text-main font-semibold" style={{
-            fontWeight: 600
-          }}>{pages}</span>
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-muted-foreground">{t("article.soTrangPages", "Số trang")}</span>
+            <span className="text-foreground font-semibold">{pages}</span>
           </div>
         </div>
       </div>
-    </Card>;
+    </Card>
+  );
 }

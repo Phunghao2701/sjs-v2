@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
-import { Row, Col } from 'react-bootstrap';
 import StatCard from '../../dashboard/components/StatCard';
+
 export default function GeographyStatsCards({
   countryStats = [],
   globalRegions = [],
@@ -9,9 +9,8 @@ export default function GeographyStatsCards({
   loading = false,
   pagination = {}
 }) {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
+
   // 1. Total Countries
   const totalCountries = pagination.total || countryStats.length || 0;
 
@@ -26,34 +25,51 @@ export default function GeographyStatsCards({
   const topCountry = countryStats.length > 0 ? countryStats[0] : null;
   const topCountryName = topCountry ? topCountry.name : '—';
   const topCountryCount = topCountry ? `${topCountry.article_count} bài báo` : '';
-  const cards = [{
-    icon: 'lucide:globe',
-    accentColor: 'var(--primary)',
-    value: totalCountries,
-    label: t("zone.tongQuocGia"),
-    growth: null
-  }, {
-    icon: 'lucide:map-pin',
-    accentColor: '#6366f1',
-    value: totalRegions,
-    label: regionsLabel,
-    growth: null
-  }, {
-    icon: 'lucide:file-text',
-    accentColor: '#0ea5e9',
-    value: totalArticles,
-    label: t("zone.tongSanLuongBaiBao"),
-    growth: null
-  }, {
-    icon: 'lucide:award',
-    accentColor: 'var(--q1-color)',
-    value: topCountryCount || '—',
-    label: `Top: ${topCountryName}`,
-    growth: null
-  }];
-  return <Row className="g-3 mb-4">
-      {cards.map((card, idx) => <Col xs={12} sm={6} lg={3} key={idx}>
-          <StatCard icon={card.icon} accentColor={card.accentColor} value={card.value} label={card.label} growth={card.growth} loading={loading} />
-        </Col>)}
-    </Row>;
+
+  const cards = [
+    {
+      icon: 'lucide:globe',
+      accentColor: 'var(--primary)',
+      value: totalCountries,
+      label: t("zone.tongQuocGia"),
+      growth: null
+    },
+    {
+      icon: 'lucide:map-pin',
+      accentColor: '#6366f1',
+      value: totalRegions,
+      label: regionsLabel,
+      growth: null
+    },
+    {
+      icon: 'lucide:file-text',
+      accentColor: '#0ea5e9',
+      value: totalArticles,
+      label: t("zone.tongSanLuongBaiBao"),
+      growth: null
+    },
+    {
+      icon: 'lucide:award',
+      accentColor: 'var(--q1-color)',
+      value: topCountryCount || '—',
+      label: `Top: ${topCountryName}`,
+      growth: null
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      {cards.map((card, idx) => (
+        <StatCard
+          key={idx}
+          icon={card.icon}
+          accentColor={card.accentColor}
+          value={card.value}
+          label={card.label}
+          growth={card.growth}
+          loading={loading}
+        />
+      ))}
+    </div>
+  );
 }

@@ -1,47 +1,73 @@
-import { useTranslation } from "react-i18next";
-import { t } from "i18next";
-import { Modal, Table } from 'react-bootstrap';
+import { useTranslation } from 'react-i18next';
+import { Icon } from '@iconify/react';
+import { Modal } from '../../../shared/ui/modal';
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../../../shared/ui/table';
 import { Button } from '../../../shared/ui/button';
+
 const ManageKeywordsModal = ({
   show,
   onHide,
   watchedKeywords,
   onRemove,
-  actionLoading
+  actionLoading,
 }) => {
-  const { t: _t } = useTranslation();
-  return <Modal show={show} onHide={onHide} centered size="lg" backdrop="static">
-      <Modal.Header closeButton className="border-bottom-0 pb-0">
-        <Modal.Title className="font-display fw-bold">{t("keyword.quanLyKeywordWatchList")}</Modal.Title>
+  const { t } = useTranslation();
+
+  return (
+    <Modal show={show} onHide={onHide} size="lg">
+      <Modal.Header closeButton className="border-0 pb-0">
+        <Modal.Title className="text-base font-semibold text-foreground">
+          {t('keyword.quanLyKeywordWatchList', 'Quản lý Keyword Watch List')}
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        {Array.isArray(watchedKeywords) && watchedKeywords.length > 0 ? <div className="table-responsive">
-            <Table hover className="align-middle">
-              <thead>
-                <tr>
-                  <th className="text-muted-custom font-display fw-medium">Keyword</th>
-                  <th className="text-muted-custom font-display fw-medium text-end">{t("journal.hanhDong")}</th>
-                </tr>
-              </thead>
-              <tbody>
+      <Modal.Body className="py-4">
+        {Array.isArray(watchedKeywords) && watchedKeywords.length > 0 ? (
+          <div className="rounded-card border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-medium">Keyword</TableHead>
+                  <TableHead className="font-medium text-right">{t('journal.hanhDong', 'Hành động')}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {watchedKeywords.map((kw, idx) => {
-              const label = typeof kw === 'string' ? kw : kw.keyword || kw.name;
-              const id = typeof kw === 'string' ? kw : kw.id || kw.keywordId;
-              return <tr key={idx}>
-                      <td className="fw-medium text-main">{label}</td>
-                      <td className="text-end">
-                        <Button variant="ghost" size="sm" className="text-danger hover:text-danger hover:bg-danger/10" onClick={() => onRemove(id)} disabled={actionLoading}>
-                          <i className="bi bi-trash3 me-1"></i>{t("keyword.xoa")}</Button>
-                      </td>
-                    </tr>;
-            })}
-              </tbody>
+                  const label = typeof kw === 'string' ? kw : kw.keyword || kw.name;
+                  const id = typeof kw === 'string' ? kw : kw.id || kw.keywordId;
+                  return (
+                    <TableRow key={idx}>
+                      <TableCell className="font-medium text-foreground">{label}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-danger hover:text-danger hover:bg-danger/10 gap-1.5 h-8 px-2"
+                          onClick={() => onRemove(id)}
+                          disabled={actionLoading}
+                        >
+                          <Icon icon="lucide:trash-2" width="14" height="14" />
+                          <span>{t('keyword.xoa', 'Xóa')}</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
             </Table>
-          </div> : <div className="text-center py-4 text-muted-custom">{t("keyword.chuaCoKeywordNaoTrongDanhSachT")}</div>}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-sm text-muted-foreground">
+            {t('keyword.chuaCoKeywordNaoTrongDanhSachT', 'Chưa có keyword nào trong danh sách theo dõi.')}
+          </div>
+        )}
       </Modal.Body>
-      <Modal.Footer className="border-top-0 pt-0">
-        <Button variant="outline" size="sm" onClick={onHide}>{t("article.dong")}</Button>
+      <Modal.Footer className="border-0 pt-0">
+        <Button variant="outline" size="sm" onClick={onHide}>
+          {t('article.dong', 'Đóng')}
+        </Button>
       </Modal.Footer>
-    </Modal>;
+    </Modal>
+  );
 };
+
 export default ManageKeywordsModal;

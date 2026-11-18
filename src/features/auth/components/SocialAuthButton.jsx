@@ -1,36 +1,29 @@
 import { useTranslation } from "react-i18next";
 /**
-* File source thuộc hệ thống FE ResearchPulse.
-*
-* File: features\auth\components\SocialAuthButton.jsx
-*/
-import { Button } from 'react-bootstrap';
+ * File source thuộc hệ thống FE ResearchPulse.
+ *
+ * File: features\auth\components\SocialAuthButton.jsx
+ */
+import { Button } from '../../../shared/ui/button';
 import Icon from '../../../shared/components/Icon';
+
 export default function SocialAuthButton({
   onClick,
   disabled = false,
   label
 }) {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const resolvedLabel = label || t("auth.dangNhapBangSso");
-  return <Button variant="light" onClick={onClick} disabled={disabled} className="w-100 d-flex align-items-center justify-content-center gap-2 py-2.5 rounded-3 border transition-all text-sm font-semibold" style={{
-    background: 'var(--bg-chip)',
-    borderColor: 'var(--border)',
-    color: 'var(--text-main)',
-    boxShadow: 'none',
-    transition: 'transform 0.15s ease, background 0.15s ease'
-  }} onMouseEnter={e => {
-    e.currentTarget.style.transform = 'translateY(-1px)';
-    e.currentTarget.style.background = '#ffffff';
-    e.currentTarget.style.borderColor = 'var(--primary)';
-  }} onMouseLeave={e => {
-    e.currentTarget.style.transform = 'translateY(0)';
-    e.currentTarget.style.background = 'var(--bg-chip)';
-    e.currentTarget.style.borderColor = 'var(--border)';
-  }}>
+
+  return (
+    <Button
+      variant="outline"
+      onClick={onClick}
+      disabled={disabled}
+      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-border bg-surface text-foreground hover:bg-muted/50 text-sm font-semibold transition-colors"
+    >
       <Icon icon="lucide:shield-check" width="18" />
       <span>{resolvedLabel}</span>
-    </Button>;
+    </Button>
+  );
 }

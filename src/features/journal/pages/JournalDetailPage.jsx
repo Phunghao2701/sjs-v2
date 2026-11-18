@@ -84,16 +84,6 @@ export default function JournalDetailPage() {
 
       {/* Main Container */}
       <PageContainer className="journal-detail-shell">
-        {/* Custom Breadcrumb Nav */}
-        <Breadcrumbs
-          items={[
-            { label: t("home"), to: "/" },
-            { label: t("search"), to: "/search" },
-            { label: loadingJournal ? t("common.dangTai") : (journal?.display_name || t("journal.tapChi")) }
-          ]}
-          className="mb-4"
-        />
-
         {/* Hero Section */}
         <JournalHero
           journal={journal}

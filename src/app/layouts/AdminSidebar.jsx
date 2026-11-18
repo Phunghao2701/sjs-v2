@@ -1,5 +1,4 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Nav } from 'react-bootstrap';
 import Icon from '../../shared/components/Icon';
 import Logo from '../../shared/components/Logo';
 import useAuth from '../../features/auth/hooks/useAuth';
@@ -30,7 +29,6 @@ export default function AdminSidebar() {
    */
   const isActive = (itemPath) => {
     if (itemPath === ROUTES.ADMIN_JOURNALS) {
-      // Journals chỉ active khi ở /admin/journals hoặc các subpath mà không phải repository
       return pathname === ROUTES.ADMIN_JOURNALS || (pathname.startsWith(ROUTES.ADMIN_JOURNALS) && !pathname.startsWith(ROUTES.ADMIN_REPOSITORY));
     }
     if (itemPath === ROUTES.ADMIN_DASHBOARD) {
@@ -48,43 +46,46 @@ export default function AdminSidebar() {
         </div>
 
         {/* Navigation Link Items */}
-        <Nav className="admin-sidebar__menu">
+        <nav className="admin-sidebar__menu flex flex-col gap-1">
           {menuItems.map((item, idx) => {
             const active = isActive(item.path);
             return (
-              <Nav.Link
+              <button
+                type="button"
                 key={idx}
                 onClick={() => navigate(item.path)}
-                className={`admin-sidebar__item sidebar-link ${active ? 'admin-sidebar__item--active' : ''}`}
+                className={`admin-sidebar__item sidebar-link w-full text-left flex items-center gap-3 border-0 bg-transparent cursor-pointer ${active ? 'admin-sidebar__item--active' : ''}`}
               >
                 <Icon icon={item.icon} width="18" className="admin-sidebar__item-icon" />
                 <span>{item.label}</span>
-              </Nav.Link>
+              </button>
             );
           })}
-        </Nav>
+        </nav>
       </div>
 
       {/* Footer-aligned items inside the sidebar */}
-      <Nav className="admin-sidebar__footer">
+      <nav className="admin-sidebar__footer flex flex-col gap-1">
         {/* Support Link */}
-        <Nav.Link
+        <button
+          type="button"
           onClick={() => navigate(ROUTES.DASHBOARD)}
-          className="admin-sidebar__item"
+          className="admin-sidebar__item w-full text-left flex items-center gap-3 border-0 bg-transparent cursor-pointer"
         >
           <Icon icon="lucide:help-circle" width="18" className="admin-sidebar__item-icon" />
           <span>Support</span>
-        </Nav.Link>
+        </button>
 
         {/* Sign Out Button */}
-        <Nav.Link
+        <button
+          type="button"
           onClick={() => auth.logout()}
-          className="admin-sidebar__item admin-sidebar__item--danger"
+          className="admin-sidebar__item admin-sidebar__item--danger w-full text-left flex items-center gap-3 border-0 bg-transparent cursor-pointer"
         >
           <Icon icon="lucide:log-out" width="18" className="admin-sidebar__item-icon" />
           <span>Sign Out</span>
-        </Nav.Link>
-      </Nav>
+        </button>
+      </nav>
     </aside>
   );
 }

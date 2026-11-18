@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { NavLink, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { FiBarChart2, FiFileText, FiFolder, FiGlobe, FiMenu, FiSearch, FiUsers, FiX, FiLogOut } from 'react-icons/fi';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import Logo from './Logo';
@@ -17,6 +17,109 @@ const items = [
   { label: 'Geography', path: 'geography', icon: FiGlobe },
 ];
 
+function getHeaderBreadcrumbs(pathname, lang, t) {
+  const cleanPath = pathname.replace(new RegExp(`^/${lang}`), '').replace(/\/$/, '') || '';
+  const segments = cleanPath.split('/').filter(Boolean);
+
+  const breadcrumbs = [
+    { label: t('navigation.workspace', 'Workspace'), to: `/${lang}/dashboard` }
+  ];
+
+  if (segments.length === 0 || segments[0] === 'dashboard') {
+    breadcrumbs.push({ label: t('navigation.overview', 'Overview') });
+    return breadcrumbs;
+  }
+
+  const section = segments[0];
+
+  switch (section) {
+    case 'projects':
+      if (segments.length === 1) {
+        breadcrumbs.push({ label: t('navigation.projects', 'Projects') });
+      } else if (segments[1] === 'create') {
+        breadcrumbs.push({ label: t('navigation.projects', 'Projects'), to: `/${lang}/projects` });
+        breadcrumbs.push({ label: t('project.taoProject', 'Create Project') });
+      } else if (segments[2] === 'edit') {
+        breadcrumbs.push({ label: t('navigation.projects', 'Projects'), to: `/${lang}/projects` });
+        breadcrumbs.push({ label: t('project.chinhSua', 'Edit') });
+      } else {
+        breadcrumbs.push({ label: t('navigation.projects', 'Projects'), to: `/${lang}/projects` });
+        breadcrumbs.push({ label: t('project.chiTiet', 'Details') });
+      }
+      break;
+
+    case 'project':
+      breadcrumbs.push({ label: t('navigation.projects', 'Projects'), to: `/${lang}/projects` });
+      breadcrumbs.push({ label: t('project.phanTich', 'Analytics') });
+      break;
+
+    case 'search':
+    case 'catalog':
+      breadcrumbs.push({ label: t('navigation.search', 'Search') });
+      break;
+
+    case 'articles':
+      if (segments.length === 1) {
+        breadcrumbs.push({ label: t('navigation.articles', 'Articles') });
+      } else if (segments[2] === 'visual') {
+        breadcrumbs.push({ label: t('navigation.articles', 'Articles'), to: `/${lang}/articles` });
+        breadcrumbs.push({ label: t('article.trucQuan', 'Visual Details') });
+      } else {
+        breadcrumbs.push({ label: t('navigation.articles', 'Articles'), to: `/${lang}/articles` });
+        breadcrumbs.push({ label: t('article.chiTiet', 'Details') });
+      }
+      break;
+
+    case 'authors':
+      if (segments.length === 1) {
+        breadcrumbs.push({ label: t('navigation.authors', 'Authors') });
+      } else if (segments[1] === 'leaderboard') {
+        breadcrumbs.push({ label: t('navigation.authors', 'Authors'), to: `/${lang}/authors` });
+        breadcrumbs.push({ label: t('author.bangXepHang', 'Leaderboard') });
+      } else {
+        breadcrumbs.push({ label: t('navigation.authors', 'Authors'), to: `/${lang}/authors` });
+        breadcrumbs.push({ label: t('author.chiTiet', 'Profile') });
+      }
+      break;
+
+    case 'geography':
+      breadcrumbs.push({ label: t('navigation.geography', 'Geography') });
+      break;
+
+    case 'keywords':
+      if (segments.length === 1) {
+        breadcrumbs.push({ label: t('navigation.keywords', 'Keywords') });
+      } else {
+        breadcrumbs.push({ label: t('navigation.keywords', 'Keywords'), to: `/${lang}/keywords` });
+        breadcrumbs.push({ label: t('keywords.baiBaoTheoTuKhoa', 'Keyword Articles') });
+      }
+      break;
+
+    case 'profile':
+      breadcrumbs.push({ label: t('navigation.account', 'Profile') });
+      break;
+
+    case 'journals':
+      breadcrumbs.push({ label: t('navigation.search', 'Search'), to: `/${lang}/search` });
+      breadcrumbs.push({ label: t('journal.chiTiet', 'Details') });
+      break;
+
+    case 'topics':
+      breadcrumbs.push({ label: t('topic.chuDe', 'Topics') });
+      break;
+
+    case 'wallet':
+      breadcrumbs.push({ label: t('navigation.wallet', 'Wallet') });
+      break;
+
+    default:
+      breadcrumbs.push({ label: section.charAt(0).toUpperCase() + section.slice(1) });
+      break;
+  }
+
+  return breadcrumbs;
+}
+
 export const DashboardShellContext = createContext(false);
 
 export default function DashboardShell({ children }) {
@@ -30,13 +133,11 @@ export default function DashboardShell({ children }) {
   const drawerCloseRef = useRef(null);
   const sidebarRef = useRef(null);
   const base = `/${lang}`;
-  const activePath = location.pathname.replace(/\/$/, '').split('/').at(-1);
-  const activeItem = items.find(({ path }) => path === activePath);
-  const pageTitle = activeItem
-    ? t(`navigation.${activeItem.path}`, activeItem.label)
-    : activePath === 'profile'
-    ? t('navigation.account', 'Profile')
-    : t('navigation.projects', 'Projects');
+
+  const headerBreadcrumbs = useMemo(
+    () => getHeaderBreadcrumbs(location.pathname, lang, t),
+    [location.pathname, lang, t]
+  );
 
   // Group project sub-routes so navigating between analytics tabs does not remount the parent layout
   const projectSubRouteMatch = location.pathname.match(/^(\/[^/]+\/project\/[^/]+)/);
@@ -133,13 +234,30 @@ export default function DashboardShell({ children }) {
       <div className="flex flex-1 flex-col min-w-0">
         <header className="app-topbar sticky top-0 z-[var(--ds-z-sticky)] flex max-md:hidden min-h-14 items-center border-b border-border bg-surface/95 px-4 sm:px-6 lg:px-8 backdrop-blur">
           <div className="w-full flex items-center justify-between">
-            <div className="flex min-w-0 items-center gap-2 text-xs sm:text-sm">
-              <span className="text-muted-foreground">{t('navigation.workspace', 'Workspace')}</span>
-              <span aria-hidden="true" className="text-subtle-foreground">/</span>
-              <span className="truncate font-semibold text-foreground">{pageTitle}</span>
-            </div>
+            <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-xs sm:text-sm">
+              {headerBreadcrumbs.map((crumb, idx) => {
+                const isLast = idx === headerBreadcrumbs.length - 1;
+                return (
+                  <div key={idx} className="flex items-center gap-1.5 min-w-0">
+                    {idx > 0 && <span aria-hidden="true" className="text-subtle-foreground/60 select-none">/</span>}
+                    {crumb.to && !isLast ? (
+                      <Link
+                        to={crumb.to}
+                        className="text-muted-foreground hover:text-foreground transition-colors truncate no-underline font-medium"
+                      >
+                        {crumb.label}
+                      </Link>
+                    ) : (
+                      <span className={`truncate ${isLast ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+                        {crumb.label}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </nav>
             <div className="flex items-center gap-2.5">
-              <button type="button" onClick={() => navigate(`${base}/search`)} className="flex h-9 min-w-[210px] items-center gap-2 rounded-control border border-border bg-background px-3 text-left text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-subtle-hover" aria-label={t('navigation.search', 'Search')}>
+              <button type="button" onClick={() => navigate(`${base}/search`)} className="flex h-9 min-w-[210px] items-center gap-2 rounded-control border border-border bg-background px-3 text-left text-xs text-muted-foreground transition-colors" aria-label={t('navigation.search', 'Search')}>
                 <FiSearch aria-hidden="true" />
                 <span>{t('navigation.searchManuscripts', 'Search manuscripts, authors, or IDs…')}</span>
               </button>

@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { Form, Row, Col } from 'react-bootstrap';
 import Icon from '../../../shared/components/Icon';
 
 export default function RoleSelect({
@@ -44,76 +43,62 @@ export default function RoleSelect({
     });
   };
 
-  return <Form.Group className="mb-4">
-      {label && <Form.Label className="text-xs font-bold mb-1.5 d-flex align-items-center gap-1" style={{
-      letterSpacing: '0.05em',
-      color: 'var(--text-main)',
-      textTransform: 'uppercase'
-    }}>
+  return (
+    <div className="mb-4">
+      {label && (
+        <label 
+          className="text-xs font-bold mb-1.5 flex items-center gap-1 uppercase tracking-wider text-foreground"
+        >
           {label}
-          {required && <span className="text-danger">*</span>}
-        </Form.Label>}
+          {required && <span className="text-destructive">*</span>}
+        </label>
+      )}
 
-      <Row className="g-3">
+      <div className="grid grid-cols-3 gap-3">
         {roles.map(role => {
-        const isSelected = value === role.key;
-        return <Col key={role.key} xs={4}>
-              <div onClick={() => handleSelect(role.key)} className={`role-card-item ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''} w-100 p-3 rounded-3 text-center d-flex flex-column align-items-center justify-content-center gap-2 select-none`} style={{
-            cursor: disabled ? 'not-allowed' : 'pointer',
-            background: '#ffffff',
-            border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border)',
-            opacity: disabled ? 0.6 : 1,
-            minHeight: '110px'
-          }}>
-                <div className="d-flex align-items-center justify-content-center rounded-circle icon-container" style={{
-              width: '32px',
-              height: '32px',
-              color: isSelected ? 'var(--primary)' : 'var(--text-muted)',
-              transition: 'all 0.2s'
-            }}>
-                  <Icon icon={role.icon} width="22" />
+          const isSelected = value === role.key;
+          return (
+            <button
+              key={role.key}
+              type="button"
+              disabled={disabled}
+              onClick={() => handleSelect(role.key)}
+              className={`w-full p-3 rounded-lg text-center flex flex-col items-center justify-center gap-2 select-none border transition-colors min-h-[110px] ${
+                isSelected
+                  ? 'border-primary bg-primary-subtle/20 shadow-xs'
+                  : 'border-border bg-surface hover:border-primary/50'
+              } ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+            >
+              <div 
+                className={`flex items-center justify-center rounded-full size-8 transition-colors ${
+                  isSelected ? 'text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                <Icon icon={role.icon} width="22" />
+              </div>
+              <div>
+                <div 
+                  className={`text-xs ${isSelected ? 'font-bold text-primary' : 'font-semibold text-foreground'}`}
+                >
+                  {role.label}
                 </div>
-                <div>
-                  <div className="font-semibold title text-xs" style={{
-                color: 'var(--text-main)',
-                fontWeight: isSelected ? '700' : '600'
-              }}>
-                    {role.label}
-                  </div>
-                  <div className="text-xs text-text-muted mt-0.5">
-                    {role.desc}
-                  </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">
+                  {role.desc}
                 </div>
               </div>
-            </Col>;
-      })}
-      </Row>
+            </button>
+          );
+        })}
+      </div>
 
-      {error && <div className="text-danger text-xs mt-1.5 d-flex align-items-center gap-1 animate-fade-in" style={{
-      fontWeight: 500
-    }}>
+      {error && (
+        <div 
+          className="text-destructive text-xs mt-1.5 flex items-center gap-1 font-medium animate-fade-in"
+        >
           <Icon icon="lucide:alert-circle" width="12" />
           <span>{error}</span>
-        </div>}
-
-      {/* Scoped hover and selection styles */}
-      <style>{`
-        .role-card-item {
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .role-card-item:hover:not(.disabled):not(.selected) {
-          border-color: var(--primary) !important;
-          transform: translateY(-2px);
-          box-shadow: 0 6px 16px rgba(0, 113, 188, 0.08) !important;
-        }
-        .role-card-item.selected {
-          border-color: var(--primary) !important;
-          box-shadow: 0 0 0 3px rgba(0, 113, 188, 0.15) !important;
-        }
-        .role-card-item.selected .icon-container {
-          transform: scale(1.08);
-          color: var(--primary) !important;
-        }
-      `}</style>
-    </Form.Group>;
+        </div>
+      )}
+    </div>
+  );
 }

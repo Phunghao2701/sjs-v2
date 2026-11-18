@@ -5,7 +5,8 @@ import { useTranslation } from "react-i18next";
  * File: features\article\components\ArticleActionCard.jsx
  */
 import { useState } from 'react';
-import { Card, Button, Spinner } from 'react-bootstrap';
+import { Card } from '../../../shared/ui/card';
+import { Button, Spinner } from '../../../shared/ui/button';
 import { Icon } from '@iconify/react';
 export default function ArticleActionCard({
   article,

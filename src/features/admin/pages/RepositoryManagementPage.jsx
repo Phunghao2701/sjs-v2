@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useEffect, useMemo, useState } from 'react';
-import { Row, Col, Card } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
 import { useJournalManagement } from '../../journal/hooks/useJournalManagement';
 import { getJournalArticlesApi } from '../../journal/api/journalApi';
@@ -12,6 +11,7 @@ import SwitchJournalModal from '../components/modals/SwitchJournalModal';
 import CreateVolumeModal from '../components/modals/CreateVolumeModal';
 import CreateIssueModal from '../components/modals/CreateIssueModal';
 import { Button } from '../../../shared/ui/button';
+import { Card } from '../../../shared/ui/card';
 import { Alert } from '../../../shared/ui/alert';
 import { PageHeader } from '../../../shared/ui/page-layout';
 
@@ -36,9 +36,11 @@ export default function RepositoryManagementPage() {
   const [summaryError, setSummaryError] = useState('');
   const [articleCountsByIssueId, setArticleCountsByIssueId] = useState({});
   const [volumeStatsById, setVolumeStatsById] = useState({});
+
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData]);
+
   useEffect(() => {
     let isMounted = true;
     const fetchRepositorySummary = async () => {
@@ -66,84 +68,96 @@ export default function RepositoryManagementPage() {
       isMounted = false;
     };
   }, [currentJournal?.id]);
-  const currentVolumes = useMemo(() => (volumes || []).filter(volume => volume.journalId === currentJournal?.id), [volumes, currentJournal?.id]);
+
+  const currentVolumes = useMemo(
+    () => (volumes || []).filter(v => v.journalId === currentJournal?.id),
+    [volumes, currentJournal?.id]
+  );
+
   useEffect(() => {
     if (currentVolumes.length > 0 && !selectedVolume) {
       setSelectedVolume(currentVolumes[0].id);
     }
   }, [currentVolumes, selectedVolume, setSelectedVolume]);
-  const currentIssues = useMemo(() => (issues || []).filter(issue => (issue.volume_id || issue.volumeId) === selectedVolume), [issues, selectedVolume]);
+
+  const currentIssues = useMemo(
+    () => (issues || []).filter(i => i.volumeId === selectedVolume),
+    [issues, selectedVolume]
+  );
+
   useEffect(() => {
     let isMounted = true;
-    const fetchRepositoryVolumeStats = async () => {
-      const issuesByVolumeId = currentVolumes.reduce((acc, volume) => {
-        acc[volume.id] = (issues || []).filter(issue => (issue.volume_id || issue.volumeId) === volume.id);
-        return acc;
-      }, {});
-      const allIssues = Object.values(issuesByVolumeId).flat();
-      if (!allIssues.length) {
-        if (isMounted) {
-          setArticleCountsByIssueId({});
-          setVolumeStatsById(Object.fromEntries(currentVolumes.map(volume => [volume.id, {
-            issueCount: 0,
-            articleCount: 0
-          }])));
+    const missingIssueIds = currentIssues
+      .map(issue => issue.issue_id || issue.id)
+      .filter(id => id && articleCountsByIssueId[id] === undefined);
+
+    if (missingIssueIds.length === 0) return;
+
+    const fetchIssueArticleCounts = async () => {
+      const results = await Promise.allSettled(
+        missingIssueIds.map(async issueId => {
+          const res = await getJournalArticlesApi({ issue_id: issueId, limit: 1 });
+          const total = res.data?.data?.total || res.data?.data?.total_items || res.data?.total || 0;
+          return { issueId, total };
+        })
+      );
+
+      if (!isMounted) return;
+
+      const newCounts = {};
+      results.forEach(item => {
+        if (item.status === 'fulfilled' && item.value) {
+          newCounts[item.value.issueId] = item.value.total;
         }
-        return;
-      }
-      try {
-        const countEntries = await Promise.all(allIssues.map(async issue => {
-          const issueId = issue.issue_id || issue.id;
-          const response = await getJournalArticlesApi({
-            issue_id: issueId,
-            page: 1,
-            limit: 1
-          });
-          const payload = response.data?.data;
-          const count = payload?.pagination?.total ?? payload?.total ?? (Array.isArray(payload) ? payload.length : 0);
-          return [issueId, count];
-        }));
-        if (isMounted) {
-          const nextArticleCounts = Object.fromEntries(countEntries);
-          setArticleCountsByIssueId(nextArticleCounts);
-          setVolumeStatsById(Object.fromEntries(currentVolumes.map(volume => {
-            const volumeIssues = issuesByVolumeId[volume.id] || [];
-            const articleCount = volumeIssues.reduce((sum, issue) => sum + (nextArticleCounts[issue.issue_id || issue.id] || 0), 0);
-            return [volume.id, {
-              issueCount: volumeIssues.length,
-              articleCount
-            }];
-          })));
-        }
-      } catch {
-        if (isMounted) {
-          setArticleCountsByIssueId({});
-          setVolumeStatsById(Object.fromEntries(currentVolumes.map(volume => [volume.id, {
-            issueCount: (issuesByVolumeId[volume.id] || []).length,
-            articleCount: undefined
-          }])));
-        }
+      });
+
+      if (Object.keys(newCounts).length > 0) {
+        setArticleCountsByIssueId(prev => ({ ...prev, ...newCounts }));
       }
     };
-    fetchRepositoryVolumeStats();
+
+    fetchIssueArticleCounts();
+
     return () => {
       isMounted = false;
     };
-  }, [currentVolumes, issues]);
-  const totalVolumes = repositorySummary?.total_volumes ?? 0;
-  const activeIssues = repositorySummary?.active_issues ?? 0;
-  const totalPublications = repositorySummary?.total_publications ?? 0;
-  const nextRelease = repositorySummary?.next_release ? new Date(repositorySummary.next_release).toLocaleDateString('en-US', {
-    month: 'short',
-    day: '2-digit',
-    year: 'numeric'
-  }) : 'N/A';
-  const activeVolObj = currentVolumes.find(volume => volume.id === selectedVolume);
+  }, [currentIssues, articleCountsByIssueId]);
+
+  useEffect(() => {
+    const stats = {};
+    currentVolumes.forEach(vol => {
+      const volIssues = (issues || []).filter(i => i.volumeId === vol.id);
+      const volIssueIds = volIssues.map(i => i.issue_id || i.id).filter(Boolean);
+      const allResolved = volIssueIds.every(id => typeof articleCountsByIssueId[id] === 'number');
+      const articleCount = allResolved
+        ? volIssueIds.reduce((sum, id) => sum + (articleCountsByIssueId[id] || 0), 0)
+        : null;
+
+      stats[vol.id] = {
+        issueCount: volIssues.length,
+        articleCount
+      };
+    });
+    setVolumeStatsById(stats);
+  }, [currentVolumes, issues, articleCountsByIssueId]);
+
+  const activeVolObj = currentVolumes.find(v => v.id === selectedVolume);
+
+  const fallbackTotalPublications = currentVolumes.reduce((sum, vol) => {
+    const volStats = volumeStatsById[vol.id];
+    return typeof volStats?.articleCount === 'number' ? sum + volStats.articleCount : sum;
+  }, 0);
+
+  const totalVolumes = repositorySummary?.total_volumes ?? currentVolumes.length;
+  const activeIssues = repositorySummary?.active_issues ?? issues.filter(i => currentVolumes.map(v => v.id).includes(i.volumeId)).length;
+  const totalPublications = repositorySummary?.total_publications ?? fallbackTotalPublications;
+  const nextRelease = repositorySummary?.next_release || t("admin.q22026Scheduled");
+
   return (
-    <div className="d-flex flex-column gap-4 text-start">
+    <div className="flex flex-col gap-4 text-left">
       <PageHeader
         breadcrumbs={[
-          { label: 'Resource Management' },
+          { label: 'Portfolio Operations' },
           { label: 'Repository Management' }
         ]}
         title="Repository Management"
@@ -156,103 +170,90 @@ export default function RepositoryManagementPage() {
         }
       />
 
-      <div className="bg-white p-4 rounded-3 border d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-2" style={{
-      borderColor: 'var(--border)'
-    }}>
-        <div className="d-flex align-items-center gap-3">
-          <div className="admin-icon-tile d-none d-sm-flex">
-            <Icon icon="lucide:book-open" width="24" />
+      <div className="bg-surface p-4 rounded-xl border border-border flex flex-col md:flex-row justify-between md:items-center gap-3 mb-2 shadow-2xs">
+        <div className="flex items-center gap-3">
+          <div className="size-10 rounded-lg bg-primary-subtle text-primary hidden sm:flex items-center justify-center shrink-0">
+            <Icon icon="lucide:book-open" width="22" />
           </div>
           <div>
-            <div className="text-muted-custom text-uppercase small fw-bold" style={{
-            fontSize: '13px',
-            letterSpacing: '0.05em'
-          }}>
+            <div className="text-muted-foreground uppercase text-xs font-bold tracking-wider">
               Select Journal Repository
             </div>
-            <h5 className="font-display fw-bold text-main m-0 d-flex align-items-center gap-2">
+            <h5 className="font-display font-bold text-foreground text-base m-0 flex items-center gap-2">
               {currentJournal ? currentJournal.title : 'No active journal selected'}
-              <span className="badge admin-status-badge admin-status-badge--accent text-xs font-display rounded px-2 py-0.5">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300">
                 ACTIVE
               </span>
             </h5>
-            <small className="text-muted-custom font-monospace">
+            <small className="text-muted-foreground font-mono text-xs">
               ISSN: {currentJournal?.issn} • Publisher: {currentJournal?.publisher || 'N/A'}
             </small>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setShowSwitchModal(true)} className="gap-1.5">
+        <Button variant="outline" size="sm" onClick={() => setShowSwitchModal(true)} className="gap-1.5 shrink-0">
           <Icon icon="lucide:refresh-cw" width="14" />
           <span>Switch Journal</span>
         </Button>
       </div>
 
-      {summaryError && <Alert variant="destructive" className="mb-2">
+      {summaryError && (
+        <Alert variant="destructive" className="mb-2">
           {summaryError}
-        </Alert>}
+        </Alert>
+      )}
 
-      <Row className="g-3 mb-2">
-        <Col xs={12} sm={6} md={3}>
-          <Card className="border p-3 shadow-none bg-white rounded-3">
-            <div className="d-flex align-items-center justify-content-between mb-2">
-              <div className="text-muted-custom small text-uppercase fw-semibold">Total Volumes</div>
-              <div className="text-muted bg-light p-1.5 rounded-2 d-flex"><Icon icon="lucide:layers" width="16" /></div>
-            </div>
-            <h3 className="fw-bold text-main m-0 font-monospace">{summaryLoading ? '...' : totalVolumes}</h3>
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} md={3}>
-          <Card className="border p-3 shadow-none bg-white rounded-3">
-            <div className="d-flex align-items-center justify-content-between mb-2">
-              <div className="text-muted-custom small text-uppercase fw-semibold">Active Issues</div>
-              <div className="text-muted bg-light p-1.5 rounded-2 d-flex"><Icon icon="lucide:book-marked" width="16" /></div>
-            </div>
-            <h3 className="fw-bold text-main m-0 font-monospace">{summaryLoading ? '...' : activeIssues}</h3>
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} md={3}>
-          <Card className="border p-3 shadow-none bg-white rounded-3">
-            <div className="d-flex align-items-center justify-content-between mb-2">
-              <div className="text-muted-custom small text-uppercase fw-semibold">Total Articles</div>
-              <div className="text-muted bg-light p-1.5 rounded-2 d-flex"><Icon icon="lucide:file-text" width="16" /></div>
-            </div>
-            <h3 className="fw-bold text-main m-0 font-monospace">{summaryLoading ? '...' : totalPublications}</h3>
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} md={3}>
-          <Card className="border p-3 shadow-none bg-white rounded-3">
-            <div className="d-flex align-items-center justify-content-between mb-2">
-              <div className="text-muted-custom small text-uppercase fw-semibold">Next Release</div>
-              <div className="text-muted bg-light p-1.5 rounded-2 d-flex"><Icon icon="lucide:calendar" width="16" /></div>
-            </div>
-            <h3 className="fw-bold text-main m-0 font-monospace admin-accent-text text-base">
-              {summaryLoading ? '...' : nextRelease}
-            </h3>
-          </Card>
-        </Col>
-      </Row>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
+        <Card className="border border-border p-4 bg-surface rounded-xl shadow-2xs">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-muted-foreground text-xs uppercase font-semibold">Total Volumes</div>
+            <div className="text-muted-foreground bg-muted p-1.5 rounded-md flex"><Icon icon="lucide:layers" width="16" /></div>
+          </div>
+          <h3 className="font-bold text-foreground text-2xl m-0 font-mono">{summaryLoading ? '...' : totalVolumes}</h3>
+        </Card>
+        <Card className="border border-border p-4 bg-surface rounded-xl shadow-2xs">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-muted-foreground text-xs uppercase font-semibold">Active Issues</div>
+            <div className="text-muted-foreground bg-muted p-1.5 rounded-md flex"><Icon icon="lucide:book-marked" width="16" /></div>
+          </div>
+          <h3 className="font-bold text-foreground text-2xl m-0 font-mono">{summaryLoading ? '...' : activeIssues}</h3>
+        </Card>
+        <Card className="border border-border p-4 bg-surface rounded-xl shadow-2xs">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-muted-foreground text-xs uppercase font-semibold">Total Articles</div>
+            <div className="text-muted-foreground bg-muted p-1.5 rounded-md flex"><Icon icon="lucide:file-text" width="16" /></div>
+          </div>
+          <h3 className="font-bold text-foreground text-2xl m-0 font-mono">{summaryLoading ? '...' : totalPublications}</h3>
+        </Card>
+        <Card className="border border-border p-4 bg-surface rounded-xl shadow-2xs">
+          <div className="flex items-center justify-between mb-2">
+            <div className="text-muted-foreground text-xs uppercase font-semibold">Next Release</div>
+            <div className="text-muted-foreground bg-muted p-1.5 rounded-md flex"><Icon icon="lucide:calendar" width="16" /></div>
+          </div>
+          <h3 className="font-bold text-foreground text-base m-0 font-mono truncate">
+            {summaryLoading ? '...' : nextRelease}
+          </h3>
+        </Card>
+      </div>
 
-      <Row className="g-4 align-items-start">
-        <Col xs={12} lg={4}>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h5 className="font-display fw-bold text-main mb-0 d-flex align-items-center gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="lg:col-span-4">
+          <div className="flex justify-between items-center mb-3">
+            <h5 className="font-display font-bold text-foreground text-base mb-0 flex items-center gap-2">
               Volumes Repository
-              <Icon icon="lucide:sliders-horizontal" className="text-muted" width="16" />
+              <Icon icon="lucide:sliders-horizontal" className="text-muted-foreground" width="16" />
             </h5>
           </div>
           <VolumeList volumes={currentVolumes} selectedVolumeId={selectedVolume} onSelectVolume={setSelectedVolume} volumeStatsById={volumeStatsById} />
-        </Col>
+        </div>
 
-        <Col xs={12} lg={8}>
-          <div className="bg-white p-4 rounded-3 border" style={{
-          borderColor: 'var(--border)'
-        }}>
-            <div className="d-flex justify-content-between align-items-start border-bottom pb-3 mb-3">
+        <div className="lg:col-span-8">
+          <div className="bg-surface p-6 rounded-xl border border-border shadow-2xs">
+            <div className="flex justify-between items-start border-b border-border pb-4 mb-4">
               <div>
-                <h5 className="font-display fw-bold text-main mb-1">
+                <h5 className="font-display font-bold text-foreground text-base mb-1">
                   {activeVolObj ? `${activeVolObj.volumeNumber} Overview` : 'Volume Overview'}
                 </h5>
-                <small className="text-muted-custom">
+                <small className="text-muted-foreground text-xs">
                   Published: {activeVolObj?.frequency || 'Quarterly'} • Frequency: Q1, Q2, Q3, Q4
                 </small>
               </div>
@@ -264,8 +265,8 @@ export default function RepositoryManagementPage() {
 
             <IssueTable issues={currentIssues} articleCountsByIssueId={articleCountsByIssueId} />
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
 
       <SwitchJournalModal show={showSwitchModal} handleClose={() => setShowSwitchModal(false)} />
       <CreateVolumeModal show={showVolumeModal} handleClose={() => setShowVolumeModal(false)} />

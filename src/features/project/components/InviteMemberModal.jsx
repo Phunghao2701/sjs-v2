@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Modal } from 'react-bootstrap';
+import { Modal } from '../../../shared/ui/modal';
 import { Button } from '../../../shared/ui/button';
 import { Input } from '../../../shared/ui/input';
 import { Icon } from '@iconify/react';

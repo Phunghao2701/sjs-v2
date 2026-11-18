@@ -20,12 +20,6 @@
   outline: none;
 }
 
-.lang-selector-trigger:hover {
-  border-color: var(--color-primary-orange, #0071BC);
-  color: var(--color-primary-orange, #0071BC);
-  background-color: rgba(0, 113, 188, 0.04);
-}
-
 .globe-icon {
   font-size: 16px;
 }

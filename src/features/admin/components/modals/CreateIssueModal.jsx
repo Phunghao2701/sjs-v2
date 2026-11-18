@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState } from 'react';
-import { Modal, Form, Row, Col } from 'react-bootstrap';
+import { Modal } from '../../../../shared/ui/modal';
 import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
 import { Button } from '../../../../shared/ui/button';
+import { Input } from '../../../../shared/ui/input';
 
 /**
  * Component CreateIssueModal - Cửa sổ Modal bật lên để Admin thêm Số phát hành (Issue) mới vào Volume đang chọn.
@@ -30,10 +31,7 @@ export default function CreateIssueModal({
 
   /** Theo dõi thay đổi chữ trong form */
   const handleChange = e => {
-    const {
-      name,
-      value
-    } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -85,46 +83,71 @@ export default function CreateIssueModal({
       alert(t("Lỗi tạo Issue: ") + errorMsg + errorDetail);
     }
   };
-  return <Modal show={show} onHide={handleClose} centered backdrop="static" className="text-main">
-      <Modal.Header closeButton className="border-bottom-0 pb-0">
-        <Modal.Title className="font-display fw-bold h5 text-main">{t("admin.taoIssueMoi")}</Modal.Title>
+
+  return (
+    <Modal show={show} onHide={handleClose} centered className="text-foreground">
+      <Modal.Header closeButton className="border-b-0 pb-0">
+        <Modal.Title className="font-display font-bold text-lg text-foreground">{t("admin.taoIssueMoi")}</Modal.Title>
       </Modal.Header>
 
-      <Form onSubmit={handleSubmit}>
-        <Modal.Body className="py-3 text-start">
-          <p className="text-muted-custom small mb-3">{t("admin.dienThongTinChiTietDeBatDauMot")}</p>
+      <form onSubmit={handleSubmit}>
+        <Modal.Body className="py-3 text-left space-y-3">
+          <p className="text-muted-foreground text-sm mb-3">{t("admin.dienThongTinChiTietDeBatDauMot")}</p>
           
           {/* Tên Issue */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-medium small text-main">{t("admin.tenIssue")}<span className="text-danger">*</span></Form.Label>
-            <Form.Control type="text" name="issueName" value={formData.issueName} onChange={handleChange} isInvalid={!!errors.issueName} placeholder={t("admin.viDuSpecialEditionOnAi")} />
-            <Form.Control.Feedback type="invalid">{errors.issueName}</Form.Control.Feedback>
-          </Form.Group>
+          <div>
+            <label className="font-medium text-xs text-foreground block mb-1">
+              {t("admin.tenIssue")}<span className="text-destructive">*</span>
+            </label>
+            <Input
+              type="text"
+              name="issueName"
+              value={formData.issueName}
+              onChange={handleChange}
+              invalid={!!errors.issueName}
+              placeholder={t("admin.viDuSpecialEditionOnAi")}
+            />
+            {errors.issueName && <p className="text-destructive text-xs mt-1">{errors.issueName}</p>}
+          </div>
 
-          <Row className="g-3 mb-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* Số Issue */}
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">{t("admin.soIssue")}<span className="text-danger">*</span></Form.Label>
-                <Form.Control type="number" name="issueNumber" value={formData.issueNumber} onChange={handleChange} isInvalid={!!errors.issueNumber} placeholder={t("admin.viDu1")} />
-                <Form.Control.Feedback type="invalid">{errors.issueNumber}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                {t("admin.soIssue")}<span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="number"
+                name="issueNumber"
+                value={formData.issueNumber}
+                onChange={handleChange}
+                invalid={!!errors.issueNumber}
+                placeholder={t("admin.viDu1")}
+              />
+              {errors.issueNumber && <p className="text-destructive text-xs mt-1">{errors.issueNumber}</p>}
+            </div>
 
             {/* Năm xuất bản */}
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">{t("admin.namXuatBan")}</Form.Label>
-                <Form.Control type="number" name="publicationYear" value={formData.publicationYear} onChange={handleChange} placeholder={t("admin.2024")} />
-              </Form.Group>
-            </Col>
-          </Row>
-
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                {t("admin.namXuatBan")}
+              </label>
+              <Input
+                type="number"
+                name="publicationYear"
+                value={formData.publicationYear}
+                onChange={handleChange}
+                placeholder={t("admin.2024")}
+              />
+            </div>
+          </div>
         </Modal.Body>
-        <Modal.Footer className="border-top-0 pt-0">
+
+        <Modal.Footer className="border-t-0 pt-0">
           <Button variant="outline" size="sm" onClick={handleClose} className="px-3">{t("admin.huy")}</Button>
           <Button type="submit" size="sm" className="px-3">{t("admin.taoIssue")}</Button>
         </Modal.Footer>
-      </Form>
-    </Modal>;
+      </form>
+    </Modal>
+  );
 }

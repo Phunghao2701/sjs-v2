@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Table } from 'react-bootstrap';
+import { Table } from '../../../shared/ui/table';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import AuthorAvatar from './AuthorAvatar';

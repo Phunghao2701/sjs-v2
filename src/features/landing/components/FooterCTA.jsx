@@ -5,8 +5,7 @@
  */
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import Container from 'react-bootstrap/Container';
-import Button from 'react-bootstrap/Button';
+import { Button } from '../../../shared/ui/button';
 import Icon from '../../../shared/components/Icon';
 
 export default function FooterCTA() {
@@ -20,7 +19,7 @@ export default function FooterCTA() {
   return (
     <section 
       id="footer-cta" 
-      className="py-5 position-relative overflow-hidden text-center"
+      className="py-12 relative overflow-hidden text-center"
       style={{
         backgroundColor: 'var(--bg-main)',
         borderTop: '1px solid var(--border)'
@@ -28,7 +27,7 @@ export default function FooterCTA() {
     >
       {/* Background Spotlight glow effect */}
       <div 
-        className="position-absolute pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
           bottom: '-200px',
           left: '50%',
@@ -41,7 +40,7 @@ export default function FooterCTA() {
         }}
       />
       
-      <Container className="py-5 position-relative z-3 reveal-scale">
+      <div className="container mx-auto px-4 py-12 relative z-10 reveal-scale">
         
         {/* Main Heading */}
         <h2 
@@ -53,37 +52,36 @@ export default function FooterCTA() {
         
         {/* Sub Heading */}
         <p 
-          className="text-muted-custom mx-auto mb-5 leading-relaxed"
+          className="text-muted-custom mx-auto mb-8 leading-relaxed"
           style={{ fontSize: 'calc(0.9rem + 0.1vw)', maxWidth: '600px', lineHeight: 1.6 }}
         >
           {t('ctaSubheading')}
         </p>
 
         {/* Buttons */}
-        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3 w-100 w-sm-auto">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 w-full sm:w-auto">
           {/* Try Searching Now Button */}
-          <Button
+          <a
             href="#search-sandbox"
-            variant="outline-secondary"
-            className="btn-view-trends w-100 w-sm-auto rounded-pill px-5 py-3 d-flex align-items-center justify-content-center gap-2"
+            className="btn-view-trends w-full sm:w-auto rounded-pill px-5 py-3 flex items-center justify-center gap-2 border border-border text-foreground hover:bg-muted/50 transition-colors"
             style={{ fontSize: '14px', fontWeight: 600 }}
           >
-            <Icon icon="lucide:search" className="btn-view-trends-icon fs-5" />
+            <Icon icon="lucide:search" className="btn-view-trends-icon text-lg" />
             <span>{t('ctaTryNowBtn')}</span>
-          </Button>
+          </a>
 
           {/* Create Free Account Button */}
           <Button
             onClick={handleCreateAccount}
-            className="btn-primary-glow w-100 w-sm-auto rounded-pill px-5 py-3 d-flex align-items-center justify-content-center gap-2 border-0"
+            className="btn-primary-glow w-full sm:w-auto rounded-pill px-5 py-3 flex items-center justify-center gap-2 border-0 h-auto"
             style={{ fontSize: '14px', fontWeight: 700 }}
           >
-            <Icon icon="lucide:user-plus" className="fs-5" />
+            <Icon icon="lucide:user-plus" className="text-lg" />
             <span>{t('ctaCreateAccountBtn')}</span>
           </Button>
         </div>
 
-      </Container>
+      </div>
     </section>
   );
 }

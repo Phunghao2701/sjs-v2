@@ -1,9 +1,11 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState, useEffect } from 'react';
-import { Modal, Form, Row, Col } from 'react-bootstrap';
-import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
+import { Modal } from '../../../../shared/ui/modal';
 import { Button } from '../../../../shared/ui/button';
+import { Input } from '../../../../shared/ui/input';
+import { useJournalManagement } from '../../../journal/hooks/useJournalManagement';
+
 export default function AddJournalModal({
   show,
   handleClose
@@ -17,7 +19,6 @@ export default function AddJournalModal({
     issn: '',
     onlineIssn: '',
     publisher: '',
-    // this will store publisher_id
     subjectCategory: '',
     subjectArea: '',
     aimScope: '',
@@ -34,6 +35,7 @@ export default function AddJournalModal({
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
   useEffect(() => {
     if (show) {
       const loadData = async () => {
@@ -48,45 +50,33 @@ export default function AddJournalModal({
             getCountryStatsApi,
             getRegionStatsApi
           } = await import('../../../zone/api/zone.api');
-          const [pubRes, countryRes, regionRes, areaRes, catRes] = await Promise.all([getPublishersApi({
-            page: 1,
-            limit: 5000
-          }), getCountryStatsApi({
-            limit: 1
-          }), getRegionStatsApi({
-            limit: 1
-          }), getSubjectAreasApi({
-            page: 1,
-            limit: 5000
-          }), getSubjectCategoriesApi({
-            page: 1,
-            limit: 5000
-          })]);
-          const pubItems = pubRes.data?.data?.items || pubRes.data?.data || [];
-          setPublishers(pubItems);
-          if (pubItems.length > 0) {
+          const [pubRes, countryRes, regionRes, areaRes, catRes] = await Promise.all([
+            getPublishersApi({ page: 1, limit: 5000 }),
+            getCountryStatsApi({ limit: 1 }),
+            getRegionStatsApi({ limit: 1 }),
+            getSubjectAreasApi({ page: 1, limit: 5000 }),
+            getSubjectCategoriesApi({ page: 1, limit: 5000 })
+          ]);
+          const pubs = pubRes.data?.data?.items || pubRes.data?.data || pubRes.data || [];
+          setPublishers(pubs);
+          const countries = countryRes.data?.data?.items || countryRes.data?.data || [];
+          const regions = regionRes.data?.data?.items || regionRes.data?.data || [];
+          setZones({
+            countryZoneId: countries[0]?.zone_id || countries[0]?.id || 1,
+            regionZoneId: regions[0]?.zone_id || regions[0]?.id || 2
+          });
+          const areas = areaRes.data?.data?.items || areaRes.data?.data || areaRes.data || [];
+          const cats = catRes.data?.data?.items || catRes.data?.data || catRes.data || [];
+          setSubjectAreas(areas);
+          setSubjectCategories(cats);
+          if (pubs.length > 0 && !formData.publisher) {
             setFormData(prev => ({
               ...prev,
-              publisher: pubItems[0].publisher_id || pubItems[0].id
+              publisher: pubs[0].publisher_id || pubs[0].id
             }));
           }
-          const rawAreaItems = areaRes.data?.data?.items || areaRes.data?.data || [];
-          const getAreaName = (a) => a.display_name || a.name || a.subject_area_name || String(a.id);
-          const areaItems = rawAreaItems.filter((a, index, self) => self.findIndex(t => getAreaName(t) === getAreaName(a)) === index);
-          setSubjectAreas(areaItems);
-
-          const rawCatItems = catRes.data?.data?.items || catRes.data?.data || [];
-          const getCatName = (c) => c.display_name || c.name || c.category_name || String(c.id);
-          const catItems = rawCatItems.filter((c, index, self) => self.findIndex(t => getCatName(t) === getCatName(c)) === index);
-          setSubjectCategories(catItems);
-          const countryItems = countryRes.data?.data?.items || countryRes.data?.data || [];
-          const regionItems = regionRes.data?.data?.items || regionRes.data?.data || [];
-          setZones({
-            countryZoneId: countryItems[0]?.zone_id || 1,
-            regionZoneId: regionItems[0]?.zone_id || 2
-          });
-        } catch (err) {
-          console.error('Failed to load publishers or zones:', err);
+        } catch (e) {
+          console.error("Error loading dependencies for AddJournalModal:", e);
         } finally {
           setLoading(false);
         }
@@ -94,11 +84,9 @@ export default function AddJournalModal({
       loadData();
     }
   }, [show]);
+
   const handleChange = e => {
-    const {
-      name,
-      value
-    } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -106,10 +94,11 @@ export default function AddJournalModal({
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
-        [name]: ''
+        [name]: null
       }));
     }
   };
+
   const validateForm = () => {
     const newErrors = {};
     if (!formData.title.trim()) newErrors.title = t("admin.tenTapChiKhongDuocDeTrong");
@@ -120,6 +109,7 @@ export default function AddJournalModal({
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const handleSubmit = async e => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -130,7 +120,6 @@ export default function AddJournalModal({
         publisher_id: parseInt(formData.publisher),
         country: parseInt(zones.countryZoneId),
         region: parseInt(zones.regionZoneId),
-        // Include frontend specific fields so normalizer works
         title: formData.title,
         issn: formData.issn,
         onlineIssn: formData.onlineIssn,
@@ -160,96 +149,137 @@ export default function AddJournalModal({
       alert(t("admin.loiTaoTapChi") + " " + errorMsg + errorDetail);
     }
   };
-  return <Modal show={show} onHide={handleClose} centered backdrop="static" className="text-main">
-      <Modal.Header closeButton className="border-bottom-0 pb-0">
-        <Modal.Title className="font-display fw-bold h4 text-main">{t("admin.themJournalMoi")}</Modal.Title>
+
+  return (
+    <Modal show={show} onHide={handleClose} centered className="text-foreground">
+      <Modal.Header closeButton className="border-b-0 pb-0">
+        <Modal.Title className="font-display font-bold text-xl text-foreground">{t("admin.themJournalMoi")}</Modal.Title>
       </Modal.Header>
       
-      <Form onSubmit={handleSubmit}>
-        <Modal.Body className="py-4 text-start">
-          
+      <form onSubmit={handleSubmit}>
+        <Modal.Body className="py-4 text-left space-y-4">
           {/* Tên Journal */}
-          <Form.Group className="mb-3">
-            <Form.Label className="fw-medium small text-main">{t("admin.tenJournal")}<span className="text-danger">*</span></Form.Label>
-            <Form.Control type="text" name="title" value={formData.title} onChange={handleChange} isInvalid={!!errors.title} placeholder={t("admin.nhapTenJournalDayDu")} />
-            <Form.Control.Feedback type="invalid">{errors.title}</Form.Control.Feedback>
-          </Form.Group>
+          <div>
+            <label className="font-medium text-xs text-foreground block mb-1">
+              {t("admin.tenJournal")}<span className="text-destructive">*</span>
+            </label>
+            <Input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              invalid={!!errors.title}
+              placeholder={t("admin.nhapTenJournalDayDu")}
+            />
+            {errors.title && <p className="text-destructive text-xs mt-1">{errors.title}</p>}
+          </div>
 
           {/* Row 2: Mã ISSN & Danh mục */}
-          <Row className="g-3 mb-3">
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">{t("admin.maIssn")}<span className="text-danger">*</span></Form.Label>
-                <Form.Control type="text" name="issn" value={formData.issn} onChange={handleChange} isInvalid={!!errors.issn} placeholder={t("admin.viDu12345678")} />
-                <Form.Control.Feedback type="invalid">{errors.issn}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                {t("admin.maIssn")}<span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="text"
+                name="issn"
+                value={formData.issn}
+                onChange={handleChange}
+                invalid={!!errors.issn}
+                placeholder={t("admin.viDu12345678")}
+              />
+              {errors.issn && <p className="text-destructive text-xs mt-1">{errors.issn}</p>}
+            </div>
             
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">{t("typeCategory")}<span className="text-danger">*</span></Form.Label>
-                <Form.Select name="subjectCategory" value={formData.subjectCategory} onChange={handleChange} isInvalid={!!errors.subjectCategory} style={{
-                cursor: 'pointer'
-              }}>
-                  <option value="">{t("admin.chonDanhMuc")}</option>
-                  {Array.from(new Map(subjectCategories.map(cat => {
-                    const catName = cat.display_name || cat.name || cat.category_name || String(cat.id);
-                    return [catName, { ...cat, _catName: catName }];
-                  })).values()).map(cat => (
-                    <option key={cat.subject_category_id || cat.id || cat._catName} value={cat._catName}>
-                      {cat._catName}
-                    </option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">{errors.subjectCategory}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                {t("typeCategory")}<span className="text-destructive">*</span>
+              </label>
+              <select
+                name="subjectCategory"
+                value={formData.subjectCategory}
+                onChange={handleChange}
+                className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer ${
+                  errors.subjectCategory ? 'border-destructive' : 'border-border'
+                }`}
+              >
+                <option value="">{t("admin.chonDanhMuc")}</option>
+                {Array.from(new Map(subjectCategories.map(cat => {
+                  const catName = cat.display_name || cat.name || cat.category_name || String(cat.id);
+                  return [catName, { ...cat, _catName: catName }];
+                })).values()).map(cat => (
+                  <option key={cat.subject_category_id || cat.id || cat._catName} value={cat._catName}>
+                    {cat._catName}
+                  </option>
+                ))}
+              </select>
+              {errors.subjectCategory && <p className="text-destructive text-xs mt-1">{errors.subjectCategory}</p>}
+            </div>
+          </div>
 
           {/* Row 3: Nhà xuất bản & Lĩnh vực nghiên cứu */}
-          <Row className="g-3 mb-3">
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">{t("admin.nhaXuatBan")}<span className="text-danger">*</span></Form.Label>
-                <Form.Select name="publisher" value={formData.publisher} onChange={handleChange} isInvalid={!!errors.publisher} style={{
-                cursor: 'pointer'
-              }}>
-                  {loading ? <option>{t("admin.dangTaiDanhSachNhaXuatBan")}</option> : publishers.length === 0 ? <option value="">{t("admin.khongCoNhaXuatBanNao")}</option> : publishers.map(pub => <option key={pub.publisher_id || pub.id} value={pub.publisher_id || pub.id}>
-                        {pub.display_name}
-                      </option>)}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">{errors.publisher}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-            
-            <Col xs={12} sm={6}>
-              <Form.Group>
-                <Form.Label className="fw-medium small text-main">{t("typeArea")}<span className="text-danger">*</span></Form.Label>
-                <Form.Select name="subjectArea" value={formData.subjectArea} onChange={handleChange} isInvalid={!!errors.subjectArea} style={{
-                cursor: 'pointer'
-              }}>
-                  <option value="">{t("admin.chonLinhVuc")}</option>
-                  {Array.from(new Map(subjectAreas.map(area => {
-                    const areaName = area.display_name || area.name || area.subject_area_name || String(area.id);
-                    return [areaName, { ...area, _areaName: areaName }];
-                  })).values()).map(area => (
-                    <option key={area.subject_area_id || area.id || area._areaName} value={area._areaName}>
-                      {area._areaName}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                {t("admin.nhaXuatBan")}<span className="text-destructive">*</span>
+              </label>
+              <select
+                name="publisher"
+                value={formData.publisher}
+                onChange={handleChange}
+                className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer ${
+                  errors.publisher ? 'border-destructive' : 'border-border'
+                }`}
+              >
+                {loading ? (
+                  <option>{t("admin.dangTaiDanhSachNhaXuatBan")}</option>
+                ) : publishers.length === 0 ? (
+                  <option value="">{t("admin.khongCoNhaXuatBanNao")}</option>
+                ) : (
+                  publishers.map(pub => (
+                    <option key={pub.publisher_id || pub.id} value={pub.publisher_id || pub.id}>
+                      {pub.display_name}
                     </option>
-                  ))}
-                </Form.Select>
-                <Form.Control.Feedback type="invalid">{errors.subjectArea}</Form.Control.Feedback>
-              </Form.Group>
-            </Col>
-          </Row>
-
+                  ))
+                )}
+              </select>
+              {errors.publisher && <p className="text-destructive text-xs mt-1">{errors.publisher}</p>}
+            </div>
+            
+            <div>
+              <label className="font-medium text-xs text-foreground block mb-1">
+                {t("typeArea")}<span className="text-destructive">*</span>
+              </label>
+              <select
+                name="subjectArea"
+                value={formData.subjectArea}
+                onChange={handleChange}
+                className={`w-full h-10 px-3 rounded-lg border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer ${
+                  errors.subjectArea ? 'border-destructive' : 'border-border'
+                }`}
+              >
+                <option value="">{t("admin.chonLinhVuc")}</option>
+                {Array.from(new Map(subjectAreas.map(area => {
+                  const areaName = area.display_name || area.name || area.subject_area_name || String(area.id);
+                  return [areaName, { ...area, _areaName: areaName }];
+                })).values()).map(area => (
+                  <option key={area.subject_area_id || area.id || area._areaName} value={area._areaName}>
+                    {area._areaName}
+                  </option>
+                ))}
+              </select>
+              {errors.subjectArea && <p className="text-destructive text-xs mt-1">{errors.subjectArea}</p>}
+            </div>
+          </div>
         </Modal.Body>
-        <Modal.Footer className="border-top-0 pt-0">
+
+        <Modal.Footer className="border-t-0 pt-0">
           <Button variant="outline" size="sm" onClick={handleClose} className="px-4">{t("admin.huy")}</Button>
           <Button type="submit" size="sm" className="px-4">
             + Create Journal
           </Button>
         </Modal.Footer>
-      </Form>
-    </Modal>;
+      </form>
+    </Modal>
+  );
 }

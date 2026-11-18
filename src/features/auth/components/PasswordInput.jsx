@@ -4,7 +4,6 @@
  * File: features\auth\components\PasswordInput.jsx
  */
 import { useState } from 'react';
-import { Form, InputGroup } from 'react-bootstrap';
 import Icon from '../../../shared/components/Icon';
 
 export default function PasswordInput({
@@ -27,40 +26,31 @@ export default function PasswordInput({
   };
 
   return (
-    <Form.Group className="mb-3">
+    <div className="mb-3">
       {label && (
-        <Form.Label 
-          className="text-xs font-bold mb-1.5 d-flex align-items-center gap-1"
-          style={{ 
-            letterSpacing: '0.05em', 
-            color: 'var(--text-main)',
-            textTransform: 'uppercase'
-          }}
+        <label 
+          htmlFor={`pwd-field-${name}`}
+          className="text-xs font-bold mb-1.5 flex items-center gap-1 uppercase tracking-wider text-foreground"
         >
           {label}
-          {required && <span className="text-danger">*</span>}
-        </Form.Label>
+          {required && <span className="text-destructive">*</span>}
+        </label>
       )}
       
-      <InputGroup 
-        className="rounded-3 overflow-hidden border"
+      <div 
+        className="flex items-center rounded-lg overflow-hidden border bg-surface transition-colors"
         style={{
-          borderColor: error ? '#ef4444' : (isFocused ? 'var(--primary)' : 'var(--border)'),
-          background: '#ffffff',
-          transition: 'all 0.2s ease-in-out',
-          boxShadow: error 
-            ? '0 0 0 3px rgba(239, 68, 68, 0.12)' 
-            : (isFocused ? '0 0 0 3px rgba(0, 113, 188, 0.15)' : '0 1px 2px rgba(0, 0, 0, 0.02)')
+          borderColor: error ? 'var(--ds-danger, #ef4444)' : (isFocused ? 'var(--primary, #0071BC)' : 'var(--border, #e2e8f0)'),
         }}
       >
-        <InputGroup.Text 
-          className="bg-transparent border-0 pe-1 text-muted-custom d-flex align-items-center justify-content-center"
-          style={{ width: '40px' }}
+        <div 
+          className="bg-transparent border-0 pe-1 text-muted-foreground flex items-center justify-center shrink-0 w-10"
         >
-          <Icon icon="lucide:lock" width="18" className="text-muted-custom opacity-70" />
-        </InputGroup.Text>
+          <Icon icon="lucide:lock" width="18" className="text-muted-foreground opacity-70" />
+        </div>
         
-        <Form.Control
+        <input
+          id={`pwd-field-${name}`}
           type={showPassword ? 'text' : 'password'}
           name={name}
           value={value}
@@ -75,38 +65,31 @@ export default function PasswordInput({
           }}
           placeholder={placeholder}
           disabled={disabled}
-          className="bg-transparent border-0 text-main text-sm py-2.5 ps-2"
-          style={{
-            boxShadow: 'none',
-            outline: 'none',
-            color: 'var(--text-main)'
-          }}
+          className="flex-1 w-full bg-transparent border-0 text-foreground text-sm py-2.5 ps-2 focus:outline-none focus:ring-0"
           {...props}
         />
 
-        <InputGroup.Text 
-          className="bg-transparent border-0 ps-1 d-flex align-items-center justify-content-center"
-          style={{ width: '40px', cursor: 'pointer' }}
+        <button 
+          type="button"
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+          className="bg-transparent border-0 ps-1 flex items-center justify-center shrink-0 w-10 cursor-pointer text-muted-foreground hover:text-foreground transition-colors"
           onClick={togglePasswordVisibility}
         >
           <Icon 
             icon={showPassword ? 'lucide:eye-off' : 'lucide:eye'} 
             width="18" 
-            className="text-muted-custom opacity-70 hover:opacity-100 transition-opacity" 
           />
-        </InputGroup.Text>
-      </InputGroup>
+        </button>
+      </div>
       
       {error && (
         <div 
-          className="text-danger text-xs mt-1.5 d-flex align-items-center gap-1 animate-fade-in"
-          style={{ fontWeight: 500 }}
+          className="text-destructive text-xs mt-1.5 flex items-center gap-1 font-medium animate-fade-in"
         >
           <Icon icon="lucide:alert-circle" width="12" />
           <span>{error}</span>
         </div>
       )}
-    </Form.Group>
+    </div>
   );
 }
-

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
  *
  * File: features\keywords\components\KeywordArticleItem.jsx
  */
-import { Button } from 'react-bootstrap';
+import { Button } from '../../../shared/ui/button';
 import { Icon } from '@iconify/react';
 import LatexText from '../../../shared/components/LatexText/LatexText';
 
@@ -15,35 +15,50 @@ export default function KeywordArticleItem({
   article,
   onViewDetail
 }) {
-  const {
-    t
-  } = useTranslation();
-  return <div className="keyword-article-card">
+  const { t } = useTranslation();
+  return (
+    <div className="keyword-article-card">
       <div className="keyword-article-meta">
         {article.publication_year && <span className="keyword-article-year">{article.publication_year}</span>}
-        {article.journal_name && <span className="keyword-article-journal">
+        {article.journal_name && (
+          <span className="keyword-article-journal">
             <Icon icon="lucide:book-open" width="14" />
             {article.journal_name}
-          </span>}
-        {article.citations_count > 0 && <span className="keyword-article-citations">
+          </span>
+        )}
+        {article.citations_count > 0 && (
+          <span className="keyword-article-citations">
             <Icon icon="lucide:quote" width="14" />
             {article.citations_count} citations
-          </span>}
+          </span>
+        )}
       </div>
 
       <h2 className="keyword-article-item__title">
         <LatexText text={article.title} />
       </h2>
 
-      {article.doi && <p className="keyword-article-doi">
+      {article.doi && (
+        <p className="keyword-article-doi">
           DOI: {article.doi}
-        </p>}
+        </p>
+      )}
 
-      {article.abstract && <p className="keyword-article-abstract">
+      {article.abstract && (
+        <p className="keyword-article-abstract">
           <LatexText text={article.abstract} />
-        </p>}
+        </p>
+      )}
 
-      <Button type="button" onClick={() => onViewDetail && onViewDetail(article.article_id)} className="keyword-article-action d-inline-flex align-items-center gap-2">{t("journal.xemChiTiet")}<Icon icon="lucide:arrow-right" width="16" />
+      <Button
+        type="button"
+        variant="default"
+        onClick={() => onViewDetail && onViewDetail(article.article_id)}
+        className="keyword-article-action inline-flex items-center gap-2"
+      >
+        {t("journal.xemChiTiet")}
+        <Icon icon="lucide:arrow-right" width="16" />
       </Button>
-    </div>;
+    </div>
+  );
 }

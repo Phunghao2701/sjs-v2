@@ -1,46 +1,77 @@
-import { useTranslation } from "react-i18next";
 import { useState } from 'react';
-import { Modal, Form } from 'react-bootstrap';
-import PrimaryButton from '../../../shared/components/Button/PrimaryButton';
+import { useTranslation } from 'react-i18next';
+import { Modal } from '../../../shared/ui/modal';
+import { Button } from '../../../shared/ui/button';
+import { Input } from '../../../shared/ui/input';
+
 const AddKeywordModal = ({
   show,
   onHide,
   onAdd,
-  actionLoading
+  actionLoading,
 }) => {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
   const [keyword, setKeyword] = useState('');
-  const handleSubmit = async e => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!keyword.trim()) return;
     try {
       await onAdd(keyword.trim());
       setKeyword('');
       onHide();
-    } catch (err) {
+    } catch {
       // Error handled by hook or parent
     }
   };
-  return <Modal show={show} onHide={onHide} centered backdrop="static">
-      <Modal.Header closeButton className="border-bottom-0 pb-0">
-        <Modal.Title className="font-display fw-bold">{t("keyword.themKeywordTheoDoi")}</Modal.Title>
+
+  return (
+    <Modal show={show} onHide={onHide} size="sm">
+      <Modal.Header closeButton className="border-0 pb-0">
+        <Modal.Title className="text-base font-semibold text-foreground">
+          {t('keyword.themKeywordTheoDoi', 'Thêm Keyword theo dõi')}
+        </Modal.Title>
       </Modal.Header>
-      <Modal.Body>
-        <Form onSubmit={handleSubmit}>
-          <Form.Group className="mb-3">
-            <Form.Label className="text-muted-custom small">{t("keyword.nhapTuKhoaKeyword")}</Form.Label>
-            <Form.Control type="text" placeholder={t("keyword.viDuLargeLanguageModel")} value={keyword} onChange={e => setKeyword(e.target.value)} disabled={actionLoading} required autoFocus />
-          </Form.Group>
-          <div className="d-flex justify-content-end gap-2 mt-4">
-            <PrimaryButton variant="outline" onClick={onHide} disabled={actionLoading}>{t("admin.huy")}</PrimaryButton>
-            <PrimaryButton type="submit" disabled={actionLoading || !keyword.trim()}>
-              {actionLoading ? t("keyword.dangThem") : t("keyword.themKeyword")}
-            </PrimaryButton>
+      <form onSubmit={handleSubmit} className="mt-3">
+        <Modal.Body className="py-2 space-y-3">
+          <div className="space-y-1.5">
+            <label htmlFor="keywordInput" className="block text-xs font-medium text-muted-foreground">
+              {t('keyword.nhapTuKhoaKeyword', 'Nhập từ khóa (Keyword)')}
+            </label>
+            <Input
+              id="keywordInput"
+              type="text"
+              placeholder={t('keyword.viDuLargeLanguageModel', 'Ví dụ: Large Language Model')}
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              disabled={actionLoading}
+              required
+              autoFocus
+            />
           </div>
-        </Form>
-      </Modal.Body>
-    </Modal>;
+        </Modal.Body>
+        <Modal.Footer className="border-0 pt-0 gap-2 flex items-center justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onHide}
+            disabled={actionLoading}
+          >
+            {t('admin.huy', 'Hủy')}
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={actionLoading || !keyword.trim()}
+            isLoading={actionLoading}
+          >
+            {actionLoading ? t('keyword.dangThem', 'Đang thêm...') : t('keyword.themKeyword', 'Thêm Keyword')}
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
+  );
 };
+
 export default AddKeywordModal;

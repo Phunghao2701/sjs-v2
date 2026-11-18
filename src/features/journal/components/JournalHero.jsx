@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
  *
  * File: features\journal\components\JournalHero.jsx
  */
-import { Row, Col } from 'react-bootstrap';
+import { Row, Col } from '../../../shared/ui/layout-grid';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Spinner } from '../../../shared/ui/button';

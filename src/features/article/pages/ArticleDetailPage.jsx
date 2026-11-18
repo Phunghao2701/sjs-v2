@@ -7,7 +7,7 @@ import { t } from "i18next";
  */
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Modal } from 'react-bootstrap';
+import { Modal } from '../../../shared/ui/modal';
 import { Icon } from '@iconify/react';
 import { Button } from '../../../shared/ui/button';
 import { PageContainer } from '../../../shared/ui/page-layout';
@@ -259,16 +259,6 @@ export default function ArticleDetailPage() {
               </aside>
 
               <section className="article-detail-main">
-                <Breadcrumbs
-                  items={[
-                    { label: t("home"), to: "/" },
-                    { label: t("articles"), to: "/articles" },
-                    { label: t("article.chiTietBaiBao") }
-                  ]}
-                  className="mb-3"
-                />
-
-
                 <h1 className="article-detail-title text-base font-semibold leading-snug">
                   <LatexText text={article.title} />
                 </h1>
@@ -341,7 +331,7 @@ export default function ArticleDetailPage() {
                       {/* TL;DR section */}
                       {article.semantic_tldr && <section id="tldr" className="article-section">
                           <h2 className="article-section-title text-base font-semibold">TL;DR</h2>
-                          <div className="p-3 rounded border-l-4 border-primary bg-primary/10 text-text-main text-sm leading-relaxed">
+                          <div className="p-3 rounded border border-border bg-primary/10 text-text-main text-sm leading-relaxed">
                             <strong>Summary:</strong> {article.semantic_tldr}
                           </div>
                         </section>}

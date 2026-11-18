@@ -1,11 +1,8 @@
 import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\journal\components\JournalSearchBar.jsx
- */
-import { Form, Row, Col, Button, InputGroup } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
+import { Button } from '../../../shared/ui/button';
+import { Input } from '../../../shared/ui/input';
+
 export default function JournalSearchBar({
   searchInput,
   setSearchInput,
@@ -16,52 +13,75 @@ export default function JournalSearchBar({
   onSubmit,
   onClear
 }) {
-  const {
-    t
-  } = useTranslation();
-  return <Form onSubmit={onSubmit} className="journal-search-panel">
-      <Row className="g-3 align-items-center">
+  const { t } = useTranslation();
+
+  return (
+    <form onSubmit={onSubmit} className="journal-search-panel">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-center">
         {/* Search Input Box */}
-        <Col lg={6} md={12}>
-          <InputGroup className="journal-search-group">
-            <InputGroup.Text className="journal-search-addon">
-              <Icon icon="lucide:search" width="18" />
-            </InputGroup.Text>
-            <Form.Control type="text" placeholder={t("journal.timJournal")} value={searchInput} onChange={e => setSearchInput(e.target.value)} className="journal-search-input" />
-            {searchInput && <Button variant="link" className="journal-search-clear p-2" onClick={() => setSearchInput('')}>
-                <Icon icon="lucide:x" width="16" />
-              </Button>}
-            <Button type="submit" className="journal-search-submit px-4 border-0">{t("search")}</Button>
-          </InputGroup>
-        </Col>
+        <div className="sm:col-span-2 md:col-span-6">
+          <div className="relative flex items-center">
+            <Icon icon="lucide:search" width="18" className="absolute left-3 text-muted-foreground pointer-events-none" />
+            <Input
+              type="text"
+              placeholder={t("journal.timJournal", "Tìm kiếm tạp chí...")}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-9 pr-24 h-10"
+            />
+            <div className="absolute right-1 flex items-center gap-1">
+              {searchInput && (
+                <button
+                  type="button"
+                  className="p-1 text-muted-foreground hover:text-foreground"
+                  onClick={() => setSearchInput('')}
+                >
+                  <Icon icon="lucide:x" width="16" />
+                </button>
+              )}
+              <Button type="submit" size="sm" className="h-8 px-3">
+                {t("search", "Tìm")}
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Quartile Dropdown */}
-        <Col lg={2.5} md={4} sm={6} xs={12}>
-          <Form.Select value={quartile} onChange={e => setQuartile(e.target.value)} className="journal-filter-select text-main py-2.5">
-            <option value="all">{t("journal.tatCaQuartile")}</option>
+        <div className="sm:col-span-1 md:col-span-2">
+          <select
+            value={quartile}
+            onChange={(e) => setQuartile(e.target.value)}
+            className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:outline-none focus:border-primary"
+          >
+            <option value="all">{t("journal.tatCaQuartile", "Tất cả Quartile")}</option>
             <option value="Q1">Q1</option>
             <option value="Q2">Q2</option>
             <option value="Q3">Q3</option>
             <option value="Q4">Q4</option>
-          </Form.Select>
-        </Col>
+          </select>
+        </div>
 
         {/* Access Dropdown */}
-        <Col lg={2.5} md={4} sm={6} xs={12}>
-          <Form.Select value={isOpenAccess} onChange={e => setIsOpenAccess(e.target.value)} className="journal-filter-select text-main py-2.5">
-            <option value="all">{t("journal.tatCaTruyCap")}</option>
+        <div className="sm:col-span-1 md:col-span-2">
+          <select
+            value={isOpenAccess}
+            onChange={(e) => setIsOpenAccess(e.target.value)}
+            className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:outline-none focus:border-primary"
+          >
+            <option value="all">{t("journal.tatCaTruyCap", "Tất cả truy cập")}</option>
             <option value="oa">Open Access (OA)</option>
             <option value="subscription">Subscription</option>
-          </Form.Select>
-        </Col>
+          </select>
+        </div>
 
         {/* Clear Button */}
-        <Col lg={1} md={4} sm={12} xs={12} className="text-md-end text-center">
-          <Button variant="link" className="journal-reset-btn py-2" onClick={onClear}>
-            <Icon icon="lucide:refresh-cw" className="me-1" />
-            Reset
+        <div className="sm:col-span-2 md:col-span-2 flex justify-center sm:justify-end">
+          <Button type="button" variant="ghost" size="sm" onClick={onClear} className="gap-1.5 h-10">
+            <Icon icon="lucide:refresh-cw" width="14" />
+            <span>Reset</span>
           </Button>
-        </Col>
-      </Row>
-    </Form>;
+        </div>
+      </div>
+    </form>
+  );
 }

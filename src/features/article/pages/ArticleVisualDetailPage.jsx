@@ -7,7 +7,9 @@ import { t } from "i18next";
  */
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Modal, Dropdown } from 'react-bootstrap';
+import { Modal } from '../../../shared/ui/modal';
+import { Dropdown } from '../../../shared/ui/dropdown-menu';
+import { Container } from '../../../shared/ui/layout-grid';
 import { Icon } from '@iconify/react';
 import { Button } from '../../../shared/ui/button';
 

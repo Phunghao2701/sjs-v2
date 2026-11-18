@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import { Button } from '../../../shared/ui/button';
 import InputField from '../../../shared/components/InputField';
 import PasswordInput from './PasswordInput';
 import CheckboxField from './CheckboxField';
@@ -45,6 +45,7 @@ export default function LoginForm({
       }));
     }
   }, []);
+
   const validateField = (name, value) => {
     let errorMsg = '';
     switch (name) {
@@ -69,39 +70,30 @@ export default function LoginForm({
     }));
     return !errorMsg;
   };
+
   const handleChange = e => {
-    const {
-      name,
-      value,
-      type,
-      checked
-    } = e.target;
+    const { name, value, type, checked } = e.target;
     const val = type === 'checkbox' ? checked : value;
     setFormData(prev => ({
       ...prev,
       [name]: val
     }));
 
-    // Clear error on change
     setErrors(prev => ({
       ...prev,
       [name]: ''
     }));
   };
+
   const handleBlur = e => {
-    const {
-      name,
-      value,
-      type,
-      checked
-    } = e.target;
+    const { name, value, type, checked } = e.target;
     const val = type === 'checkbox' ? checked : value;
     validateField(name, val);
   };
+
   const handleSubmit = e => {
     e.preventDefault();
 
-    // Validate email & password
     const emailValid = validateField('email', formData.email);
     const passwordValid = validateField('password', formData.password);
     if (!emailValid || !passwordValid) return;
@@ -111,6 +103,7 @@ export default function LoginForm({
       remember_login: formData.remember_login
     });
   };
+
   const handleQuickLogin = account => {
     if (isLoading) return;
     onSubmit({
@@ -119,51 +112,84 @@ export default function LoginForm({
       remember_login: true,
     });
   };
-  const rememberLabel = <span className="text-xs font-semibold select-none" style={{
-    color: 'var(--text-main)',
-    letterSpacing: '0.01em'
-  }}>{t("auth.ghiNhoDangNhap")}</span>;
-  return <Form onSubmit={handleSubmit} noValidate>
+
+  const rememberLabel = (
+    <span className="text-xs font-semibold select-none text-foreground">
+      {t("auth.ghiNhoDangNhap")}
+    </span>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} noValidate>
       {/* Server API Error Banner */}
       <FormErrorMessage message={apiError} />
 
       {/* Email Input */}
-      <InputField label="Email" name="email" type="email" value={formData.email} onChange={handleChange} onBlur={handleBlur} placeholder={t("auth.nameemailcom")} error={errors.email} icon="lucide:mail" required disabled={isLoading} />
+      <InputField
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder={t("auth.nameemailcom")}
+        error={errors.email}
+        icon="lucide:mail"
+        required
+        disabled={isLoading}
+      />
 
       {/* Password Input */}
-      <div className="position-relative mb-3">
-        <div className="d-flex justify-content-between align-items-center mb-1.5">
-          <Form.Label className="text-xs font-bold mb-0 d-flex align-items-center gap-1" style={{
-          letterSpacing: '0.05em',
-          color: 'var(--text-main)',
-          textTransform: 'uppercase'
-        }}>{t("auth.matKhau")}<span className="text-danger">*</span>
-          </Form.Label>
-          <a href="/forgot-password" className="text-xs font-semibold text-decoration-none" style={{
-          color: 'var(--primary)',
-          letterSpacing: '0.01em'
-        }} onClick={e => {
-          e.preventDefault();
-          window.location.href = '/forgot-password';
-        }}>{t("auth.quenMatKhau")}</a>
+      <div className="relative mb-3">
+        <div className="flex justify-between items-center mb-1.5">
+          <label className="text-xs font-bold mb-0 flex items-center gap-1 uppercase tracking-wider text-foreground">
+            {t("auth.matKhau")}<span className="text-destructive">*</span>
+          </label>
+          <a
+            href="/forgot-password"
+            className="text-xs font-semibold text-primary hover:underline"
+            onClick={e => {
+              e.preventDefault();
+              window.location.href = '/forgot-password';
+            }}
+          >
+            {t("auth.quenMatKhau")}
+          </a>
         </div>
-        <PasswordInput label={null} name="password" value={formData.password} onChange={handleChange} onBlur={handleBlur} placeholder={t("admin.key")} error={errors.password} required disabled={isLoading} />
+        <PasswordInput
+          label={null}
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          placeholder={t("admin.key")}
+          error={errors.password}
+          required
+          disabled={isLoading}
+        />
       </div>
 
       {/* Remember Login Checkbox */}
-      <CheckboxField name="remember_login" checked={formData.remember_login} onChange={handleChange} labelMarkup={rememberLabel} disabled={isLoading} />
+      <CheckboxField
+        name="remember_login"
+        checked={formData.remember_login}
+        onChange={handleChange}
+        labelMarkup={rememberLabel}
+        disabled={isLoading}
+      />
 
       {/* Submit Button */}
       <SubmitButton isLoading={isLoading} loadingText={t("auth.dangDangNhap")} label={t("signIn")} />
 
       {devAccounts.length > 0 && (
-        <div className="d-flex gap-2 mt-2">
+        <div className="flex gap-2 mt-2">
           {devAccounts.map(account => (
             <Button
               key={account.label}
               type="button"
-              variant="outline-secondary"
-              className="flex-fill"
+              variant="outline"
+              size="sm"
+              className="flex-1 text-xs"
               onClick={() => handleQuickLogin(account)}
               disabled={isLoading}
             >
@@ -172,5 +198,6 @@ export default function LoginForm({
           ))}
         </div>
       )}
-    </Form>;
+    </form>
+  );
 }

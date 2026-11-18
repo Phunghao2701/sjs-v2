@@ -4,10 +4,6 @@
  * File: features\landing\components\Hero.jsx
  */
 import { useTranslation } from 'react-i18next';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import Button from 'react-bootstrap/Button';
 import Icon from '../../../shared/components/Icon';
 
 export default function Hero() {
@@ -21,16 +17,16 @@ export default function Hero() {
   ];
 
   return (
-    <section className="relative min-vh-100 d-flex flex-column justify-content-between pt-5 pb-5 overflow-hidden grid-bg">
+    <section className="relative min-h-screen flex flex-col justify-between pt-16 pb-6 overflow-hidden grid-bg">
       {/* Radial overlay to fade out the grid pattern */}
-      <div className="position-absolute w-100 h-100 radial-fade pe-none" style={{ top: 0, left: 0 }} />
+      <div className="absolute inset-0 radial-fade pointer-events-none" />
 
       {/* Hero content container */}
-      <Container className="position-relative d-flex flex-column justify-content-center align-items-center text-center flex-grow-1 z-3 pt-5">
+      <div className="container mx-auto px-4 relative flex flex-col justify-center items-center text-center flex-grow z-10 pt-10">
         
         {/* Animated OpenAlex Badge */}
         <div 
-          className="d-inline-flex align-items-center gap-2 px-3 py-2 rounded-pill mb-4 reveal-on-scroll delay-100"
+          className="inline-flex items-center gap-2 px-3 py-2 rounded-full mb-4 reveal-on-scroll delay-100"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.08)',
             border: '1px solid rgba(0, 0, 0, 0.2)',
@@ -63,7 +59,7 @@ export default function Hero() {
 
         {/* Sub Heading */}
         <p 
-          className="text-main mb-5 max-w-2xl reveal-on-scroll delay-300"
+          className="text-main mb-8 max-w-2xl reveal-on-scroll delay-300 mx-auto"
           style={{
             fontSize: 'calc(0.95rem + 0.15vw)',
             lineHeight: 1.6,
@@ -74,44 +70,39 @@ export default function Hero() {
         </p>
 
         {/* Action CTA Buttons */}
-        <div className="d-flex flex-column flex-sm-row justify-content-center align-items-center gap-3 w-100 w-sm-auto mb-5 reveal-on-scroll delay-400">
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-3 w-full sm:w-auto mb-10 reveal-on-scroll delay-400">
           {/* Start Searching Button */}
-          <Button
+          <a
             href="#search-sandbox"
-            className="btn-primary-glow rounded-pill px-5 py-3 d-flex align-items-center justify-content-center gap-2"
-            style={{ fontSize: '14px', letterSpacing: '0.03em' }}
+            className="btn-primary-glow rounded-pill px-5 py-3 flex items-center justify-center gap-2 w-full sm:w-auto text-white"
+            style={{ fontSize: '14px', letterSpacing: '0.03em', fontWeight: 600 }}
           >
-            <Icon icon="lucide:rocket" className="fs-5" />
+            <Icon icon="lucide:rocket" className="text-lg" />
             <span>{t('ctaSearch')}</span>
-          </Button>
+          </a>
 
           {/* View Trends Button */}
-          <Button
+          <a
             href="#features"
-            variant="outline-secondary"
-            className="btn-view-trends rounded-pill px-5 py-3 d-flex align-items-center justify-content-center gap-2"
+            className="btn-view-trends rounded-pill px-5 py-3 flex items-center justify-center gap-2 w-full sm:w-auto border border-border text-foreground hover:bg-muted/50 transition-colors"
+            style={{ fontSize: '14px', fontWeight: 600 }}
           >
-            <Icon icon="lucide:bar-chart-2" className="fs-5 btn-view-trends-icon" />
+            <Icon icon="lucide:bar-chart-2" className="text-lg btn-view-trends-icon" />
             <span>{t('ctaTrends')}</span>
-          </Button>
+          </a>
         </div>
-      </Container>
+      </div>
 
       {/* Stats Counter Row Container */}
-      <div className="position-relative w-100 z-3 reveal-scale delay-500" style={{ borderTop: '1px solid var(--border)' }}>
-        <Container className="pt-4 pb-2">
-          <Row className="gy-4 gy-md-0 text-center">
+      <div className="relative w-full z-10 reveal-scale delay-500" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="container mx-auto px-4 pt-6 pb-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {stats.map((stat, idx) => (
-              <Col 
-                xs={6} 
-                md={3} 
+              <div 
                 key={idx}
-                className={idx > 0 ? 'border-start-md border-white-10' : ''}
-                style={{
-                  borderLeft: (idx > 0 && window.innerWidth >= 768) ? '1px solid rgba(255, 255, 255, 0.08)' : 'none'
-                }}
+                className={idx > 0 ? 'md:border-l md:border-black/10' : ''}
               >
-                <div className="d-flex flex-column align-items-center justify-content-center">
+                <div className="flex flex-col items-center justify-center">
                   {/* Stat Value */}
                   <span 
                     className="font-display mb-1"
@@ -126,7 +117,7 @@ export default function Hero() {
                   </span>
                   {/* Stat Label */}
                   <span 
-                    className="text-muted-custom font-weight-bold"
+                    className="text-muted-custom font-bold"
                     style={{
                       fontSize: '13px',
                       letterSpacing: '0.15em',
@@ -136,10 +127,10 @@ export default function Hero() {
                     {t(stat.labelKey)}
                   </span>
                 </div>
-              </Col>
+              </div>
             ))}
-          </Row>
-        </Container>
+          </div>
+        </div>
       </div>
     </section>
   );

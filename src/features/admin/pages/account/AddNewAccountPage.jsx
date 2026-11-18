@@ -1,14 +1,15 @@
 import { useTranslation } from "react-i18next";
 import { t } from "i18next";
 import { useState } from 'react';
-import { Card, Row, Col } from 'react-bootstrap';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Icon from '../../../../shared/components/Icon';
 import UserAccountForm from '../../components/account/UserAccountForm';
 import { createAdminUser } from '../../api/adminUsers.api';
 import ROUTES from '../../../../app/routes/routePaths';
 import { Alert } from '../../../../shared/ui/alert';
 import { PageHeader } from '../../../../shared/ui/page-layout';
+import { Card } from '../../../../shared/ui/card';
+
 const getApiErrorMessage = error => {
   if (error.response?.status === 403) {
     return t("admin.backendTuChoiQuyenAdminTokenHi");
@@ -32,9 +33,6 @@ export default function AddNewAccountPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
 
-  /**
-   * Gọi API tạo tài khoản thay vì lưu mock trong Zustand.
-   */
   const handleFormSubmit = async payload => {
     try {
       setSubmitting(true);
@@ -48,8 +46,9 @@ export default function AddNewAccountPage() {
       setSubmitting(false);
     }
   };
+
   return (
-    <div className="container-fluid py-2 space-y-6">
+    <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-6">
       <PageHeader
         breadcrumbs={[
           { label: 'Platform Directory', to: ROUTES.ADMIN_USERS },
@@ -60,110 +59,56 @@ export default function AddNewAccountPage() {
         description={t("admin.vuiLongDienDayDuCacThongTinBen")}
       />
 
-      <div className="mx-auto" style={{
-      maxWidth: '820px'
-    }}>
+      <div className="mx-auto max-w-[820px]">
         {/* Core Account Form card */}
-        <Card className="p-4 p-md-5 rounded-4 border bg-white shadow-sm mb-4">
-          {submitError && <Alert variant="destructive" className="mb-4">
+        <Card className="p-6 md:p-8 rounded-2xl border border-border bg-surface shadow-2xs mb-6">
+          {submitError && (
+            <Alert variant="destructive" className="mb-4">
               {submitError}
-            </Alert>}
+            </Alert>
+          )}
 
           <UserAccountForm isEdit={false} onSubmit={handleFormSubmit} onCancel={() => navigate(ROUTES.ADMIN_USERS)} submitting={submitting} />
         </Card>
 
-        {/* Informational Feature Highlights (Page 17 bottom cards) */}
-        <Row className="g-3 mb-5">
-          <Col xs={12} md={4}>
-            <Card className="p-4 border h-100 rounded-3" style={{
-            backgroundColor: '#fef2f2',
-            borderColor: '#fee2e2',
-            boxShadow: 'none'
-          }}>
-              <div className="d-flex flex-column align-items-start gap-3">
-                <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{
-                width: '32px',
-                height: '32px',
-                backgroundColor: '#fee2e2',
-                color: '#ef4444'
-              }}>
-                  <Icon icon="lucide:mail" width="16" />
-                </div>
-                <div>
-                  <h6 className="fw-bold mb-1.5" style={{
-                  fontSize: '14px',
-                  color: '#7f1d1d'
-                }}>{t("admin.thongBaoTuDong")}</h6>
-                  <p className="small mb-0 lh-sm" style={{
-                  fontSize: '13px',
-                  color: '#991b1b',
-                  opacity: 0.95
-                }}>{t("admin.heThongSeTuDongGuiEmailKichHoa")}</p>
-                </div>
+        {/* Informational Feature Highlights */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <Card className="p-4 border border-red-200 bg-red-50 dark:bg-red-950/20 rounded-xl shadow-2xs">
+            <div className="flex flex-col items-start gap-3">
+              <div className="size-8 rounded-full flex items-center justify-center shrink-0 bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300">
+                <Icon icon="lucide:mail" width="16" />
               </div>
-            </Card>
-          </Col>
+              <div>
+                <h6 className="font-bold mb-1 text-sm text-red-900 dark:text-red-200">{t("admin.thongBaoTuDong")}</h6>
+                <p className="text-xs mb-0 text-red-800 dark:text-red-300/80 leading-relaxed">{t("admin.heThongSeTuDongGuiEmailKichHoa")}</p>
+              </div>
+            </div>
+          </Card>
 
-          <Col xs={12} md={4}>
-            <Card className="p-4 border h-100 rounded-3" style={{
-            backgroundColor: '#E6F3FA',
-            borderColor: '#fed7aa',
-            boxShadow: 'none'
-          }}>
-              <div className="d-flex flex-column align-items-start gap-3">
-                <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{
-                width: '32px',
-                height: '32px',
-                backgroundColor: '#E6F3FA',
-                color: '#005A96'
-              }}>
-                  <Icon icon="lucide:shield-check" width="16" />
-                </div>
-                <div>
-                  <h6 className="fw-bold mb-1.5" style={{
-                  fontSize: '14px',
-                  color: '#9a3412'
-                }}>{t("admin.phanQuyenThongMinh")}</h6>
-                  <p className="small mb-0 lh-sm" style={{
-                  fontSize: '13px',
-                  color: '#9a3412',
-                  opacity: 0.95
-                }}>{t("admin.vaiTroXacDinhCacQuyenTruyCapVa")}</p>
-                </div>
+          <Card className="p-4 border border-sky-200 bg-sky-50 dark:bg-sky-950/20 rounded-xl shadow-2xs">
+            <div className="flex flex-col items-start gap-3">
+              <div className="size-8 rounded-full flex items-center justify-center shrink-0 bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">
+                <Icon icon="lucide:shield-check" width="16" />
               </div>
-            </Card>
-          </Col>
+              <div>
+                <h6 className="font-bold mb-1 text-sm text-sky-900 dark:text-sky-200">{t("admin.phanQuyenThongMinh")}</h6>
+                <p className="text-xs mb-0 text-sky-800 dark:text-sky-300/80 leading-relaxed">{t("admin.vaiTroXacDinhCacQuyenTruyCapVa")}</p>
+              </div>
+            </div>
+          </Card>
 
-          <Col xs={12} md={4}>
-            <Card className="p-4 border h-100 rounded-3" style={{
-            backgroundColor: '#f8fafc',
-            borderColor: '#e2e8f0',
-            boxShadow: 'none'
-          }}>
-              <div className="d-flex flex-column align-items-start gap-3">
-                <div className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style={{
-                width: '32px',
-                height: '32px',
-                backgroundColor: '#e2e8f0',
-                color: '#64748b'
-              }}>
-                  <Icon icon="lucide:clock" width="16" />
-                </div>
-                <div>
-                  <h6 className="fw-bold mb-1.5" style={{
-                  fontSize: '14px',
-                  color: '#1e293b'
-                }}>{t("admin.lichSuThaoTac")}</h6>
-                  <p className="small mb-0 lh-sm" style={{
-                  fontSize: '13px',
-                  color: '#475569',
-                  opacity: 0.95
-                }}>{t("admin.moiHanhDongTaoTaiKhoanDeuDuocG")}</p>
-                </div>
+          <Card className="p-4 border border-border bg-muted/40 rounded-xl shadow-2xs">
+            <div className="flex flex-col items-start gap-3">
+              <div className="size-8 rounded-full flex items-center justify-center shrink-0 bg-muted text-muted-foreground">
+                <Icon icon="lucide:clock" width="16" />
               </div>
-            </Card>
-          </Col>
-        </Row>
+              <div>
+                <h6 className="font-bold mb-1 text-sm text-foreground">{t("admin.lichSuThaoTac")}</h6>
+                <p className="text-xs mb-0 text-muted-foreground leading-relaxed">{t("admin.moiHanhDongTaoTaiKhoanDeuDuocG")}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   );

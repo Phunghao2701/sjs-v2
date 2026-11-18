@@ -44,16 +44,6 @@ export default function JournalListPage() {
 
       <PageContainer className="journal-list-shell">
         <PageHeader
-          breadcrumbs={[
-            { label: t("home", "Home"), to: "/" },
-            { label: t("typeJournal") }
-          ]}
-          badge={
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-subtle text-primary text-xs font-semibold">
-              <Icon icon="lucide:library" width="14" />
-              <span>Journal catalog</span>
-            </div>
-          }
           title={t("typeJournal")}
           description={t("journal.danhSachTapChiKhoaHocTrongHeTh")}
         />

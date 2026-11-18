@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import Icon from '../../../shared/components/Icon';
 import useAuthors from '../hooks/useAuthors';
 import AuthorLeaderboardTable from '../components/AuthorLeaderboardTable';
+import AuthorLeaderboardCharts from '../components/AuthorLeaderboardCharts';
 import AuthorNavigationTabs from '../components/AuthorNavigationTabs';
 import { Button } from '../../../shared/ui/button';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
-import { FilterCard } from '../../../shared/components/Card';
-import { FilterSelect } from '../../../shared/components/Input';
 import AdminPagination from '../../../shared/components/Pagination';
 import './AuthorLeaderboardPage.css';
 
@@ -28,7 +27,8 @@ export default function AuthorLeaderboardPage() {
   const [selectedArea, setSelectedArea] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const limit = 10;
+  const [viewMode, setViewMode] = useState('charts'); // 'charts' | 'table'
+  const [limit, setLimit] = useState(10);
 
   useEffect(() => {
     if (!subjectAreas || subjectAreas.length === 0) {
@@ -43,108 +43,120 @@ export default function AuthorLeaderboardPage() {
       page: currentPage,
       limit: limit,
     });
-  }, [selectedArea, selectedPeriod, currentPage, fetchLeaderboard]);
+  }, [selectedArea, selectedPeriod, currentPage, limit, fetchLeaderboard]);
 
   const handleAreaChange = (e) => {
     setSelectedArea(e.target.value);
     setCurrentPage(1);
   };
 
-  const handlePeriodChange = (e) => {
-    setSelectedPeriod(e.target.value);
+  const handlePeriodChange = (val) => {
+    setSelectedPeriod(val);
+    setCurrentPage(1);
+  };
+
+  const handleLimitChange = (val) => {
+    setLimit(val);
     setCurrentPage(1);
   };
 
   return (
     <PageContainer>
         <PageHeader
-          breadcrumbs={[
-            { label: t("author.tongQuan"), to: "/" },
-            { label: t("author.tacGiaNoiBat"), to: "/authors" },
-            { label: t("author.bangXepHang") }
-          ]}
-          badge={
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary-subtle text-primary text-xs font-semibold">
-              <Icon icon="lucide:trophy" width="14" />
-              <span>Author leaderboard</span>
-            </div>
-          }
           title={t("author.bangXepHangTacGia")}
           description={t("author.cacTacGiaNoiBatNhatHeThongDuoc")}
           actions={
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/authors')}
-            >
-              <Icon icon="lucide:arrow-left" width="14" className="mr-1.5" />
-              <span>{t("author.quayLaiDanhSachTacGia")}</span>
-            </Button>
+            <div className="flex items-center gap-2">
+              <div className="inline-flex rounded-lg border border-border bg-surface-muted/60 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setViewMode('charts')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
+                    viewMode === 'charts'
+                      ? 'bg-primary text-white shadow-2xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Icon icon="lucide:bar-chart-3" width={13} />
+                  <span>{t('author.bieuDoPhanTich', 'Analytics View')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('table')}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded text-xs font-semibold transition-all cursor-pointer ${
+                    viewMode === 'table'
+                      ? 'bg-primary text-white shadow-2xs'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Icon icon="lucide:table" width={13} />
+                  <span>{t('author.bangChiTiet', 'Table View')}</span>
+                </button>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate('/authors')}
+              >
+                <Icon icon="lucide:arrow-left" width={14} className="mr-1.5" />
+                <span>{t("author.quayLaiDanhSachTacGia")}</span>
+              </Button>
+            </div>
           }
         />
 
         <AuthorNavigationTabs activeTab="leaderboard" />
 
-        <FilterCard className="mb-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <span className="block text-xs font-medium text-muted-foreground mb-1.5">
-                {t("author.linhVuc1")}
-              </span>
-              <FilterSelect
-                value={selectedArea}
-                onChange={handleAreaChange}
-                options={[
-                  { value: '', label: t("author.tatCaLinhVuc") },
-                  ...(subjectAreas || []).map((area) => ({
-                    value: area.display_name || area.name || '',
-                    label: area.display_name || area.name || '',
-                  })),
-                ]}
-              />
-            </div>
-
-            <div>
-              <span className="block text-xs font-medium text-muted-foreground mb-1.5">
-                {t("author.thoiGian")}
-              </span>
-              <FilterSelect
-                value={selectedPeriod}
-                onChange={handlePeriodChange}
-                options={[
-                  { value: 'all', label: t("author.tatCaThoiGian") },
-                  { value: 'month', label: t("author.thangNay") },
-                  { value: 'year', label: t("author.namNay") },
-                ]}
-              />
-            </div>
-          </div>
-        </FilterCard>
-
-        <AuthorLeaderboardTable
-          authors={leaderboard}
-          loading={loadingLeaderboard}
-          error={errorLeaderboard}
-          onRetry={() =>
-            fetchLeaderboard({
-              subject_area: selectedArea,
-              period: selectedPeriod,
-              page: currentPage,
-              limit: limit,
-            })
-          }
-        />
-
-        {leaderboard.length > 0 && leaderboardTotalPages > 1 && (
-          <div className="mt-6">
-            <AdminPagination
-              totalItems={totalLeaderboard}
-              currentPage={currentPage}
-              limit={limit}
-              onPageChange={setCurrentPage}
-              entityName={t("author.tacGia")}
+        {viewMode === 'charts' ? (
+          <AuthorLeaderboardCharts
+            authors={leaderboard}
+            subjectAreas={subjectAreas}
+            selectedArea={selectedArea}
+            onAreaChange={handleAreaChange}
+            period={selectedPeriod}
+            onPeriodChange={handlePeriodChange}
+            limit={limit}
+            onLimitChange={handleLimitChange}
+            loading={loadingLeaderboard}
+            error={errorLeaderboard}
+            onRetry={() =>
+              fetchLeaderboard({
+                subject_area: selectedArea,
+                period: selectedPeriod,
+                page: currentPage,
+                limit: limit,
+              })
+            }
+          />
+        ) : (
+          <>
+            <AuthorLeaderboardTable
+              authors={leaderboard}
+              loading={loadingLeaderboard}
+              error={errorLeaderboard}
+              onRetry={() =>
+                fetchLeaderboard({
+                  subject_area: selectedArea,
+                  period: selectedPeriod,
+                  page: currentPage,
+                  limit: limit,
+                })
+              }
             />
-          </div>
+
+            {leaderboard.length > 0 && leaderboardTotalPages > 1 && (
+              <div className="mt-6">
+                <AdminPagination
+                  totalItems={totalLeaderboard}
+                  currentPage={currentPage}
+                  limit={limit}
+                  onPageChange={setCurrentPage}
+                  entityName={t("author.tacGia")}
+                />
+              </div>
+            )}
+          </>
         )}
       </PageContainer>
   );

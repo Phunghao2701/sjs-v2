@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Col } from 'react-bootstrap';
+import { Col } from '../../../shared/ui/layout-grid';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { Card } from '../../../shared/ui/card';

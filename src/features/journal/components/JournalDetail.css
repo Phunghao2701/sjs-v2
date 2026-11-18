@@ -417,7 +417,6 @@
   align-items: center;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--primary);
   border-radius: 8px;
   display: flex;
   gap: 1rem;

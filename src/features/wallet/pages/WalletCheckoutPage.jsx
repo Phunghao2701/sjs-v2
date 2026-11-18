@@ -109,12 +109,6 @@ export default function WalletCheckoutPage() {
   return <div className="wallet-checkout-page">
       <Header />
       <div className="wallet-checkout-inner">
-        <div className="wallet-checkout-breadcrumb">
-          <button type="button" onClick={() => navigate(ROUTES.WALLET_TOP_UP)}>{t("wallet.napCoin")}</button>
-          <Icon icon="lucide:chevron-right" width={14} />
-          <span>{t("wallet.xacNhanThanhToan")}</span>
-        </div>
-
         <div className="wallet-checkout-hero">
           <div>
             <h1 className="wallet-checkout-title">{t("wallet.xacNhanThanhToan")}</h1>

@@ -37,6 +37,12 @@ export const getDefaultLang = () => {
   return getStoredLang() || getBrowserLang();
 };
 
+export const getAuthenticatedHomePath = (user, lang = getDefaultLang()) => (
+  user?.role === 'ADMINISTRATOR'
+    ? `/${lang}/admin/dashboard`
+    : `/${lang}/dashboard`
+);
+
 export const replaceLangInPath = (pathname, newLang) => {
   if (!isSupportedLang(newLang)) return pathname;
 

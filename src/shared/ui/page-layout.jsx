@@ -16,25 +16,12 @@ function PageHeader({
   title,
   description,
   actions,
-  badge,
-  breadcrumb,
-  breadcrumbs,
   className = '',
   children,
 }) {
-  const activeBreadcrumb = breadcrumb || breadcrumbs;
-
   return (
     <header className={cn('flex flex-col gap-3 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between', className)}>
       <div className="min-w-0 flex-1">
-        {activeBreadcrumb && (
-          Array.isArray(activeBreadcrumb) ? (
-            <Breadcrumbs items={activeBreadcrumb} className="mb-1.5" />
-          ) : (
-            <div className="mb-1.5">{activeBreadcrumb}</div>
-          )
-        )}
-        {badge && <div className="mb-1.5">{badge}</div>}
         {title && (
           <h1 className="m-0 text-lg sm:text-xl font-bold leading-snug tracking-tight text-foreground">
             {title}

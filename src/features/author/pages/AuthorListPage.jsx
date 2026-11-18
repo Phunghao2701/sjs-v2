@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Form } from 'react-bootstrap';
 import Icon from '../../../shared/components/Icon';
 import useAuthors from '../hooks/useAuthors';
 import AuthorTable from '../components/AuthorTable';
@@ -10,7 +9,6 @@ import AuthorNavigationTabs from '../components/AuthorNavigationTabs';
 import AdminPagination from '../../../shared/components/Pagination';
 import { Button } from '../../../shared/ui/button';
 import { Card } from '../../../shared/ui/card';
-import { Badge } from '../../../shared/ui/badge';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { cn } from '../../../lib/utils';
@@ -165,16 +163,6 @@ export default function AuthorListPage() {
   return (
     <PageContainer>
       <PageHeader
-        breadcrumbs={[
-          { label: "Workspace", to: "/dashboard" },
-          { label: t("author.danhSachTacGia", "Authors") }
-        ]}
-        badge={
-          <Badge variant="info" className="gap-1.5 py-1 px-2.5 text-xs font-semibold">
-            <Icon icon="lucide:users-round" width="14" />
-            <span>Author registry</span>
-          </Badge>
-        }
         title={t("author.danhSachNhaKhoaHocTacGia", "Authors & Researchers Directory")}
         description={t("author.traCuuThongTinChiSoHocThuatHin", "Explore author profiles, scientific contributions, h-index rankings, and publication impact.")}
         actions={
@@ -209,7 +197,7 @@ export default function AuthorListPage() {
 
       {/* Filter bar */}
       <Card className="p-3 sm:p-3.5 shadow-card">
-        <Form onSubmit={handleSearchSubmit}>
+        <form onSubmit={handleSearchSubmit}>
           <div className="flex flex-col sm:flex-row items-center gap-2.5">
             <div className="relative flex-1 w-full">
               <Icon icon="lucide:search" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" width={15} />
@@ -241,7 +229,7 @@ export default function AuthorListPage() {
               <span>{t("searchBtn", "Search")}</span>
             </Button>
           </div>
-        </Form>
+        </form>
       </Card>
 
       {/* View Mode Toolbar: Count & Toggle (Grid / List) */}

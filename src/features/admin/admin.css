@@ -441,10 +441,6 @@
   outline: none;
 }
 
-.admin-year-select:hover {
-  border-color: var(--primary);
-}
-
 /* SVG chart full width, chiều cao cố định theo viewBox ratio */
 .admin-trends-card__chart {
   width: 100%;
@@ -1779,10 +1775,6 @@
 .admin-form-input {
   min-height: 42px;
   background-color: var(--bg-card);
-}
-
-.admin-form-input:hover {
-  border-color: var(--primary-light);
 }
 
 .admin-btn {

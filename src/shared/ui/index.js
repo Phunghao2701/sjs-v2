@@ -12,3 +12,6 @@ export * from './dialog';
 export * from './modal';
 export * from './table';
 export * from './tabs';
+export * from './dropdown-menu';
+export * from './layout-grid';
+export * from './sheet';

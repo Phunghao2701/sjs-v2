@@ -1,36 +1,39 @@
 import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\journal\components\JournalTabs.jsx
- */
-import { Nav } from 'react-bootstrap';
 import { Icon } from '@iconify/react';
-export default function JournalTabs({
-  activeTab,
-  onTabChange
-}) {
-  const {
-    t
-  } = useTranslation();
-  return <div className="journal-tabs-wrap mb-4" aria-label="Điều hướng chi tiết tạp chí">
-      <Nav variant="tabs" activeKey={activeTab} onSelect={onTabChange} className="tab-nav-custom border-0 d-flex flex-nowrap overflow-auto">
-        <Nav.Item>
-          <Nav.Link eventKey="ranking" className="d-flex align-items-center gap-2 text-nowrap">
-            <Icon icon="lucide:bar-chart-3" width="16" />{t("journal.hoatDongOpenAlex", "OpenAlex activity")}</Nav.Link>
-        </Nav.Item>
+import { cn } from '../../../lib/utils';
 
-        <Nav.Item>
-          <Nav.Link eventKey="volumes" className="d-flex align-items-center gap-2 text-nowrap">
-            <Icon icon="lucide:book-open" width="16" />
-            Volumes & Issues
-          </Nav.Link>
-        </Nav.Item>
+export default function JournalTabs({ activeTab, onTabChange }) {
+  const { t } = useTranslation();
 
-        <Nav.Item>
-          <Nav.Link eventKey="articles" className="d-flex align-items-center gap-2 text-nowrap">
-            <Icon icon="lucide:file-text" width="16" />{t("journal.baiBaoGanDay")}</Nav.Link>
-        </Nav.Item>
-      </Nav>
-    </div>;
+  const tabs = [
+    { key: 'ranking', label: t("journal.hoatDongOpenAlex", "OpenAlex activity"), icon: 'lucide:bar-chart-3' },
+    { key: 'volumes', label: 'Volumes & Issues', icon: 'lucide:book-open' },
+    { key: 'articles', label: t("journal.baiBaoGanDay", "Bài báo gần đây"), icon: 'lucide:file-text' },
+  ];
+
+  return (
+    <div className="flex items-center gap-2 border-b border-border mb-6 overflow-x-auto pb-px" role="tablist">
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.key;
+        return (
+          <button
+            key={tab.key}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onTabChange(tab.key)}
+            className={cn(
+              'inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold transition-all border-b-2 whitespace-nowrap',
+              isActive
+                ? 'border-primary text-primary bg-primary-subtle/30 rounded-t-lg'
+                : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
+            )}
+          >
+            <Icon icon={tab.icon} width="16" height="16" />
+            <span>{tab.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
 }

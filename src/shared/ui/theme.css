@@ -247,6 +247,19 @@ body {
   box-shadow: none !important;
 }
 
+/* Neutralize hover on text inputs, textareas, selects, and dropdown toggles */
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([class*="border-0"]):not([class*="border-none"]),
+  textarea:not([class*="border-0"]):not([class*="border-none"]),
+  select:not([class*="border-0"]):not([class*="border-none"]),
+  .form-control:not([class*="border-0"]):not([class*="border-none"]),
+  .form-select:not([class*="border-0"]):not([class*="border-none"]),
+  .dropdown-toggle:not([class*="border-0"]):not([class*="border-none"])
+):hover:not(:focus):not(:focus-visible):not([aria-invalid="true"]):not(.is-invalid):not([aria-expanded="true"]) {
+  border-color: var(--ds-border) !important;
+  box-shadow: none !important;
+}
+
 .form-control[aria-invalid="true"],
 .form-select[aria-invalid="true"],
 input[aria-invalid="true"],
@@ -362,7 +375,7 @@ textarea[aria-invalid="true"]:focus {
   padding: 0.45rem 0.625rem;
   min-height: 36px;
   border-radius: var(--ds-radius-control, 8px);
-  border-left: 3px solid transparent;
+  border-left: none !important;
   transition: all 0.15s ease-in-out;
 }
 
@@ -389,7 +402,7 @@ textarea[aria-invalid="true"]:focus {
 .app-sidebar nav a[aria-current="page"] {
   color: var(--ds-primary, #0071bc) !important;
   background-color: var(--ds-primary-subtle, #e0f2fe) !important;
-  border-left-color: var(--ds-primary, #0071bc) !important;
+  border-left: none !important;
   font-weight: 600 !important;
 }
 
@@ -447,6 +460,11 @@ textarea[aria-invalid="true"]:focus {
   border-color: var(--ds-primary) !important;
   outline: none !important;
   outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+
+.admin-content :where(input:not([type="checkbox"]):not([type="radio"]), select, textarea, .form-control, .form-select):hover:not(:focus):not(:focus-visible):not([aria-invalid="true"]):not(.is-invalid) {
+  border-color: var(--ds-border) !important;
   box-shadow: none !important;
 }
 

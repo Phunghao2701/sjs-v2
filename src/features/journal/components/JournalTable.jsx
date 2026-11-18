@@ -4,7 +4,9 @@ import { useTranslation } from "react-i18next";
  *
  * File: features\journal\components\JournalTable.jsx
  */
-import { Table, Badge, Button } from 'react-bootstrap';
+import { Table } from '../../../shared/ui/table';
+import { Badge } from '../../../shared/ui/badge';
+import { Button } from '../../../shared/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 export default function JournalTable({

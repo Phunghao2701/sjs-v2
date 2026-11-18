@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
  * @file AuthorAreasBreakdown.jsx
  * @description Donut chart + ranked area list for the author research distribution.
  */
-import { Card } from "react-bootstrap";
+import { Card } from "../../../shared/ui/card";
 import LoadingSkeleton from "../../../shared/components/LoadingSkeleton";
 import EmptyState from "../../../shared/components/EmptyState";
 

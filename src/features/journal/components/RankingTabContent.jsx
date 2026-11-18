@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next";
  *
  * File: features\journal\components\RankingTabContent.jsx
  */
-import { Row, Col, Table } from 'react-bootstrap';
+import { Row, Col } from '../../../shared/ui/layout-grid';
+import { Table } from '../../../shared/ui/table';
 import { Icon } from '@iconify/react';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { StatePanel } from '../../../shared/ui/state-panel';
