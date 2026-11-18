@@ -89,14 +89,14 @@ export default function TopAuthorsTable({ authors = [], loading, error, onAuthor
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[620px] border-collapse text-left text-xs table-fixed">
+            <table className="w-full min-w-[620px] border-collapse text-left text-xs">
               <thead className="bg-surface-muted/60 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-b border-border">
                 <tr>
-                  <th scope="col" className="px-3 py-2 w-14 text-center">#</th>
-                  <th scope="col" className="px-3 py-2 w-auto">{t('typeAuthor', 'Author')}</th>
-                  <th scope="col" className="px-3 py-2 w-44 hidden sm:table-cell">{t('author.linhVuc', 'Research Field')}</th>
-                  <th scope="col" className="px-3 py-2 w-28 text-right">{t('articles', 'Articles')}</th>
-                  <th scope="col" className="px-4 py-2 w-28 text-right">Citations</th>
+                  <th scope="col" className="px-4 py-2.5 w-12 text-center">#</th>
+                  <th scope="col" className="px-4 py-2.5 w-[38%]">{t('typeAuthor', 'Author')}</th>
+                  <th scope="col" className="px-4 py-2.5 w-[34%] hidden sm:table-cell">{t('author.linhVuc', 'Research Field')}</th>
+                  <th scope="col" className="px-4 py-2.5 w-[14%] text-right">{t('articles', 'Articles')}</th>
+                  <th scope="col" className="px-5 py-2.5 w-[14%] text-right">Citations</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
@@ -114,14 +114,14 @@ export default function TopAuthorsTable({ authors = [], loading, error, onAuthor
 
                   return (
                     <tr key={author.author_id ?? author.id ?? i} className="transition-colors hover:bg-surface-muted/40">
-                      <td className="px-3 py-2 text-center">
+                      <td className="px-4 py-3 text-center">
                         <RankBadge rank={i + 1} />
                       </td>
-                      <td className="px-3 py-2">
+                      <td className="px-4 py-3">
                         <button
                           type="button"
                           onClick={() => onAuthorClick?.(author)}
-                          className="flex max-w-full items-center gap-2 rounded border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-primary cursor-pointer group"
+                          className="flex max-w-full items-center gap-2.5 rounded border-0 bg-transparent p-0 text-left focus-visible:outline-2 focus-visible:outline-primary cursor-pointer group"
                         >
                           <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-subtle text-[11px] font-bold text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                             {initials}
@@ -138,15 +138,15 @@ export default function TopAuthorsTable({ authors = [], loading, error, onAuthor
                           </span>
                         </button>
                       </td>
-                      <td className="px-3 py-2 hidden sm:table-cell">
-                        <span className="inline-block max-w-[160px] truncate rounded-full bg-surface-muted border border-border px-2 py-0.5 text-[10px] text-muted-foreground" title={field}>
+                      <td className="px-4 py-3 hidden sm:table-cell">
+                        <span className="inline-block max-w-[320px] truncate rounded-full bg-surface-muted border border-border px-2.5 py-0.5 text-[11px] text-muted-foreground" title={field}>
                           {field || '—'}
                         </span>
                       </td>
-                      <td className="px-3 py-2 text-right font-mono text-foreground font-medium tabular-nums text-xs">
+                      <td className="px-4 py-3 text-right font-mono text-foreground font-medium tabular-nums text-xs">
                         {formatCount(articles)}
                       </td>
-                      <td className="px-4 py-2 text-right font-mono font-semibold text-primary tabular-nums text-xs">
+                      <td className="px-5 py-3 text-right font-mono font-semibold text-primary tabular-nums text-xs">
                         {formatCount(citations)}
                       </td>
                     </tr>

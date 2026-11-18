@@ -55,7 +55,7 @@
 
 .geography-select:focus {
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 3px var(--primary-light) !important;
+  box-shadow: none !important;
   outline: none;
 }
 
@@ -92,7 +92,7 @@
 .geography-search-input:focus {
   background-color: var(--bg-card) !important;
   border-color: var(--primary) !important;
-  box-shadow: 0 0 0 3px var(--primary-light) !important;
+  box-shadow: none !important;
   outline: none;
 }
 

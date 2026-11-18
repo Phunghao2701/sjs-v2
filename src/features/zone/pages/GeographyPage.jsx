@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@iconify/react';
 import useZoneStats from '../hooks/useZoneStats';
 import { getCountryArticlesApi } from '../api/zone.api';
@@ -13,6 +14,7 @@ import { isAuthenticated as checkAuthSession } from '../../../shared/utils/auth'
 import { Alert } from '../../../shared/ui/alert';
 import { Button } from '../../../shared/ui/button';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
+import { MotionPage, fadeUp } from '../../../shared/ui/motion';
 import './GeographyPage.css';
 
 export default function GeographyPage() {
@@ -115,32 +117,11 @@ export default function GeographyPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title={t("zone.phanBoTapChiTheoQuocGia", "Geographic Distribution of Publications")}
-        description={t("zone.xemThongKeSoLuongAnPhamKhoaHoc", "Explore worldwide scientific publication volume, top-producing nations, and country rankings.")}
-        actions={
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">
-              {t("article.namXuatBan", "Publication Year")}
-            </span>
-            <select
-              value={selectedYear}
-              onChange={(e) => {
-                setSelectedYear(e.target.value);
-                setArticlesPage(1);
-              }}
-              className="h-9 rounded-control border border-border bg-background px-3 text-xs font-medium text-foreground transition-colors focus:border-primary focus:outline-none"
-            >
-              <option value="All">{t("zone.tatCaCacNam", "All Years")}</option>
-              {['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'].map((yr) => (
-                <option key={yr} value={yr}>
-                  {yr}
-                </option>
-              ))}
-            </select>
-          </div>
-        }
-      />
+      <MotionPage className="space-y-5">
+        <PageHeader
+          title={t("zone.phanBoTapChiTheoQuocGia", "Geographic Distribution of Publications")}
+          description={t("zone.xemThongKeSoLuongAnPhamKhoaHoc", "Explore worldwide scientific publication volume, top-producing nations, and country rankings.")}
+        />
 
         {/* Error handling for countries */}
         {errorCountries && (
@@ -165,7 +146,7 @@ export default function GeographyPage() {
         )}
 
         {/* Main Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+        <motion.div variants={fadeUp} className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           <div className="lg:col-span-7 xl:col-span-8 min-w-0">
             <GeographyWorldMap
               data={countryStats}
@@ -173,6 +154,10 @@ export default function GeographyPage() {
               selectedCountry={selectedCountry}
               onSelectCountry={handleSelectCountry}
               selectedYear={selectedYear}
+              onYearChange={(year) => {
+                setSelectedYear(year);
+                setArticlesPage(1);
+              }}
             />
           </div>
 
@@ -184,27 +169,37 @@ export default function GeographyPage() {
               onSelectCountry={handleSelectCountry}
             />
           </div>
-        </div>
+        </motion.div>
 
         {/* Selected Country Articles List */}
-        {selectedCountry && (
-          <div className="mt-6" ref={articlesRef}>
-            <GeographyArticleList
-              articles={articles}
-              loading={loadingArticles}
-              total={totalArticles}
-              page={articlesPage}
-              totalPages={totalPages}
-              onPageChange={setArticlesPage}
-              onDetailClick={handleDetailClick}
-              countryName={selectedCountry.name}
-              onClose={() => setSelectedCountry(null)}
-            />
-          </div>
-        )}
+        <AnimatePresence>
+          {selectedCountry && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="mt-6"
+              ref={articlesRef}
+            >
+              <GeographyArticleList
+                articles={articles}
+                loading={loadingArticles}
+                total={totalArticles}
+                page={articlesPage}
+                totalPages={totalPages}
+                onPageChange={setArticlesPage}
+                onDetailClick={handleDetailClick}
+                countryName={selectedCountry.name}
+                onClose={() => setSelectedCountry(null)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Login guard modal */}
         <AuthRequiredModal show={showAuthModal} onHide={() => setShowAuthModal(false)} />
-      </PageContainer>
-    );
+      </MotionPage>
+    </PageContainer>
+  );
   }

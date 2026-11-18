@@ -42,11 +42,8 @@ export default function ArticleTable({
           <td className="px-3 py-3.5">
             <Skeleton className="h-5 w-20 rounded-md" />
           </td>
-          <td className="px-3 py-3.5 text-center">
+          <td className="px-4 py-3.5 text-center">
             <Skeleton className="h-5 w-10 rounded-full mx-auto" />
-          </td>
-          <td className="px-4 py-3.5 text-end">
-            <Skeleton className="h-4 w-14 rounded ms-auto" />
           </td>
         </tr>
       ))}
@@ -66,8 +63,7 @@ export default function ArticleTable({
               <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
               <th className="px-3 py-3">DOI</th>
               <th className="px-3 py-3">Topic / Field</th>
-              <th className="px-3 py-3 text-center">Access</th>
-              <th className="px-4 py-3 text-end">{t("article.chiTiet", "Action")}</th>
+              <th className="px-4 py-3 text-center">Access</th>
             </tr>
           </thead>
           {renderSkeletons()}

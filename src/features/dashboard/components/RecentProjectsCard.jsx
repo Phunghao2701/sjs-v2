@@ -23,6 +23,25 @@ export default function RecentProjectsCard({ projects = [], loading, error, onVi
     deleted: 'Deleted'
   };
 
+  const statusConfig = {
+    active: {
+      bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      dot: 'bg-emerald-500'
+    },
+    new: {
+      bg: 'bg-sky-50 text-sky-700 border-sky-200',
+      dot: 'bg-sky-500'
+    },
+    paused: {
+      bg: 'bg-amber-50 text-amber-700 border-amber-200',
+      dot: 'bg-amber-500'
+    },
+    archived: {
+      bg: 'bg-slate-100 text-slate-700 border-slate-200',
+      dot: 'bg-slate-400'
+    },
+  };
+
   return (
     <Card className="h-full min-w-0 flex flex-col overflow-hidden">
       <CardHeader>
@@ -103,8 +122,8 @@ export default function RecentProjectsCard({ projects = [], loading, error, onVi
                         {journalsCount} {t('project.tapChi', 'journals')} · {formatCount(articlesCount)} {t('author.baiBao', 'papers')}
                       </span>
                     </span>
-                    <span className="shrink-0 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-medium flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-emerald-500" />
+                    <span className={`shrink-0 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold flex items-center gap-1.5 shadow-2xs ${statusConfig[status]?.bg ?? statusConfig.active.bg}`}>
+                      <span className={`size-1.5 rounded-full shrink-0 ${statusConfig[status]?.dot ?? statusConfig.active.dot}`} />
                       {labels[status] ?? labels.active}
                     </span>
                   </button>

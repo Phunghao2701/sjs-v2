@@ -14,28 +14,36 @@ export default function QuickAccessGrid() {
       label: t('search', 'Search & Discover'),
       desc: t('dashboard.khamPhaBaiBaoDeTai', 'Search papers & journals'),
       path: `/${lang}/search`,
-      iconBg: 'bg-primary-subtle text-primary'
     },
     {
       icon: 'lucide:file-text',
       label: t('articles', 'Articles Directory'),
       desc: t('dashboard.xepHangQ1q4KhoaHoc', 'Browse indexed publications'),
       path: `/${lang}/articles`,
-      iconBg: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-400'
     },
     {
       icon: 'lucide:globe',
       label: t('geography', 'Geographic Distribution'),
       desc: t('dashboard.banDoPhanBoTacGia', 'Global research output map'),
       path: `/${lang}/geography`,
-      iconBg: 'bg-success-subtle text-success'
     },
     {
       icon: 'lucide:trophy',
       label: 'Leaderboard',
       desc: t('dashboard.xepHangTacGiaNoiBat', 'Top contributing researchers'),
       path: `/${lang}/authors`,
-      iconBg: 'bg-warning-subtle text-warning'
+    },
+    {
+      icon: 'lucide:folder',
+      label: t('projects', 'Research Projects'),
+      desc: t('dashboard.quanLyDuAnVaTapChi', 'Track and organize your studies'),
+      path: `/${lang}/projects`,
+    },
+    {
+      icon: 'lucide:plus-circle',
+      label: t('dashboard.taoProjectMoi', 'Create Project'),
+      desc: t('dashboard.khoiTaoDuAnNghienCuu', 'Start a new tracking workspace'),
+      path: `/${lang}/projects/create`,
     },
   ];
 
@@ -47,19 +55,21 @@ export default function QuickAccessGrid() {
           <span>{t('dashboard.truyCapNhanh', 'Quick Access')}</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col justify-between">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <CardContent className="flex-1 flex flex-col">
+        <div className="my-auto grid grid-cols-1 gap-2.5 sm:grid-cols-2 py-1">
           {items.map((item) => (
             <button
               key={item.icon}
               type="button"
               onClick={() => navigate(item.path)}
-              className="flex min-w-0 items-center justify-between gap-2 rounded-lg border border-border/50 bg-surface p-2.5 text-left transition-colors hover:border-primary/50 hover:bg-surface-muted/40 focus-visible:outline-2 focus-visible:outline-primary cursor-pointer group"
+              className="flex min-w-0 items-center justify-between gap-2.5 rounded-lg border border-border/50 bg-surface px-3 py-3 text-left transition-colors hover:border-primary/50 hover:bg-surface-muted/40 focus-visible:outline-2 focus-visible:outline-primary cursor-pointer group"
             >
               <div className="flex min-w-0 items-center gap-2.5">
-                <span className={`flex size-8 shrink-0 items-center justify-center rounded-lg ${item.iconBg}`}>
-                  <Icon icon={item.icon} width={16} />
-                </span>
+                <Icon
+                  icon={item.icon}
+                  width={18}
+                  className="text-muted-foreground shrink-0 group-hover:text-primary transition-colors"
+                />
                 <span className="min-w-0">
                   <span className="block text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors">
                     {item.label}
@@ -75,9 +85,9 @@ export default function QuickAccessGrid() {
         </div>
 
         {/* Bottom grounded footer */}
-        <div className="pt-2.5 mt-3 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
+        <div className="pt-2.5 mt-auto border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
           <span>{t('dashboard.phimTatHeThong', 'Navigation Shortcuts')}</span>
-          <span className="font-semibold text-foreground font-mono">4 {t('dashboard.chucNang', 'modules')}</span>
+          <span className="font-semibold text-foreground font-mono">{items.length} {t('dashboard.chucNang', 'modules')}</span>
         </div>
       </CardContent>
     </Card>

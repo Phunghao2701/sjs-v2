@@ -1,55 +1,121 @@
-import { useTranslation } from "react-i18next";
-/**
- * @file AuthorTableRow.jsx
- * @description Component dòng con của `AuthorTable`.
- */
-
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import AuthorAvatar from './AuthorAvatar';
+import { motion } from 'framer-motion';
+import { Icon } from '@iconify/react';
+
+// Generates a consistent, pleasant pastel avatar color based on name
+const getAvatarTheme = (name = '') => {
+  const themes = [
+    { bg: 'bg-blue-100', text: 'text-blue-700' },
+    { bg: 'bg-indigo-100', text: 'text-indigo-700' },
+    { bg: 'bg-purple-100', text: 'text-purple-700' },
+    { bg: 'bg-emerald-100', text: 'text-emerald-700' },
+    { bg: 'bg-sky-100', text: 'text-sky-700' },
+    { bg: 'bg-amber-100', text: 'text-amber-800' },
+    { bg: 'bg-rose-100', text: 'text-rose-700' },
+    { bg: 'bg-teal-100', text: 'text-teal-700' },
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return themes[Math.abs(hash) % themes.length];
+};
+
+const getInitials = (name = '') => {
+  const parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'AU';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+const formatNum = (val) => {
+  if (val === null || val === undefined || Number.isNaN(Number(val))) return '0';
+  return Number(val).toLocaleString();
+};
+
+const cleanStr = (val) => String(val ?? '').replace(/[\t\r\n]+/g, ' ').trim();
+
 export default function AuthorTableRow({
   author,
   index
 }) {
-  const {
-    t
-  } = useTranslation();
   const navigate = useNavigate();
+
   if (!author) return null;
-  const id = author.author_id ?? author.id;
-  const name = author.display_name ?? author.full_name ?? author.name ?? t("typeAuthor");
-  const orcid = author.orcid ?? '—';
-  const institution1 = author.institution_1 ?? author.affiliation ?? author.institution ?? '—';
-  const institution2 = author.institution_2 ?? author.department ?? '';
-  const avatarUrl = author.url_image || author.avatar_url || '';
-  const institutionText = institution2 ? `${institution1} - ${institution2}` : institution1;
-  const hIndex = author.h_index ?? '—';
-  const citations = author.citation_count ?? author.citations ?? 0;
-  const articlesCount = author.article_count ?? author.papers ?? 0;
-  const avatarColor = author.avatar_color ?? '#0071BC';
-  const formatLocalNumber = num => {
-    if (num == null || isNaN(num)) return '0';
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  };
+
+  const id = String(author.author_id ?? author.id ?? author.openalex_id ?? '');
+  const rawName = cleanStr(author.display_name || author.full_name || author.name || author.author_name || '');
+  const name = rawName || (author.openalex_id ? `Author ${author.openalex_id}` : (id ? `Author #${id}` : 'Unknown Author'));
+
+  const rawInst1 = cleanStr(author.institution_1 ?? author.last_known_institution ?? author.affiliation ?? author.institution ?? '');
+  const rawInst2 = cleanStr(author.institution_2 ?? author.department ?? '');
+  const institutionText = rawInst2 ? `${rawInst1} - ${rawInst2}` : rawInst1;
+  const hasInstitution = Boolean(institutionText && institutionText !== '-' && institutionText !== '—');
+
+  const hIndex = author.h_index ?? author.hindex ?? 0;
+  const citations = author.citation_count ?? author.cited_by_count ?? author.citations ?? 0;
+  const articlesCount = author.article_count ?? author.works_count ?? author.papers ?? 0;
+  const avatarTheme = getAvatarTheme(name);
+
   const handleRowClick = () => {
     if (id) navigate(`/authors/${id}`);
   };
-  return <tr onClick={handleRowClick} className="author-table-row align-middle">
-      <td className="author-table-index text-center">{index}</td>
-      <td>
-        <div className="d-flex align-items-center gap-2">
-          <AuthorAvatar name={name} url={avatarUrl} size="sm" bgColor={avatarColor} />
-          <div className="min-w-0">
-            <div className="author-table-name text-truncate">{name}</div>
-            {orcid && orcid !== '—' && <div className="author-table-orcid">ORCID: {orcid}</div>}
+
+  return (
+    <motion.tr
+      onClick={handleRowClick}
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+      whileHover={{ backgroundColor: 'var(--ds-surface-muted, rgba(241, 245, 249, 0.6))' }}
+      className="group border-b border-border transition-colors cursor-pointer"
+    >
+      {/* 1. # Rank (Clean plain number, no circle) */}
+      <td className="py-3 px-4 w-12 text-center text-xs font-semibold text-muted-foreground tabular-nums">
+        {index}
+      </td>
+
+      {/* 2. Author (Initials Avatar + Bold Name) */}
+      <td className="py-3 px-4">
+        <div className="flex items-center gap-3">
+          <div className={`flex size-8 shrink-0 items-center justify-center rounded-full font-bold text-xs border border-border/40 ${avatarTheme.bg} ${avatarTheme.text}`}>
+            {getInitials(name)}
           </div>
+          <span className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
+            {name}
+          </span>
         </div>
       </td>
-      <td className="author-table-cell author-table-org text-truncate">{institutionText}</td>
-      <td className="author-table-cell">{formatLocalNumber(articlesCount)}</td>
-      <td className="author-table-cell">{formatLocalNumber(citations)}</td>
-      <td className="author-table-cell author-table-hindex">{hIndex}</td>
-      <td>
-        <span className="author-table-link">{t("author.chiTiet")}</span>
+
+      {/* 3. Affiliation */}
+      <td className="py-3 px-4">
+        {hasInstitution ? (
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground max-w-[280px]">
+            <Icon icon="lucide:landmark" className="size-4 shrink-0 text-muted-foreground/70" />
+            <span className="truncate" title={institutionText}>
+              {institutionText}
+            </span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground/50 text-xs">—</span>
+        )}
       </td>
-    </tr>;
+
+      {/* 4. Publications */}
+      <td className="py-3 px-4 text-xs font-bold text-foreground tabular-nums">
+        {formatNum(articlesCount)}
+      </td>
+
+      {/* 5. Citations */}
+      <td className="py-3 px-4 text-xs font-medium text-foreground/80 tabular-nums">
+        {formatNum(citations)}
+      </td>
+
+      {/* 6. H-index */}
+      <td className="py-3 px-4 text-xs font-medium text-foreground/80 tabular-nums">
+        {hIndex}
+      </td>
+    </motion.tr>
+  );
 }

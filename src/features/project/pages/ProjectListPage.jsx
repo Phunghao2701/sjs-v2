@@ -11,8 +11,9 @@ import { Skeleton } from '../../../shared/ui/skeleton';
 import { StatePanel } from '../../../shared/ui/state-panel';
 import { Card } from '../../../shared/ui/card';
 import useAuth from '../../auth/hooks/useAuth';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
-import { MotionGrid, MotionItem } from '../../../shared/ui/motion';
+import { MotionPage, MotionGrid, MotionItem, fadeUp } from '../../../shared/ui/motion';
 import { getSubjectAreasApi } from '../../catalog/api/catalogApi';
 
 const ProjectListPage = () => {
@@ -175,78 +176,76 @@ const ProjectListPage = () => {
 
   return (
     <PageContainer>
-      {/* 1. Header with Breadcrumb & Primary Action Button */}
-      <PageHeader
-        breadcrumbs={[
-          { label: 'Workspace', to: ROUTES.DASHBOARD },
-          { label: 'Research Projects' }
-        ]}
-        title={t("project.duAnNghienCuuCuaToi", "My Research Projects")}
-        description={t("project.quanLyCacKeywordWatchlistsPhan", "Manage keyword watch-lists, analyze publishing trends and monitor scientific articles.")}
-        actions={
-          <Button onClick={() => navigate(ROUTES.PROJECT_CREATE)} size="default" className="gap-2 shrink-0">
-            <Icon icon="lucide:plus" width={16} aria-hidden="true" />
-            <span>{t("project.taoDuAnMoi", "Create Project")}</span>
-          </Button>
-        }
-      />
+      <MotionPage className="space-y-6">
+        {/* 1. Header with Breadcrumb & Primary Action Button */}
+        <PageHeader
+          breadcrumbs={[
+            { label: 'Workspace', to: ROUTES.DASHBOARD },
+            { label: 'Research Projects' }
+          ]}
+          title={t("project.duAnNghienCuuCuaToi", "My Research Projects")}
+          description={t("project.quanLyCacKeywordWatchlistsPhan", "Manage keyword watch-lists, analyze publishing trends and monitor scientific articles.")}
+          actions={
+            <Button onClick={() => navigate(ROUTES.PROJECT_CREATE)} size="default" className="gap-2 shrink-0">
+              <Icon icon="lucide:plus" width={16} aria-hidden="true" />
+              <span>{t("project.taoDuAnMoi", "Create Project")}</span>
+            </Button>
+          }
+        />
 
-      {/* 2. Exactly 3 KPI Metric Cards (as in proposed wireframe) */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {/* KPI 1: Total Projects */}
-        <Card className="p-3 sm:p-3.5 flex items-center justify-between border-border bg-surface shadow-xs">
-          <div className="space-y-0.5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
-              Total Projects
-            </p>
-            <p className="text-xl font-bold tracking-tight text-foreground m-0 leading-none">
-              {nonDeletedProjects.length}
-            </p>
-            <p className="text-[11px] text-muted-foreground m-0">
-              In your workspace
-            </p>
-          </div>
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary-subtle text-primary shrink-0">
-            <Icon icon="lucide:folder-kanban" width="18" aria-hidden="true" />
-          </div>
-        </Card>
+        {/* 2. Exactly 3 KPI Metric Cards (as in proposed wireframe) */}
+        <MotionGrid staggerDelay={0.04} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* KPI 1: Total Projects */}
+          <MotionItem>
+            <Card className="p-3 sm:p-3.5 border-border bg-surface shadow-xs h-full">
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
+                  Total Projects
+                </p>
+                <p className="text-xl font-bold tracking-tight text-foreground m-0 leading-none">
+                  {nonDeletedProjects.length}
+                </p>
+                <p className="text-[11px] text-muted-foreground m-0">
+                  In your workspace
+                </p>
+              </div>
+            </Card>
+          </MotionItem>
 
-        {/* KPI 2: Active Monitoring */}
-        <Card className="p-3 sm:p-3.5 flex items-center justify-between border-border bg-surface shadow-xs">
-          <div className="space-y-0.5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
-              Active Monitoring
-            </p>
-            <p className="text-xl font-bold tracking-tight text-success m-0 leading-none">
-              {activeProjectsCount}
-            </p>
-            <p className="text-[11px] text-muted-foreground m-0">
-              Live feeds enabled
-            </p>
-          </div>
-          <div className="flex size-9 items-center justify-center rounded-lg bg-success-subtle text-success shrink-0">
-            <Icon icon="lucide:activity" width="18" aria-hidden="true" />
-          </div>
-        </Card>
+          {/* KPI 2: Active Monitoring */}
+          <MotionItem>
+            <Card className="p-3 sm:p-3.5 border-border bg-surface shadow-xs h-full">
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
+                  Active Monitoring
+                </p>
+                <p className="text-xl font-bold tracking-tight text-success m-0 leading-none">
+                  {activeProjectsCount}
+                </p>
+                <p className="text-[11px] text-muted-foreground m-0">
+                  Live feeds enabled
+                </p>
+              </div>
+            </Card>
+          </MotionItem>
 
-        {/* KPI 3: Keywords */}
-        <Card className="p-3 sm:p-3.5 flex items-center justify-between border-border bg-surface shadow-xs">
-          <div className="space-y-0.5">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
-              Keywords
-            </p>
-            <p className="text-xl font-bold tracking-tight text-foreground m-0 leading-none">
-              {totalKeywordsMonitored}
-            </p>
-            <p className="text-[11px] text-muted-foreground m-0">
-              Across all watchlists
-            </p>
-          </div>
-          <div className="flex size-9 items-center justify-center rounded-lg bg-primary-subtle text-primary shrink-0">
-            <Icon icon="lucide:key" width="18" aria-hidden="true" />
-          </div>
-        </Card>
-      </div>
+          {/* KPI 3: Keywords */}
+          <MotionItem>
+            <Card className="p-3 sm:p-3.5 border-border bg-surface shadow-xs h-full">
+              <div className="space-y-0.5">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground m-0">
+                  Keywords
+                </p>
+                <p className="text-xl font-bold tracking-tight text-foreground m-0 leading-none">
+                  {totalKeywordsMonitored}
+                </p>
+                <p className="text-[11px] text-muted-foreground m-0">
+                  Across all watchlists
+                </p>
+              </div>
+            </Card>
+          </MotionItem>
+        </MotionGrid>
 
       {/* 3. Toolbar: [ 🔍 Search projects... ] [ Filter: Status ▾ ] [ Sort ▾ ] [ ⊞ ☰ ] */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pb-3 border-b border-border">
@@ -422,33 +421,35 @@ const ProjectListPage = () => {
             }
           />
         ) : viewMode === 'grid' ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <MotionGrid staggerDelay={0.03} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredAndSortedProjects.map((project) => (
-              <ProjectCard
-                key={project.project_id || project.id}
-                project={project}
-                onDelete={handleDelete}
-                onRestore={handleRestore}
-                currentUser={currentUser}
-                areas={areas}
-                viewMode="grid"
-              />
+              <MotionItem key={project.project_id || project.id}>
+                <ProjectCard
+                  project={project}
+                  onDelete={handleDelete}
+                  onRestore={handleRestore}
+                  currentUser={currentUser}
+                  areas={areas}
+                  viewMode="grid"
+                />
+              </MotionItem>
             ))}
-          </div>
+          </MotionGrid>
         ) : (
-          <div className="flex flex-col gap-3">
+          <MotionGrid staggerDelay={0.03} className="flex flex-col gap-3">
             {filteredAndSortedProjects.map((project) => (
-              <ProjectCard
-                key={project.project_id || project.id}
-                project={project}
-                onDelete={handleDelete}
-                onRestore={handleRestore}
-                currentUser={currentUser}
-                areas={areas}
-                viewMode="list"
-              />
+              <MotionItem key={project.project_id || project.id}>
+                <ProjectCard
+                  project={project}
+                  onDelete={handleDelete}
+                  onRestore={handleRestore}
+                  currentUser={currentUser}
+                  areas={areas}
+                  viewMode="list"
+                />
+              </MotionItem>
             ))}
-          </div>
+          </MotionGrid>
         )}
       </div>
 
@@ -485,6 +486,7 @@ const ProjectListPage = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+      </MotionPage>
     </PageContainer>
   );
 };

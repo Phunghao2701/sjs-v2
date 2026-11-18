@@ -151,7 +151,8 @@ export default function GeographyWorldMap({
   loading = false,
   selectedCountry = null,
   onSelectCountry,
-  selectedYear = 'All'
+  selectedYear = 'All',
+  onYearChange,
 }) {
   const { t } = useTranslation();
   const [viewMode, setViewMode] = useState('map'); // 'map' | 'regions'
@@ -276,7 +277,7 @@ export default function GeographyWorldMap({
   return (
     <div className="rounded-xl border border-border bg-surface p-5 shadow-xs flex flex-col h-full min-w-0 relative">
       {/* Card Header with View Switcher */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/70">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-border/70 shrink-0">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <Icon icon="lucide:globe" width={18} className="text-primary shrink-0" />
@@ -322,9 +323,27 @@ export default function GeographyWorldMap({
             </button>
           </div>
 
-          <span className="px-2 py-0.5 rounded-full bg-surface-muted text-[11px] font-semibold text-muted-foreground whitespace-nowrap shrink-0">
-            {selectedYear === 'All' ? t('zone.tatCaCacNam', 'All Years') : selectedYear}
-          </span>
+          {/* Year Filter Select */}
+          <div className="relative inline-flex items-center shrink-0">
+            <select
+              value={selectedYear}
+              onChange={(e) => onYearChange?.(e.target.value)}
+              className="h-7.5 pl-2.5 pr-6 text-xs font-semibold rounded-md border border-border/80 bg-surface text-foreground appearance-none cursor-pointer hover:border-primary/50 focus:border-primary focus:outline-none transition-colors shadow-2xs"
+              aria-label={t('article.namXuatBan', 'Publication Year')}
+            >
+              <option value="All">{t('zone.tatCaCacNam', 'All Years')}</option>
+              {['2026', '2025', '2024', '2023', '2022', '2021', '2020', '2019', '2018', '2017', '2016', '2015'].map((yr) => (
+                <option key={yr} value={yr}>
+                  {yr}
+                </option>
+              ))}
+            </select>
+            <Icon
+              icon="lucide:chevron-down"
+              width={12}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+            />
+          </div>
         </div>
       </div>
 
@@ -511,7 +530,7 @@ export default function GeographyWorldMap({
           )}
 
           {/* Activity Density Legend Bar */}
-          <div className="mt-3 pt-2.5 border-t border-border/60 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+          <div className="mt-3 pt-2.5 border-t border-border/60 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground shrink-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-foreground text-[11px] uppercase tracking-wider">
                 {t('zone.matDoXuatBan', 'Publication Density')}:

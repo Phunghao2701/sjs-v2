@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Icon } from '@iconify/react';
 import { Card } from '../../../shared/ui/card';
 import { Skeleton } from '../../../shared/ui/skeleton';
+import { MotionGrid, MotionItem } from '../../../shared/ui/motion';
 
 export default function ArticleStatsCards({
   stats,
@@ -49,13 +50,10 @@ export default function ArticleStatsCards({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="p-3 sm:p-3.5">
-            <div className="flex items-start justify-between gap-2.5">
-              <div className="space-y-1.5 w-full">
-                <Skeleton className="h-3 w-20 rounded" />
-                <Skeleton className="h-6 w-24 rounded" />
-                <Skeleton className="h-2.5 w-20 rounded" />
-              </div>
-              <Skeleton className="size-8 rounded-lg shrink-0" />
+            <div className="space-y-1.5 w-full">
+              <Skeleton className="h-3 w-20 rounded" />
+              <Skeleton className="h-6 w-24 rounded" />
+              <Skeleton className="h-2.5 w-20 rounded" />
             </div>
           </Card>
         ))}
@@ -64,10 +62,10 @@ export default function ArticleStatsCards({
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <MotionGrid staggerDelay={0.04} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {statItems.map((item, index) => (
-        <Card key={index} className="p-3 sm:p-3.5 transition-colors hover:border-primary/40">
-          <div className="flex items-start justify-between gap-2.5">
+        <MotionItem key={index}>
+          <Card className="p-3 sm:p-3.5 transition-colors hover:border-primary/40 h-full">
             <div className="space-y-0.5 min-w-0">
               <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block truncate">
                 {item.label}
@@ -79,12 +77,9 @@ export default function ArticleStatsCards({
                 {item.hint}
               </p>
             </div>
-            <div className={`p-1.5 rounded-lg shrink-0 ${item.iconBg}`}>
-              <Icon icon={item.icon} width="16" height="16" />
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </MotionItem>
       ))}
-    </div>
+    </MotionGrid>
   );
 }

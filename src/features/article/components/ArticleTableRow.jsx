@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from "react-i18next";
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import LatexText from '../../../shared/components/LatexText/LatexText';
 import { Badge } from '../../../shared/ui/badge';
 import { Button } from '../../../shared/ui/button';
@@ -61,9 +62,13 @@ export default function ArticleTableRow({
   const journalName = article.journal_name || article.journal?.display_name;
 
   return (
-    <tr
+    <motion.tr
       onClick={() => onDetailClick(article.article_id)}
-      className="cursor-pointer transition-colors hover:bg-primary-subtle/30 group text-start"
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+      whileHover={{ backgroundColor: 'var(--ds-primary-subtle, rgba(224, 242, 254, 0.3))' }}
+      className="cursor-pointer transition-colors group text-start"
     >
       {/* Index */}
       <td className="px-3 py-3.5 text-center text-xs font-mono text-muted-foreground w-10">
@@ -132,7 +137,7 @@ export default function ArticleTableRow({
       </td>
 
       {/* Open Access */}
-      <td className="px-3 py-3.5 text-center whitespace-nowrap">
+      <td className="px-4 py-3.5 text-center whitespace-nowrap">
         {article.is_open_access ? (
           <Badge variant="success" className="gap-1 text-[11px] font-bold px-2 py-0.5">
             <span className="size-1.5 rounded-full bg-success" />
@@ -144,20 +149,6 @@ export default function ArticleTableRow({
           </Badge>
         )}
       </td>
-
-      {/* Action: Details */}
-      <td className="px-4 py-3.5 text-end whitespace-nowrap">
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={() => onDetailClick(article.article_id)}
-          className="h-8 px-2.5 text-xs font-semibold text-primary hover:text-primary-hover hover:bg-primary-subtle gap-1"
-        >
-          <span>{t("article.chiTiet1", "Details")}</span>
-          <Icon icon="lucide:arrow-right" width={13} />
-        </Button>
-      </td>
-    </tr>
+    </motion.tr>
   );
 }

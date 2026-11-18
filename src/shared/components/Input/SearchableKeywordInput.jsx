@@ -15,10 +15,34 @@ export default function SearchableKeywordInput({
   const { t } = useTranslation();
   const resolvedPlaceholder = placeholder || t("common.chonTuKhoa", "Select or type a keyword...");
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen || !wrapperRef.current) return;
+    const calculatePosition = () => {
+      if (!wrapperRef.current) return;
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      // If space below is less than 280px and space above is greater than space below, flip up
+      if (spaceBelow < 280 && spaceAbove > spaceBelow) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+    };
+    calculatePosition();
+    window.addEventListener('resize', calculatePosition);
+    window.addEventListener('scroll', calculatePosition, true);
+    return () => {
+      window.removeEventListener('resize', calculatePosition);
+      window.removeEventListener('scroll', calculatePosition, true);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -94,7 +118,14 @@ export default function SearchableKeywordInput({
         } ${isOpen ? 'border-primary' : ''}`}
         onClick={(e) => {
           if (!disabled && !e.target.closest('button')) {
-            setIsOpen(!isOpen);
+            const willOpen = !isOpen;
+            if (willOpen && wrapperRef.current) {
+              const rect = wrapperRef.current.getBoundingClientRect();
+              const spaceBelow = window.innerHeight - rect.bottom;
+              const spaceAbove = rect.top;
+              setOpenUpward(spaceBelow < 300 && spaceAbove > spaceBelow);
+            }
+            setIsOpen(willOpen);
           }
         }}
       >
@@ -135,7 +166,9 @@ export default function SearchableKeywordInput({
 
       {/* Dropdown panel */}
       {isOpen && (
-        <div className="absolute top-full left-0 w-full bg-surface border border-border rounded-control shadow-popover mt-1.5 z-30 flex flex-col overflow-hidden max-h-72">
+        <div className={`absolute left-0 w-full bg-surface border border-border rounded-control shadow-popover z-50 flex flex-col overflow-hidden max-h-64 ${
+          openUpward ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+        }`}>
           {/* Search input inside dropdown */}
           <div className="p-2 border-b border-border bg-surface-muted/30">
             <div className="relative">

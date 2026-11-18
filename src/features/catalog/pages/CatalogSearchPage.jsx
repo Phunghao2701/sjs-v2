@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Dropdown } from '../../../shared/ui/dropdown-menu';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useCatalogSearch } from '../hooks/useCatalogSearch';
 import FilterPanel from '../components/FilterPanel';
 import JournalTable from '../components/JournalTable';
@@ -11,6 +12,7 @@ import AdminPagination from '../../../shared/components/Pagination';
 import { Card } from '../../../shared/ui/card';
 import { StatePanel } from '../../../shared/ui/state-panel';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
+import { MotionPage, fadeUp } from '../../../shared/ui/motion';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import '../components/CatalogSearch.css';
 
@@ -60,15 +62,17 @@ export default function CatalogSearchPage() {
   const totalPages = Math.ceil(total / pageLimit) || 1;
 
   return (
-    <PageContainer className="space-y-6">
-      {/* 1. Standard Page Header */}
-      <PageHeader
-        title={t("catalog.danhMucTimKiem", "Journal Catalog & Search")}
-        description={t("catalog.timKiemJournalLocTheoLinhVucXe", "Search international scientific journals, Scimago quartile rankings, and citation metrics.")}
-      />
+    <PageContainer>
+      <MotionPage className="space-y-6">
+        {/* 1. Standard Page Header */}
+        <PageHeader
+          title={t("catalog.danhMucTimKiem", "Journal Catalog & Search")}
+          description={t("catalog.timKiemJournalLocTheoLinhVucXe", "Search international scientific journals, Scimago quartile rankings, and citation metrics.")}
+        />
 
-      {/* 2. Unified Container: Filter + Toolbar + Table + Pagination */}
-      <Card className="rounded-card border border-border bg-surface shadow-card overflow-hidden">
+        {/* 2. Unified Container: Filter + Toolbar + Table + Pagination */}
+        <motion.div variants={fadeUp}>
+          <Card className="rounded-card border border-border bg-surface shadow-card overflow-hidden">
         {/* Filter Toolbar Panel */}
         <FilterPanel
           asCard={false}
@@ -227,9 +231,11 @@ export default function CatalogSearchPage() {
           </div>
         )}
       </Card>
+      </motion.div>
 
       {/* Guest Authentication Interception Modal */}
       <AuthRequiredModal show={showAuthModal} onHide={() => setShowAuthModal(false)} />
-    </PageContainer>
+    </MotionPage>
+  </PageContainer>
   );
 }

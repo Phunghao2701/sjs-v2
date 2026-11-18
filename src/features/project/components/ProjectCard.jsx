@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Icon } from '@iconify/react';
 import { Card } from '../../../shared/ui/card';
 import { Badge } from '../../../shared/ui/badge';
@@ -145,18 +146,19 @@ const ProjectCard = ({
   // 1. LIST VIEW CARD (Clean, Clickable Card Container, No Links Underlines)
   if (viewMode === 'list') {
     return (
-      <Card
-        role="button"
-        tabIndex={0}
-        onClick={handleCardClick}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleCardClick(e);
-          }
-        }}
-        className="group flex flex-col sm:flex-row sm:items-center justify-between p-3.5 gap-4 transition-colors hover:border-primary/50 hover:bg-surface-muted/20 shadow-xs cursor-pointer border border-border bg-surface rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary select-none"
-      >
+      <motion.div whileHover={{ y: -1 }} whileTap={{ scale: 0.995 }} transition={{ duration: 0.12 }}>
+        <Card
+          role="button"
+          tabIndex={0}
+          onClick={handleCardClick}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleCardClick(e);
+            }
+          }}
+          className="group flex flex-col sm:flex-row sm:items-center justify-between p-3.5 gap-4 transition-colors hover:border-primary/50 hover:bg-surface-muted/20 shadow-xs cursor-pointer border border-border bg-surface rounded-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary select-none"
+        >
         <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
@@ -188,11 +190,13 @@ const ProjectCard = ({
           </span>
         </div>
       </Card>
+      </motion.div>
     );
   }
 
   // 2. GRID CARD - STRICTLY MATCHING DESIGN SYSTEM (Clean, Clickable Card Container, No Accidental Underlines)
   return (
+    <motion.div whileHover={{ y: -3 }} whileTap={{ scale: 0.99 }} transition={{ duration: 0.15 }} className="h-full">
     <Card
       role="button"
       tabIndex={0}
@@ -346,6 +350,7 @@ const ProjectCard = ({
         </span>
       </div>
     </Card>
+    </motion.div>
   );
 };
 

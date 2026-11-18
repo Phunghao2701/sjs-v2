@@ -110,7 +110,7 @@ h6, .h6 { font-size: 0.6875rem; font-weight: 600; }   /* 11px */
 
 /* ─── Neutralize Bootstrap Padding Collisions on Sidebar ─────────────── */
 aside.app-sidebar {
-  padding: 0.75rem !important;
+  padding: 0 !important;
 }
 
 /* ─── Design System Border Radius (Controls & Cards) ─────────────────── */

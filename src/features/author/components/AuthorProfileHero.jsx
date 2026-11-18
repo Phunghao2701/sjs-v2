@@ -153,7 +153,7 @@ export default function AuthorProfileHero({ author, metrics }) {
             <div className="ap-hero-actions">
               <button
                 type="button"
-                className="ap-btn ap-btn-primary w-100"
+                className="ap-btn ap-btn-primary w-full"
                 onClick={() => document.getElementById("publications")?.scrollIntoView({ behavior: "smooth" })}
               >
                 <Icon icon="lucide:book-open" width="13" />
@@ -165,7 +165,7 @@ export default function AuthorProfileHero({ author, metrics }) {
                   href={`https://orcid.org/${author.orcid}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ap-btn ap-btn-outline w-100"
+                  className="ap-btn ap-btn-outline w-full"
                 >
                   <Icon icon="lucide:external-link" width="12" />
                   <span>External ORCID Record</span>

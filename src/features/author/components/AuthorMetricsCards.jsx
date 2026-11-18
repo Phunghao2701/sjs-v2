@@ -1,8 +1,9 @@
-﻿import Icon from "../../../shared/components/Icon";
+﻿import { motion } from "framer-motion";
+import Icon from "../../../shared/components/Icon";
 
 /**
  * @file AuthorMetricsCards.jsx
- * @description Compact, high-density scientific metrics strip.
+ * @description Compact, high-density scientific metrics strip with framer-motion animations.
  */
 export default function AuthorMetricsCards({ metrics }) {
   if (!metrics) return null;
@@ -57,14 +58,21 @@ export default function AuthorMetricsCards({ metrics }) {
   return (
     <div className="ap-metrics-strip">
       {metricItems.map((item, idx) => (
-        <div key={idx} className={`ap-metric-tile ${item.highlight ? "highlight" : ""}`}>
+        <motion.div
+          key={idx}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18, delay: idx * 0.03, ease: 'easeOut' }}
+          whileHover={{ y: -2, transition: { duration: 0.12 } }}
+          className={`ap-metric-tile ${item.highlight ? "highlight" : ""}`}
+        >
           <div className="ap-metric-tile-header">
             <Icon icon={item.icon} width="14" className="ap-metric-icon" />
             <span className="ap-metric-tile-label">{item.label}</span>
           </div>
           <div className="ap-metric-tile-val">{item.value}</div>
           <div className="ap-metric-tile-sub">{item.subtext}</div>
-        </div>
+        </motion.div>
       ))}
     </div>
   );

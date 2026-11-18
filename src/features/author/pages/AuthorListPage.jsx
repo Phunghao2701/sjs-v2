@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import Icon from '../../../shared/components/Icon';
 import useAuthors from '../hooks/useAuthors';
 import AuthorTable from '../components/AuthorTable';
@@ -10,6 +11,7 @@ import AdminPagination from '../../../shared/components/Pagination';
 import { Button } from '../../../shared/ui/button';
 import { Card } from '../../../shared/ui/card';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
+import { MotionPage, MotionGrid, MotionItem, fadeUp } from '../../../shared/ui/motion';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { cn } from '../../../lib/utils';
 import './AuthorListPage.css';
@@ -29,7 +31,7 @@ export default function AuthorListPage() {
     fetchSubjectAreas,
   } = useAuthors();
   const [viewMode, setViewModeState] = useState(() => {
-    return searchParams.get('view') || localStorage.getItem('author_view_mode') || 'grid';
+    return searchParams.get('view') || localStorage.getItem('author_view_mode') || 'table';
   });
 
   const setViewMode = (mode) => {
@@ -40,7 +42,7 @@ export default function AuthorListPage() {
       // ignore storage access errors
     }
     const nextParams = new URLSearchParams(searchParams);
-    if (mode === 'grid') {
+    if (mode === 'table') {
       nextParams.delete('view');
     } else {
       nextParams.set('view', mode);
@@ -50,8 +52,9 @@ export default function AuthorListPage() {
   const searchVal = searchParams.get('search') || '';
   const pageVal = parseInt(searchParams.get('page') || '1', 10);
   const limitVal = parseInt(searchParams.get('limit') || '10', 10);
-  const sortVal = searchParams.get('sort') || 'impact';
+  const sortVal = searchParams.get('sort') || 'articles';
   const subjectAreaVal = searchParams.get('subject_area') || '';
+  const periodVal = searchParams.get('period') || '';
   const countryVal = searchParams.get('country') || '';
   const [searchInput, setSearchInput] = useState(searchVal);
 
@@ -62,13 +65,14 @@ export default function AuthorListPage() {
       limit: limitVal,
       sort: sortVal,
       subject_area: subjectAreaVal,
+      period: periodVal,
       country: countryVal,
     };
     const filteredParams = Object.fromEntries(
       Object.entries(params).filter(([, value]) => value !== '')
     );
     fetchAuthors(filteredParams);
-  }, [searchVal, pageVal, limitVal, sortVal, subjectAreaVal, countryVal, fetchAuthors]);
+  }, [searchVal, pageVal, limitVal, sortVal, subjectAreaVal, periodVal, countryVal, fetchAuthors]);
 
   useEffect(() => {
     if (!subjectAreas || subjectAreas.length === 0) {
@@ -162,186 +166,268 @@ export default function AuthorListPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title={t("author.danhSachNhaKhoaHocTacGia", "Authors & Researchers Directory")}
-        description={t("author.traCuuThongTinChiSoHocThuatHin", "Explore author profiles, scientific contributions, h-index rankings, and publication impact.")}
-        actions={
-          <div className="text-end">
-            <div className="text-xs text-muted-foreground">{t("author.tongTacGia", "Total Authors")}</div>
-            <div className="text-sm font-bold text-foreground">
-              {totalAuthors ? totalAuthors.toLocaleString() : '—'} authors
-            </div>
-          </div>
-        }
-      />
+      <MotionPage className="space-y-4">
+        <PageHeader
+          title={t("author.danhSachNhaKhoaHocTacGia", "Authors & Researchers Directory")}
+          description={t("author.traCuuThongTinChiSoHocThuatHin", "Explore author profiles, scientific contributions, h-index rankings, and publication impact.")}
+        />
 
-      <AuthorNavigationTabs activeTab="list" />
-
-      {/* 4 Stat Cards */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {statCards.map((stat, idx) => (
-          <Card key={idx} className="p-3 sm:p-3.5 flex flex-col justify-between relative overflow-hidden group">
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">{stat.label}</span>
-              <div className={cn("size-7 rounded-lg flex items-center justify-center shrink-0", stat.iconBg, stat.iconColor)}>
-                <Icon icon={stat.icon} width="14" height="14" />
-              </div>
-            </div>
-            <div className="mt-1">
-              <div className="text-lg sm:text-xl font-bold tracking-tight text-foreground tabular-nums">{stat.value}</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5 truncate" title={stat.desc}>{stat.desc}</div>
-            </div>
-          </Card>
-        ))}
-      </section>
-
-      {/* Filter bar */}
-      <Card className="p-3 sm:p-3.5 shadow-card">
-        <form onSubmit={handleSearchSubmit}>
-          <div className="flex flex-col sm:flex-row items-center gap-2.5">
-            <div className="relative flex-1 w-full">
-              <Icon icon="lucide:search" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" width={15} />
-              <input
-                type="text"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                placeholder={t("author.timTheoTenVienNghienCuuTuKhoa", "Search by author name, institution, or keyword...")}
-                className="w-full h-9 pl-9 pr-3 text-xs bg-background border border-border rounded-control focus:border-primary focus:outline-none transition-colors text-foreground"
-              />
-            </div>
-
-            <div className="w-full sm:w-[220px] shrink-0">
-              <select
-                value={subjectAreaVal}
-                onChange={(e) => handleFilterChange('subject_area', e.target.value)}
-                className="w-full h-9 px-2.5 text-xs bg-background border border-border rounded-control focus:border-primary focus:outline-none transition-colors text-foreground"
+        <AuthorNavigationTabs
+          activeTab="list"
+          rightContent={
+            <div className="flex items-center gap-1 bg-surface border border-border p-1 rounded-control shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setViewMode('list')}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs transition-colors border-0 cursor-pointer",
+                  viewMode === 'list' || viewMode === 'table'
+                    ? "bg-primary text-white font-semibold shadow-xs"
+                    : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+                )}
+                title={t("viewList", "List View")}
+                aria-label="List View"
+                aria-pressed={viewMode === 'list' || viewMode === 'table'}
               >
-                <option value="">{t("admin.chonLinhVuc", "All subject areas")}</option>
-                {(subjectAreas || []).map((area) => {
-                  const val = area.display_name || area.name || '';
-                  return <option key={val} value={val}>{val}</option>;
-                })}
-              </select>
+                <Icon icon="lucide:list" width={14} />
+                <span>List</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs transition-colors border-0 cursor-pointer",
+                  viewMode === 'grid' || viewMode === 'cards'
+                    ? "bg-primary text-white font-semibold shadow-xs"
+                    : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+                )}
+                title={t("viewGrid", "Grid View")}
+                aria-label="Grid View"
+                aria-pressed={viewMode === 'grid' || viewMode === 'cards'}
+              >
+                <Icon icon="lucide:layout-grid" width={14} />
+                <span>Grid</span>
+              </button>
             </div>
+          }
+        />
 
-            <Button type="submit" size="sm" className="h-9 px-4 gap-1.5 shrink-0 w-full sm:w-auto text-xs">
-              <Icon icon="lucide:search" width={14} aria-hidden="true" />
-              <span>{t("searchBtn", "Search")}</span>
-            </Button>
-          </div>
-        </form>
-      </Card>
-
-      {/* View Mode Toolbar: Count & Toggle (Grid / List) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
-        <div className="text-xs text-muted-foreground">
-          {loadingAuthors ? (
-            <span className="flex items-center gap-1.5">
-              <Icon icon="lucide:loader-2" width="13" className="animate-spin text-primary" />
-              <span>{t("dangTai", "Loading authors...")}</span>
-            </span>
-          ) : (
-            <span>
-              {t("catalog.timThay", "Found ")}
-              <strong className="text-foreground font-bold">{Number(totalAuthors || 0).toLocaleString()}</strong> {t("author.tacGia", "authors")}
-              <span className="mx-1.5">•</span>
-              {t("pagination.page", "Page")} <strong className="text-foreground">{pageVal}</strong> of <strong className="text-foreground">{totalPagesCount}</strong>
-            </span>
-          )}
-        </div>
-
-        {/* View Mode Toggle: Grid vs List */}
-        <div className="flex items-center gap-1 bg-surface border border-border p-1 rounded-control shadow-2xs self-end sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setViewMode('grid')}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs transition-colors border-0 cursor-pointer",
-              viewMode === 'grid'
-                ? "bg-primary text-white font-semibold shadow-xs"
-                : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-surface-muted"
-            )}
-            title={t("viewGrid", "Grid View")}
-            aria-label="Grid View"
-            aria-pressed={viewMode === 'grid'}
-          >
-            <Icon icon="lucide:layout-grid" width={14} />
-            <span>Grid</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('list')}
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs transition-colors border-0 cursor-pointer",
-              viewMode === 'list'
-                ? "bg-primary text-white font-semibold shadow-xs"
-                : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-surface-muted"
-            )}
-            title={t("viewList", "List View")}
-            aria-label="List View"
-            aria-pressed={viewMode === 'list'}
-          >
-            <Icon icon="lucide:list" width={14} />
-            <span>List</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Authors List (Responsive 4 columns) */}
-      <div>
-        {viewMode === 'grid' ? (
-          loadingAuthors ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {Array.from({ length: limitVal }).map((_, idx) => (
-                <Card key={idx} className="p-4 space-y-3">
-                  <div className="flex gap-3 items-center">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <div className="flex-1 space-y-1.5">
-                      <Skeleton className="h-4 w-3/5 rounded" />
-                      <Skeleton className="h-3 w-2/5 rounded" />
-                    </div>
+        {/* 4 Stat Cards */}
+        <MotionGrid staggerDelay={0.04} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {statCards.map((stat, idx) => (
+            <MotionItem key={idx}>
+              <Card className="p-3 sm:p-3.5 flex flex-col justify-between relative overflow-hidden group h-full">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">{stat.label}</span>
+                  <div className={cn("size-7 rounded-lg flex items-center justify-center shrink-0", stat.iconBg, stat.iconColor)}>
+                    <Icon icon={stat.icon} width="14" height="14" />
                   </div>
-                  <Skeleton className="h-7 w-full rounded" />
-                  <Skeleton className="h-4 w-1/3 rounded" />
-                </Card>
-              ))}
-            </div>
-          ) : authors.length === 0 ? (
-            <AuthorTable
-              authors={[]}
-              loading={false}
-              error={errorAuthors}
-              onRetry={() => fetchAuthors()}
-            />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {authors.map((author) => (
-                <AuthorCard key={author.author_id ?? author.id} author={author} />
-              ))}
-            </div>
-          )
-        ) : (
-          <AuthorTable
-            authors={authors}
-            loading={loadingAuthors}
-            error={errorAuthors}
-            onRetry={() => fetchAuthors()}
-            startIndex={startIndex}
-          />
-        )}
-      </div>
+                </div>
+                <div className="mt-1">
+                  <div className="text-lg sm:text-xl font-bold tracking-tight text-foreground tabular-nums">{stat.value}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 truncate" title={stat.desc}>{stat.desc}</div>
+                </div>
+              </Card>
+            </MotionItem>
+          ))}
+        </MotionGrid>
 
-      {authors.length > 0 && totalPagesCount > 1 && (
-        <div className="pt-2">
-          <AdminPagination
-            totalItems={totalAuthors}
-            currentPage={pageVal}
-            limit={limitVal}
-            onPageChange={handlePageChange}
-            entityName={t("author.tacGia", "authors")}
-          />
-        </div>
-      )}
+        {/* Unified Author Section: Search Header + Results Toolbar + Table/Grid Content + Pagination Footer in ONE Card */}
+        <motion.div variants={fadeUp}>
+          <Card className="rounded-card border border-border bg-surface shadow-card overflow-hidden">
+            {/* 1. Integrated Search & Filter Header (gộp section search vào table) */}
+            <div className="p-3 sm:p-3.5 bg-surface">
+              <form onSubmit={handleSearchSubmit}>
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <div className="relative flex-1 w-full min-w-[200px]">
+                    <Icon icon="lucide:search" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" width={15} />
+                    <input
+                      type="text"
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      placeholder={t("author.timTheoTenVienNghienCuuTuKhoa", "Search by author name, institution, or keyword...")}
+                      className="w-full h-9 pl-9 pr-8 text-xs bg-surface border border-border rounded-control focus:border-primary focus:outline-none transition-colors text-foreground shadow-2xs"
+                    />
+                    {searchInput && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearchInput('');
+                          const nextParams = new URLSearchParams(searchParams);
+                          nextParams.delete('search');
+                          nextParams.set('page', '1');
+                          setSearchParams(nextParams);
+                        }}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 rounded border-0 bg-transparent cursor-pointer"
+                        aria-label="Clear search"
+                      >
+                        <Icon icon="lucide:x" width={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Date Period Filter */}
+                  <div className="relative inline-flex items-center w-full sm:w-auto shrink-0">
+                    <Icon icon="lucide:calendar" className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                    <select
+                      value={periodVal}
+                      onChange={(e) => handleFilterChange('period', e.target.value)}
+                      className="w-full sm:w-[130px] h-9 pl-8 pr-8 text-xs bg-surface border border-border rounded-control focus:border-primary focus:outline-none transition-colors text-foreground appearance-none cursor-pointer shadow-2xs"
+                    >
+                      <option value="">{t("allTime", "All time")}</option>
+                      <option value="2021-2026">2021 – 2026</option>
+                      <option value="2016-2020">2016 – 2020</option>
+                      <option value="2011-2015">2011 – 2015</option>
+                      <option value="2000-2010">2000 – 2010</option>
+                    </select>
+                    <Icon icon="lucide:chevron-down" className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3 text-muted-foreground pointer-events-none" />
+                  </div>
+
+                  {/* Research Fields Filter */}
+                  <div className="relative inline-flex items-center w-full sm:w-[200px] shrink-0">
+                    <Icon icon="lucide:layers" className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                    <select
+                      value={subjectAreaVal}
+                      onChange={(e) => handleFilterChange('subject_area', e.target.value)}
+                      className="w-full h-9 pl-8 pr-8 text-xs bg-surface border border-border rounded-control focus:border-primary focus:outline-none transition-colors text-foreground appearance-none cursor-pointer truncate shadow-2xs"
+                    >
+                      <option value="">{t("admin.chonLinhVuc", "All research fields")}</option>
+                      {(subjectAreas || []).map((area) => {
+                        const val = area.display_name || area.name || '';
+                        return <option key={val} value={val}>{val}</option>;
+                      })}
+                    </select>
+                    <Icon icon="lucide:chevron-down" className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3 text-muted-foreground pointer-events-none" />
+                  </div>
+
+                  {/* Sort by Filter */}
+                  <div className="relative inline-flex items-center w-full sm:w-auto shrink-0">
+                    <Icon icon="lucide:arrow-up-down" className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+                    <select
+                      value={sortVal}
+                      onChange={(e) => handleFilterChange('sort', e.target.value)}
+                      className="w-full sm:w-[160px] h-9 pl-8 pr-8 text-xs bg-surface border border-border rounded-control focus:border-primary focus:outline-none transition-colors text-foreground appearance-none cursor-pointer shadow-2xs"
+                    >
+                      <option value="articles">{t("sortPublications", "Sort: Publications")}</option>
+                      <option value="citations">{t("sortCitations", "Sort: Citations")}</option>
+                      <option value="impact">{t("sortHIndex", "Sort: H-index")}</option>
+                    </select>
+                    <Icon icon="lucide:chevron-down" className="absolute right-2.5 top-1/2 -translate-y-1/2 size-3 text-muted-foreground pointer-events-none" />
+                  </div>
+
+                  <Button type="submit" size="sm" className="h-9 px-4 gap-1.5 shrink-0 w-full sm:w-auto text-xs font-semibold">
+                    <Icon icon="lucide:search" width={14} aria-hidden="true" />
+                    <span>{t("searchBtn", "Search")}</span>
+                  </Button>
+                </div>
+              </form>
+            </div>
+
+            {/* 2. Results Counter Toolbar (đồng bộ như Catalog / Article) */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5 border-t border-border bg-surface-muted/30">
+              <div className="text-xs text-muted-foreground">
+                <span>{t("article.timThay", "Found")} </span>
+                <strong className="text-foreground font-semibold">{totalAuthors.toLocaleString()}</strong>
+                <span> {t("author.tacGia", "authors")}</span>
+                {totalAuthors > 0 && (
+                  <span> &bull; Page <strong className="text-foreground font-semibold">{pageVal}</strong> of <strong className="text-foreground font-semibold">{totalPagesCount}</strong></span>
+                )}
+              </div>
+
+              {(searchVal || periodVal || subjectAreaVal || sortVal !== 'articles') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchInput('');
+                    const nextParams = new URLSearchParams();
+                    nextParams.set('page', '1');
+                    setSearchParams(nextParams);
+                  }}
+                  className="text-xs text-danger hover:underline font-semibold flex items-center gap-1 border-0 bg-transparent p-0 cursor-pointer"
+                >
+                  <Icon icon="lucide:rotate-ccw" width={12} />
+                  <span>{t("resetAllFilters", "Reset all filters")}</span>
+                </button>
+              )}
+            </div>
+
+            {/* 3. Table / Grid content */}
+            <div className="border-t border-border">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={viewMode}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                >
+                  {viewMode === 'grid' || viewMode === 'cards' ? (
+                    loadingAuthors ? (
+                      <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {Array.from({ length: limitVal }).map((_, idx) => (
+                          <Card key={idx} className="p-4 space-y-3">
+                            <div className="flex gap-3 items-center">
+                              <Skeleton className="h-10 w-10 rounded-full" />
+                              <div className="flex-1 space-y-1.5">
+                                <Skeleton className="h-4 w-3/5 rounded" />
+                                <Skeleton className="h-3 w-2/5 rounded" />
+                              </div>
+                            </div>
+                            <Skeleton className="h-7 w-full rounded" />
+                            <Skeleton className="h-4 w-1/3 rounded" />
+                          </Card>
+                        ))}
+                      </div>
+                    ) : authors.length === 0 ? (
+                      <AuthorTable
+                        asCard={false}
+                        authors={[]}
+                        loading={false}
+                        error={errorAuthors}
+                        onRetry={() => fetchAuthors()}
+                      />
+                    ) : (
+                      <div className="p-4">
+                        <MotionGrid staggerDelay={0.03} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                          {authors.map((author) => (
+                            <MotionItem key={author.author_id ?? author.id}>
+                              <AuthorCard author={author} />
+                            </MotionItem>
+                          ))}
+                        </MotionGrid>
+                      </div>
+                    )
+                  ) : (
+                    <AuthorTable
+                      asCard={false}
+                      authors={authors}
+                      loading={loadingAuthors}
+                      error={errorAuthors}
+                      onRetry={() => fetchAuthors()}
+                      startIndex={startIndex}
+                      currentSort={sortVal}
+                      onSortChange={(newSort) => handleFilterChange('sort', newSort)}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* 4. Unified Pagination inside single card footer */}
+            {totalAuthors > 0 && totalPagesCount > 1 && (
+              <div className="border-t border-border px-4 py-3 bg-surface">
+                <AdminPagination
+                  totalItems={totalAuthors}
+                  currentPage={pageVal}
+                  limit={limitVal}
+                  onPageChange={handlePageChange}
+                  entityName={t("author.tacGia", "authors")}
+                />
+              </div>
+            )}
+          </Card>
+        </motion.div>
+      </MotionPage>
     </PageContainer>
   );
 }

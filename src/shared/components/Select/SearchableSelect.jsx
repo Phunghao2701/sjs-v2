@@ -16,10 +16,33 @@ export default function SearchableSelect({
   const { t } = useTranslation();
   const resolvedPlaceholder = placeholder || t("common.chon", "Select...");
   const [isOpen, setIsOpen] = useState(false);
+  const [openUpward, setOpenUpward] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [asyncOptions, setAsyncOptions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const wrapperRef = useRef(null);
+
+  useEffect(() => {
+    if (!isOpen || !wrapperRef.current) return;
+    const calculatePosition = () => {
+      if (!wrapperRef.current) return;
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      if (spaceBelow < 280 && spaceAbove > spaceBelow) {
+        setOpenUpward(true);
+      } else {
+        setOpenUpward(false);
+      }
+    };
+    calculatePosition();
+    window.addEventListener('resize', calculatePosition);
+    window.addEventListener('scroll', calculatePosition, true);
+    return () => {
+      window.removeEventListener('resize', calculatePosition);
+      window.removeEventListener('scroll', calculatePosition, true);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -79,7 +102,18 @@ export default function SearchableSelect({
         className={`w-full h-11 px-3.5 rounded-control border border-border bg-surface text-sm flex items-center justify-between gap-2 transition-all select-none focus:outline-none focus-visible:outline-none focus:border-primary focus-visible:border-primary ${
           disabled ? 'opacity-50 cursor-not-allowed bg-surface-muted' : 'cursor-pointer'
         } ${isOpen ? 'border-primary' : ''}`}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!disabled) {
+            const willOpen = !isOpen;
+            if (willOpen && wrapperRef.current) {
+              const rect = wrapperRef.current.getBoundingClientRect();
+              const spaceBelow = window.innerHeight - rect.bottom;
+              const spaceAbove = rect.top;
+              setOpenUpward(spaceBelow < 300 && spaceAbove > spaceBelow);
+            }
+            setIsOpen(willOpen);
+          }
+        }}
       >
         <span className={`truncate flex-1 ${selectedOption ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
           {selectedOption ? selectedOption.label : resolvedPlaceholder}
@@ -102,7 +136,9 @@ export default function SearchableSelect({
       </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 w-full bg-surface border border-border rounded-control shadow-popover mt-1.5 z-30 flex flex-col overflow-hidden max-h-72">
+        <div className={`absolute left-0 w-full bg-surface border border-border rounded-control shadow-popover z-50 flex flex-col overflow-hidden max-h-64 ${
+          openUpward ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+        }`}>
           <div className="p-2 border-b border-border bg-surface-muted/30">
             <div className="relative">
               <Icon icon="lucide:search" width={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />

@@ -174,45 +174,57 @@ export default function DashboardShell({ children }) {
     };
   }, [mobileOpen]);
 
-  const sidebar = (
-    <aside className="app-sidebar flex min-h-full flex-col border-r border-border bg-surface p-3" aria-label="Primary navigation">
-      <div className="h-12 flex items-center border-b border-border px-2 mb-2">
-        <Logo size={26} fontSize="0.95rem" />
-      </div>
-      <nav className="flex flex-col gap-0.5">
-        {items.map(({ label, path, icon: Icon }) => (
-          <NavLink
-            key={path}
-            to={`${base}/${path}`}
-            onClick={() => setMobileOpen(false)}
-            className={({ isActive }) =>
-              `group flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control px-2.5 py-1.5 text-left text-xs transition-colors ${
-                isActive
-                  ? 'bg-primary-subtle font-semibold !text-primary'
-                  : 'font-medium !text-muted-foreground hover:bg-surface-muted hover:!text-foreground'
-              }`
-            }
+  const renderSidebar = (showLogo = true) => (
+    <aside className="app-sidebar flex min-h-full flex-col border-r border-border bg-surface" aria-label="Primary navigation">
+      {showLogo && (
+        <div className="h-14 min-h-14 flex items-center border-b border-border px-4 box-border">
+          <Link to={`${base}/dashboard`} className="flex items-center no-underline text-inherit">
+            <Logo size={26} fontSize="0.95rem" />
+          </Link>
+        </div>
+      )}
+      <div className="flex flex-1 flex-col p-3">
+        <nav className="flex flex-col gap-0.5">
+          {items.map(({ label, path, icon: Icon }) => (
+            <NavLink
+              key={path}
+              to={`${base}/${path}`}
+              onClick={() => setMobileOpen(false)}
+              className={({ isActive }) =>
+                `group flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control px-2.5 py-1.5 text-left text-xs transition-colors ${
+                  isActive
+                    ? 'bg-primary-subtle font-semibold !text-primary'
+                    : 'font-medium !text-muted-foreground hover:bg-surface-muted hover:!text-foreground'
+                }`
+              }
+            >
+              <Icon aria-hidden="true" className="shrink-0 text-base" />
+              <span>{t(`navigation.${path}`, label)}</span>
+            </NavLink>
+          ))}
+        </nav>
+        <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-2">
+          <button
+            type="button"
+            className="flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control border-0 bg-transparent px-2.5 py-1.5 text-left text-xs font-semibold text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground cursor-pointer"
+            onClick={() => {
+              setMobileOpen(false);
+              navigate(`${base}/profile`);
+            }}
           >
-            <Icon aria-hidden="true" className="shrink-0 text-base" />
-            <span>{t(`navigation.${path}`, label)}</span>
-          </NavLink>
-        ))}
-      </nav>
-      <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-2">
-        <button
-          type="button"
-          className="flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control border-0 bg-transparent px-2.5 py-1.5 text-left text-xs font-semibold text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground cursor-pointer"
-          onClick={() => navigate(`${base}/profile`)}
-        >
-          <FiUsers aria-hidden="true" className="text-base" /> <span>{t('navigation.account', 'Account')}</span>
-        </button>
-        <button
-          type="button"
-          className="flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control border-0 bg-transparent px-2.5 py-1.5 text-left text-xs font-semibold text-muted-foreground transition-colors hover:bg-danger-subtle hover:text-danger cursor-pointer"
-          onClick={() => logout()}
-        >
-          <FiLogOut aria-hidden="true" className="text-base" /> <span>{t('navigation.signOut', 'Sign out')}</span>
-        </button>
+            <FiUsers aria-hidden="true" className="text-base" /> <span>{t('navigation.account', 'Account')}</span>
+          </button>
+          <button
+            type="button"
+            className="flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control border-0 bg-transparent px-2.5 py-1.5 text-left text-xs font-semibold text-muted-foreground transition-colors hover:bg-danger-subtle hover:text-danger cursor-pointer"
+            onClick={() => {
+              setMobileOpen(false);
+              logout();
+            }}
+          >
+            <FiLogOut aria-hidden="true" className="text-base" /> <span>{t('navigation.signOut', 'Sign out')}</span>
+          </button>
+        </div>
       </div>
     </aside>
   );
@@ -227,12 +239,12 @@ export default function DashboardShell({ children }) {
 
       {/* Desktop Sticky Sidebar (Flex item, zero margin needed for main) */}
       <div className="hidden md:block w-[230px] shrink-0">
-        <div ref={sidebarRef} className="sticky top-0 h-screen overflow-y-auto overflow-x-hidden">{sidebar}</div>
+        <div ref={sidebarRef} className="sticky top-0 h-screen overflow-y-auto overflow-x-hidden">{renderSidebar(true)}</div>
       </div>
 
       {/* Main Content Column */}
       <div className="flex flex-1 flex-col min-w-0">
-        <header className="app-topbar sticky top-0 z-[var(--ds-z-sticky)] flex max-md:hidden min-h-14 items-center border-b border-border bg-surface/95 px-4 sm:px-6 lg:px-8 backdrop-blur">
+        <header className="app-topbar sticky top-0 z-[var(--ds-z-sticky)] flex max-md:hidden h-14 min-h-14 items-center border-b border-border bg-surface/95 px-4 sm:px-6 lg:px-8 backdrop-blur box-border">
           <div className="w-full flex items-center justify-between">
             <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-xs sm:text-sm">
               {headerBreadcrumbs.map((crumb, idx) => {
@@ -286,9 +298,9 @@ export default function DashboardShell({ children }) {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div className="fixed inset-0 z-[var(--ds-z-overlay)] bg-foreground/35 md:hidden" initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={reduceMotion ? undefined : { opacity: 0 }} onClick={() => setMobileOpen(false)}>
-            <motion.div data-mobile-nav-panel role="dialog" aria-modal="true" aria-label={t('navigation.menu', 'Main navigation')} className="h-full w-[min(82vw,280px)] bg-surface shadow-popover" initial={reduceMotion ? false : { x: -280 }} animate={{ x: 0 }} exit={reduceMotion ? undefined : { x: -280 }} transition={{ type: 'tween', duration: reduceMotion ? 0 : 0.2, ease: 'easeOut' }} onClick={(event) => event.stopPropagation()}>
-              <div className="flex items-center justify-between border-b border-border p-4"><Logo size={30} fontSize="1.05rem" /><Button ref={drawerCloseRef} variant="ghost" size="icon" aria-label={t('navigation.close', 'Close navigation')} onClick={() => setMobileOpen(false)}><FiX /></Button></div>
-              {sidebar}
+            <motion.div data-mobile-nav-panel role="dialog" aria-modal="true" aria-label={t('navigation.menu', 'Main navigation')} className="h-full w-[min(82vw,280px)] bg-surface shadow-popover flex flex-col" initial={reduceMotion ? false : { x: -280 }} animate={{ x: 0 }} exit={reduceMotion ? undefined : { x: -280 }} transition={{ type: 'tween', duration: reduceMotion ? 0 : 0.2, ease: 'easeOut' }} onClick={(event) => event.stopPropagation()}>
+              <div className="flex h-14 min-h-14 items-center justify-between border-b border-border px-4 box-border"><Logo size={26} fontSize="0.95rem" /><Button ref={drawerCloseRef} variant="ghost" size="icon" aria-label={t('navigation.close', 'Close navigation')} onClick={() => setMobileOpen(false)}><FiX /></Button></div>
+              <div className="flex-1 overflow-y-auto">{renderSidebar(false)}</div>
             </motion.div>
           </motion.div>
         )}

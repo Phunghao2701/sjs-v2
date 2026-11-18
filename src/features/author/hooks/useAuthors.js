@@ -14,47 +14,25 @@ import {
   getSubjectAreasApi,
 } from '../api/author.api';
 
-// ── DỮ LIỆU GIẢ ĐỊNH DỰ PHÒNG ───────────────────
-const MOCK_AUTHORS = [
-  { id: '1', author_id: '1', name: 'GS. TS. Nguyễn Văn A', full_name: 'GS. TS. Nguyễn Văn A', institution_1: 'Đại học Bách Khoa Hà Nội', institution_2: 'Viện Công nghệ Thông tin và Truyền thông', email: 'a.nguyenvan@hust.edu.vn', h_index: 38, citation_count: 4520, article_count: 124, orcid: '0000-0002-1823-4567', avatar_color: '#0071BC', bio: '...', homepage: '', subject_areas: ['Machine Learning', 'Computer Vision', 'Healthcare AI'] },
-  { id: '2', author_id: '2', name: 'PGS. TS. Trần Thị B', full_name: 'PGS. TS. Trần Thị B', institution_1: 'Đại học Quốc gia TP.HCM', institution_2: 'Khoa Khoa học & Kỹ thuật Máy tính', email: 'ttb@hcmut.edu.vn', h_index: 29, citation_count: 2980, article_count: 87, orcid: '0000-0003-4567-8901', avatar_color: '#6366F1', bio: '...', homepage: '', subject_areas: ['Natural Language Processing', 'Deep Learning', 'Data Mining'] },
-  { id: '3', author_id: '3', name: 'TS. Lê Văn C', full_name: 'TS. Lê Văn C', institution_1: 'Viện Hàn lâm Khoa học và Công nghệ Việt Nam', institution_2: 'Viện Vật lý', email: 'lvc@iop.vast.ac.vn', h_index: 22, citation_count: 1850, article_count: 56, orcid: '0000-0001-9876-5432', avatar_color: '#0EA5E9', bio: '...', homepage: '', subject_areas: ['Quantum Optics', 'Nanophotonics', 'Laser Physics'] },
-  { id: '4', author_id: '4', name: 'Dr. Michael Jordan', full_name: 'Dr. Michael Jordan', institution_1: 'University of California, Berkeley', institution_2: 'Department of EECS', email: 'jordan@cs.berkeley.edu', h_index: 168, citation_count: 215000, article_count: 650, orcid: '0000-0002-2345-6789', avatar_color: '#D97706', bio: '...', homepage: '', subject_areas: ['Machine Learning', 'Optimization', 'Statistics'] }
-];
-
-const MOCK_LEADERBOARD = [
-  { id: '1', author_id: '1', name: 'GS. TS. Nguyễn Văn A', subject_area: 'Computer Vision', article_count: 124, citation_count: 4520, papers: 124, citations: 4520 },
-  { id: '2', author_id: '2', name: 'PGS. TS. Trần Thị B', subject_area: 'Deep Learning', article_count: 87, citation_count: 2980, papers: 87, citations: 2980 },
-  { id: '3', author_id: '3', name: 'TS. Lê Văn C', subject_area: 'Quantum Optics', article_count: 56, citation_count: 1850, papers: 56, citations: 1850 },
-  { id: '4', author_id: '4', name: 'Dr. Michael Jordan', subject_area: 'Machine Learning', article_count: 650, citation_count: 215000, papers: 650, citations: 215000 }
-];
-
-const createUnknownAuthorFallback = (authorId) => ({ id: String(authorId), author_id: String(authorId), name: `Tác giả #${authorId}`, full_name: `Tác giả #${authorId}`, institution_1: 'Chưa có dữ liệu từ API tác giả', institution_2: '', email: '', h_index: 0, citation_count: 0, article_count: 0, orcid: '', avatar_color: '#6366F1', bio: 'Hiện chưa tải được hồ sơ chi tiết của tác giả này từ backend.', homepage: '', subject_areas: [] });
-const MOCK_ARTICLES_MAP = {
-  '1': [{ article_id: '1', title: 'Attention Is All You Need for Medical Image Classification', journal_name: 'IEEE Transactions on Pattern Analysis and Machine Intelligence', publication_year: 2026, doi: '10.1109/TPAMI.2026.12345', citation_count: 42 }],
-  '2': [{ article_id: '4', title: 'BERT-based Named Entity Recognition for Vietnamese Electronic Health Records', journal_name: 'Journal of Biomedical Informatics', publication_year: 2025, doi: '10.1016/j.jbi.2025.10425', citation_count: 15 }],
-  '3': [{ article_id: '6', title: 'Coherent Control of Multi-Photon Transitions in Quantum Dot Systems', journal_name: 'Nature Photonics', publication_year: 2025, doi: '10.1038/s41566-025-0123-x', citation_count: 48 }],
-  '4': [{ article_id: '8', title: 'An Introduction to Variational Autoencoders and Graphical Models', journal_name: 'Foundations and Trends in Machine Learning', publication_year: 2024, doi: '10.1561/2200000099', citation_count: 1450 }]
-};
-const MOCK_BREAKDOWNS_MAP = {
-  '1': [{ subject_area: 'Machine Learning', count: 56, percentage: 45 }, { subject_area: 'Computer Vision', count: 37, percentage: 30 }],
-  '2': [{ subject_area: 'Natural Language Processing', count: 42, percentage: 48 }, { subject_area: 'Deep Learning', count: 28, percentage: 32 }],
-  '3': [{ subject_area: 'Quantum Optics', count: 28, percentage: 50 }, { subject_area: 'Nanophotonics', count: 18, percentage: 32 }],
-  '4': [{ subject_area: 'Machine Learning', count: 350, percentage: 54 }, { subject_area: 'Optimization', count: 180, percentage: 28 }]
-};
-
 const normalizeAuthorRecord = (author) => {
   if (!author || typeof author !== 'object') return author;
-  const rawName = author.display_name ?? author.full_name ?? author.name ?? '';
-  const cleanedName = String(rawName).trim().replace(/^[\s;'"`]+/, '').trim() || 'Tác giả';
+  const cleanStr = (val) => String(val ?? '').replace(/[\t\r\n]+/g, ' ').trim();
+  const rawName = cleanStr(author.display_name || author.full_name || author.name || author.author_name || '');
+  const cleanedName = rawName || (author.openalex_id ? `Author ${author.openalex_id}` : (author.author_id ? `Author #${author.author_id}` : 'Tác giả'));
+  const rawInst1 = cleanStr(author.institution_1 ?? author.last_known_institution ?? author.affiliation ?? author.institution ?? '');
+  const rawInst2 = cleanStr(author.institution_2 ?? author.department ?? '');
   return {
     ...author,
     full_name: cleanedName,
     name: cleanedName,
-    institution_1: author.institution_1 ?? author.last_known_institution ?? author.institution ?? '',
-    institution_2: author.institution_2 ?? author.department ?? author.affiliation ?? '',
+    display_name: cleanedName,
+    institution_1: rawInst1,
+    institution_2: rawInst2,
     article_count: author.article_count ?? author.works_count ?? 0,
+    works_count: author.works_count ?? author.article_count ?? 0,
     citation_count: author.citation_count ?? author.cited_by_count ?? 0,
+    cited_by_count: author.cited_by_count ?? author.citation_count ?? 0,
+    h_index: author.h_index ?? author.hindex ?? 0,
     homepage: author.homepage ?? author.homepage_url ?? '',
     bio: author.bio ?? author.description ?? '',
     orcid: author.orcid ?? '',
@@ -151,7 +129,19 @@ export default function useAuthors() {
     queryKey: ['authors', 'list', authorsParams],
     queryFn: async () => {
       try {
-        const response = await getAuthorsApi(authorsParams);
+        const apiParams = { ...authorsParams };
+        if (authorsParams?.sort === 'citations') {
+          apiParams.sort_by = 'cited_by_count';
+          apiParams.order = 'desc';
+        } else if (authorsParams?.sort === 'impact' || authorsParams?.sort === 'h_index') {
+          apiParams.sort_by = 'h_index';
+          apiParams.order = 'desc';
+        } else {
+          apiParams.sort_by = 'works_count';
+          apiParams.order = 'desc';
+        }
+        delete apiParams.sort;
+        const response = await getAuthorsApi(apiParams);
         if (response.data && typeof response.data === 'object' && response.data.success !== false) {
           const payload = response.data.data;
           const items = extractItemsFromCollectionPayload(payload);
@@ -171,22 +161,8 @@ export default function useAuthors() {
           throw new Error(response.data?.message || 'Failed to fetch authors');
         }
       } catch (err) {
-        // Mock Fallback
-        const keyword = (authorsParams.search || '').toLowerCase().trim();
-        const area = (authorsParams.subject_area || '').trim();
-        const sort = authorsParams.sort || '';
-        let filtered = [...MOCK_AUTHORS];
-        if (keyword) filtered = filtered.filter(a => a.name.toLowerCase().includes(keyword) || (a.institution_1 || '').toLowerCase().includes(keyword) || (a.institution_2 || '').toLowerCase().includes(keyword) || (a.orcid || '').includes(keyword) || a.subject_areas.some(tag => tag.toLowerCase().includes(keyword)));
-        if (area) filtered = filtered.filter(a => a.subject_areas.includes(area));
-        if (sort === 'impact' || sort === 'h_index') filtered = sortAuthorsByImpact(filtered);
-        else if (sort === 'articles') filtered.sort((a, b) => getAuthorMetric(b, ['article_count', 'works_count', 'papers']) - getAuthorMetric(a, ['article_count', 'works_count', 'papers']));
-        else if (sort === 'citations') filtered.sort((a, b) => getAuthorMetric(b, ['citation_count', 'cited_by_count', 'citations']) - getAuthorMetric(a, ['citation_count', 'cited_by_count', 'citations']));
-
-        const page = parseInt(authorsParams.page || '1', 10);
-        const limit = parseInt(authorsParams.limit || '10', 10);
-        const startIndex = (page - 1) * limit;
-        const paginated = filtered.slice(startIndex, startIndex + limit);
-        return { authors: paginated, total: filtered.length, totalPages: Math.max(1, Math.ceil(filtered.length / limit)) };
+        console.error('Failed to fetch authors from API:', err);
+        throw err;
       }
     },
     enabled: !!authorsParams,
@@ -206,7 +182,8 @@ export default function useAuthors() {
           throw new Error(response.data?.message || 'Failed to fetch author detail');
         }
       } catch (err) {
-        return MOCK_AUTHORS.find(a => String(a.id) === String(authorDetailId)) || createUnknownAuthorFallback(authorDetailId);
+        console.error('Failed to fetch author detail from API:', err);
+        throw err;
       }
     },
     enabled: !!authorDetailId,
@@ -227,7 +204,8 @@ export default function useAuthors() {
           throw new Error(response.data?.message || 'Failed to fetch author articles');
         }
       } catch (err) {
-        return MOCK_ARTICLES_MAP[String(id)] || [];
+        console.error('Failed to fetch author articles from API:', err);
+        return [];
       }
     },
     enabled: !!authorArticlesParams,
@@ -247,7 +225,8 @@ export default function useAuthors() {
           throw new Error(response.data?.message || 'Failed to fetch areas breakdown');
         }
       } catch (err) {
-        return MOCK_BREAKDOWNS_MAP[String(authorBreakdownId)] || [];
+        console.error('Failed to fetch areas breakdown from API:', err);
+        return [];
       }
     },
     enabled: !!authorBreakdownId,
@@ -309,7 +288,7 @@ export default function useAuthors() {
         }
       } catch (err) {
         console.error('Failed to fetch author leaderboard from API:', err);
-        return { leaderboard: [], total: 0, totalPages: 1 };
+        throw err;
       }
     },
     enabled: !!leaderboardParams,

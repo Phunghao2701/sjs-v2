@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Icon from '../../../shared/components/Icon';
 import api from '../../../shared/services/api';
 import { Alert } from '../../../shared/ui/alert';
@@ -9,9 +9,12 @@ import { Card } from '../../../shared/ui/card';
 
 const statusPath = '/admin/integrations/openalex';
 const importPath = '/admin/imports/scimago';
+const IMPORT_SESSION_STORAGE_KEY = 'admin.scimagoImportSession';
 const MAX_IMPORT_BYTES = 50 * 1024 * 1024;
 const MAX_CHUNK_BYTES = 256 * 1024;
 const MAX_CHUNK_ROWS = 50;
+const MAX_CHUNK_ATTEMPTS = 8;
+const MAX_RETRY_DELAY_MS = 30000;
 
 function splitCsvRecords(text) {
   const input = String(text || '').replace(/^\uFEFF/, '');
@@ -58,9 +61,34 @@ function makeCsvBatches(records) {
   return batches;
 }
 
-async function postChunkWithRetry(url, body) {
+function readStoredImportSession() {
+  try {
+    const stored = JSON.parse(window.sessionStorage.getItem(IMPORT_SESSION_STORAGE_KEY) || 'null');
+    if (!stored?.importId || !Array.isArray(stored.uploadedIndexes)) return null;
+    return { ...stored, uploadedBatches: new Set(stored.uploadedIndexes) };
+  } catch {
+    return null;
+  }
+}
+
+function storeImportSession(session) {
+  try {
+    window.sessionStorage.setItem(IMPORT_SESSION_STORAGE_KEY, JSON.stringify({
+      importId: session.importId,
+      fileName: session.fileName,
+      fileSize: session.fileSize,
+      fileLastModified: session.fileLastModified,
+      year: session.year,
+      uploadedIndexes: [...session.uploadedBatches],
+    }));
+  } catch {
+    // Import can still continue in memory if browser storage is unavailable.
+  }
+}
+
+async function postChunkWithRetry(url, body, onRetry) {
   let lastError;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 1; attempt <= MAX_CHUNK_ATTEMPTS; attempt += 1) {
     try {
       return await api.post(url, body);
     } catch (error) {
@@ -68,13 +96,38 @@ async function postChunkWithRetry(url, body) {
       const status = error.response?.status;
       const transient = !status || status === 408 || status === 429 || status >= 500;
       if (!transient) throw error;
-      if (attempt < 2) await new Promise(resolve => window.setTimeout(resolve, 500 * (2 ** attempt)));
+      if (attempt < MAX_CHUNK_ATTEMPTS) {
+        const delay = Math.min(2000 * (2 ** (attempt - 1)), MAX_RETRY_DELAY_MS);
+        const jitter = Math.floor(Math.random() * 500);
+        onRetry?.({ attempt: attempt + 1, error, delay: delay + jitter });
+        await new Promise(resolve => window.setTimeout(resolve, delay + jitter));
+      }
     }
   }
   throw lastError;
 }
 
+async function uploadCsvBatches(importId, batches, uploadedBatches, onProgress, onBatchUploaded) {
+  let completed = uploadedBatches.size;
+  for (let batchIndex = 0; batchIndex < batches.length; batchIndex += 1) {
+    if (uploadedBatches.has(batchIndex)) continue;
+    await postChunkWithRetry(`${importPath}/${importId}/chunks`, {
+      batch_index: batchIndex,
+      csv: batches[batchIndex],
+    }, ({ attempt, error, delay }) => {
+      onProgress({ completed, batchIndex, attempt, delay, error });
+    });
+    uploadedBatches.add(batchIndex);
+    onBatchUploaded?.(batchIndex);
+    completed += 1;
+    onProgress({ completed, batchIndex, attempt: 0, delay: 0 });
+    // A small gap prevents a long import from continuously hammering Firestore-backed routes.
+    if (batchIndex < batches.length - 1) await new Promise(resolve => window.setTimeout(resolve, 100));
+  }
+}
+
 export default function AdminDataSourcesPage() {
+  const importSessionRef = useRef(null);
   const [keyStatus, setKeyStatus] = useState(null);
   const [apiKey, setApiKey] = useState('');
   const [loadingKey, setLoadingKey] = useState(true);
@@ -142,28 +195,78 @@ export default function AdminDataSourcesPage() {
     }
     setImporting(true); setMessage(null); setImportProgress({ percent: 0, completed: 0, total: 0, phase: 'Reading CSV...' });
     try {
-      const records = splitCsvRecords(await file.text());
-      if (records.length < 2) throw new Error('The SCImago CSV must contain a header and at least one data row.');
-      const header = records.shift();
-      const batches = makeCsvBatches(records);
-      setImportProgress({ percent: 0, completed: 0, total: batches.length, phase: 'Starting import...' });
+      let session = importSessionRef.current || readStoredImportSession();
+      const sameFile = session
+        && session.fileName === file.name
+        && session.fileSize === file.size
+        && session.fileLastModified === file.lastModified
+        && session.year === Number(year);
 
-      const startResponse = await api.post(importPath, { file_name: file.name, header, year: Number(year) });
-      const started = startResponse.data?.data || startResponse.data;
-      if (!started?.import_id) throw new Error('The Worker did not return an import ID.');
-      for (let index = 0; index < batches.length; index += 1) {
-        await postChunkWithRetry(`${importPath}/${started.import_id}/chunks`, { batch_index: index, csv: batches[index] });
-        setImportProgress({ percent: Math.round(((index + 1) / batches.length) * 95), completed: index + 1, total: batches.length, phase: 'Importing journal rankings...' });
+      if (!sameFile || !session.batches) {
+        const records = splitCsvRecords(await file.text());
+        if (records.length < 2) throw new Error('The SCImago CSV must contain a header and at least one data row.');
+        const header = records.shift();
+        const batches = makeCsvBatches(records);
+        if (sameFile) {
+          session = { ...session, batches };
+        } else {
+          setImportProgress({ percent: 0, completed: 0, total: batches.length, phase: 'Starting import...' });
+          const startResponse = await api.post(importPath, { file_name: file.name, header, year: Number(year) });
+          const started = startResponse.data?.data || startResponse.data;
+          if (!started?.import_id) throw new Error('The Worker did not return an import ID.');
+          session = {
+            importId: started.import_id,
+            uploadedBatches: new Set(),
+            fileName: file.name,
+            fileSize: file.size,
+            fileLastModified: file.lastModified,
+            year: Number(year),
+          };
+        }
+        session.batches = batches;
+        importSessionRef.current = session;
+        storeImportSession(session);
       }
-      const completeResponse = await api.post(`${importPath}/${started.import_id}/complete`, { total_chunks: batches.length });
+
+      const { importId, batches, uploadedBatches } = session;
+      const describeProgress = ({ completed, batchIndex, attempt, delay, maxConcurrency }) => {
+        setImportProgress({
+          percent: Math.round((completed / batches.length) * 95),
+          completed,
+          total: batches.length,
+          phase: attempt
+            ? `Connection interrupted at batch ${batchIndex + 1}; retry ${attempt}/${MAX_CHUNK_ATTEMPTS} in ${Math.ceil(delay / 1000)}s...`
+            : `Importing batch ${batchIndex + 1} of ${batches.length}...`,
+        });
+      };
+      setImportProgress({
+        percent: Math.round((uploadedBatches.size / batches.length) * 95),
+        completed: uploadedBatches.size,
+        total: batches.length,
+        phase: uploadedBatches.size ? 'Resuming the unfinished batches...' : `Importing in order, one batch at a time...`,
+      });
+      await uploadCsvBatches(importId, batches, uploadedBatches, describeProgress, () => storeImportSession(session));
+      const completeResponse = await api.post(`${importPath}/${importId}/complete`, { total_chunks: batches.length });
       const result = completeResponse.data?.data || completeResponse.data;
       setImportProgress({ percent: 100, completed: batches.length, total: batches.length, phase: 'Import complete' });
       setMessage({ type: 'success', text: `Import complete: ${result.imported || 0} journal records processed; ${result.unmatched || 0} ISSNs did not match the journal catalog.` });
+      importSessionRef.current = null;
+      window.sessionStorage.removeItem(IMPORT_SESSION_STORAGE_KEY);
       setFile(null);
       form.reset();
     } catch (error) {
       setImportProgress(progress => progress ? { ...progress, phase: 'Import failed' } : null);
-      setMessage({ type: 'danger', text: error.response?.data?.message || error.message || 'Could not import the SCImago file.' });
+      const message = error.response?.data?.message
+        || (!error.response && error.message === 'Network Error'
+          ? 'Worker connection failed without a readable response (the browser reports a network/CORS error).'
+          : error.message)
+        || 'Could not import the SCImago file.';
+      setMessage({
+        type: 'danger',
+        text: importSessionRef.current
+          ? `${message} Completed batches are saved. Click Import rankings again to resume safely from this file.`
+          : message,
+      });
     } finally { setImporting(false); }
   };
 
@@ -251,7 +354,19 @@ export default function AdminDataSourcesPage() {
                     type="file"
                     accept=".csv,text/csv"
                     disabled={importing}
-                    onChange={event => { setFile(event.target.files?.[0] || null); setMessage(null); setImportProgress(null); }}
+                    onChange={event => {
+                      const nextFile = event.target.files?.[0] || null;
+                      const stored = readStoredImportSession();
+                      const canResume = nextFile && stored
+                        && stored.fileName === nextFile.name
+                        && stored.fileSize === nextFile.size
+                        && stored.fileLastModified === nextFile.lastModified;
+                      setFile(nextFile);
+                      importSessionRef.current = canResume ? stored : null;
+                      if (!canResume) window.sessionStorage.removeItem(IMPORT_SESSION_STORAGE_KEY);
+                      setMessage(null);
+                      setImportProgress(null);
+                    }}
                     className="w-full text-xs text-foreground file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:opacity-90 cursor-pointer"
                   />
                 </div>

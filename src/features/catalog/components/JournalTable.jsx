@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Table } from '../../../shared/ui/table';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Badge } from '../../../shared/ui/badge';
 import { Button } from '../../../shared/ui/button';
 
@@ -77,17 +78,18 @@ export default function JournalTable({
               <th className="px-3 py-3 text-start">Publisher & Region</th>
               <th className="px-3 py-3 text-center">Quartile</th>
               <th className="px-3 py-3 text-center">SJR Metric</th>
-              <th className="px-3 py-3 text-center">Access</th>
-              <th className="px-4 py-3 text-end">Action</th>
+              <th className="px-4 py-3 text-center">Access</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {journals.map((journal) => {
+            {journals.map((journal, idx) => {
               const id = journal.id || journal.journal_id;
-              const isFollowed = !!followedJournals[id];
               return (
-                <tr
+                <motion.tr
                   key={id}
+                  initial={{ opacity: 0, y: 3 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.15, delay: Math.min(idx * 0.02, 0.2) }}
                   onClick={() => navigate(`/journals/${id}`)}
                   className="cursor-pointer transition-colors hover:bg-primary-subtle/20 group"
                 >
@@ -135,29 +137,10 @@ export default function JournalTable({
                   </td>
 
                   {/* Access Type Badge */}
-                  <td className="px-3 py-3.5 text-center whitespace-nowrap">
+                  <td className="px-4 py-3.5 text-center whitespace-nowrap">
                     {renderAccessBadge(journal)}
                   </td>
-
-                  {/* Follow Action Button */}
-                  <td className="px-4 py-3.5 text-end whitespace-nowrap">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={isFollowed ? "secondary" : "outline"}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        onFollow(id);
-                      }}
-                      className="h-8 px-2.5 text-xs gap-1.5"
-                      title={isFollowed ? 'Unfollow journal' : 'Follow journal'}
-                    >
-                      <Icon icon={isFollowed ? 'lucide:check' : 'lucide:plus'} width="13" />
-                      <span>{isFollowed ? t("catalog.daTheoDoi", "Following") : t("catalog.theoDoi", "Follow")}</span>
-                    </Button>
-                  </td>
-                </tr>
+                </motion.tr>
               );
             })}
           </tbody>
