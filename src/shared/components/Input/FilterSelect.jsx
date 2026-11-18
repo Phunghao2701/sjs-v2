@@ -19,7 +19,7 @@ export default function FilterSelect({
       onChange={onChange}
       disabled={disabled}
       className={cn(
-        "h-9 rounded-md border border-border bg-surface px-3 py-1 text-sm text-text-main shadow-none transition-colors focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50",
+        "h-9 rounded-md border border-border bg-surface px-3 py-1 text-sm text-text-main shadow-none transition-colors focus:outline-none focus:border-primary focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       style={style}

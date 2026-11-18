@@ -20,9 +20,9 @@ export default function AuthLayout({ banner, children }) {
         <div className="flex items-center justify-center py-8 px-4 sm:px-6 md:px-10 min-h-screen overflow-y-auto bg-surface">
           <motion.div 
             className="w-full max-w-[440px]"
-            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.28, ease: 'easeOut' }}
+            transition={{ duration: reduceMotion ? 0 : 0.22, ease: 'easeOut' }}
           >
             {children}
           </motion.div>

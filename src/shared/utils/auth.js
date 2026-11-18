@@ -39,13 +39,7 @@ export const isAuthenticated = async () => {
         const isExpired = decoded.exp && decoded.exp * 1000 <= Date.now();
 
         if (isExpired) {
-          // Token đã hết hạn!
-          if (!authStore.remember) {
-            // Không tick Remember-me -> kích hoạt modal thông báo hết hạn phiên
-            authStore.setSessionExpiredModalVisible(true);
-            return false;
-          }
-          // Có tick Remember-me -> tiếp tục xuống dưới gọi api.get('/users/me')
+          // Token đã hết hạn -> tiếp tục xuống dưới gọi api.get('/users/me')
           // để Axios interceptor kích hoạt luồng tự động refresh token ngầm
         } else if (authStore.isAuthenticated && useUserStore.getState().email) {
           return true;

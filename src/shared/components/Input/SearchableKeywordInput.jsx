@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
 import keywordApi from '../../../features/keywords/api/keywordApi';
+
 export default function SearchableKeywordInput({
   keywords = [],
   onAddKeyword,
@@ -11,17 +12,14 @@ export default function SearchableKeywordInput({
   debounceTime = 300,
   subjectAreaId = null
 }) {
-  const {
-    t
-  } = useTranslation();
-  const resolvedPlaceholder = placeholder || t("common.chonTuKhoa");
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder || t("common.chonTuKhoa", "Select or type a keyword...");
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const wrapperRef = useRef(null);
 
-  // Handle outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -32,17 +30,13 @@ export default function SearchableKeywordInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [wrapperRef]);
 
-  // Fetch suggestions with debounce
   useEffect(() => {
     if (!isOpen) return;
     const fetchSuggestions = async () => {
       const val = searchTerm.trim();
       setIsSearching(true);
       try {
-        const queryParams = {
-          search: val,
-          limit: 20
-        };
+        const queryParams = { search: val, limit: 20 };
         if (subjectAreaId) {
           queryParams.subject_area_id = subjectAreaId;
         }
@@ -50,14 +44,15 @@ export default function SearchableKeywordInput({
         const items = res?.data?.data?.items || res?.data?.data || [];
         setSuggestions(Array.isArray(items) ? items : []);
       } catch (err) {
-        console.error(t("common.loiLayDanhSachKeyword"), err);
+        console.error(t("common.loiLayDanhSachKeyword", "Error fetching keywords:"), err);
       } finally {
         setIsSearching(false);
       }
     };
     const timeoutId = setTimeout(fetchSuggestions, debounceTime);
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, isOpen, debounceTime, subjectAreaId]);
+  }, [searchTerm, isOpen, debounceTime, subjectAreaId, t]);
+
   const handleSelect = kwName => {
     if (kwName && onAddKeyword) {
       onAddKeyword(kwName);
@@ -65,6 +60,7 @@ export default function SearchableKeywordInput({
     setSearchTerm('');
     setIsOpen(false);
   };
+
   const handleKeyDown = e => {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();
@@ -75,79 +71,132 @@ export default function SearchableKeywordInput({
     }
   };
 
-  // Filter out already selected keywords from suggestions
   const filteredSuggestions = suggestions.filter(s => !keywords.includes(s.display_name || s.name));
-  const showCreateOption = searchTerm.trim().length > 0 && !suggestions.find(s => (s.display_name || s.name).toLowerCase() === searchTerm.trim().toLowerCase()) && !keywords.includes(searchTerm.trim());
-  return <div className="position-relative" ref={wrapperRef}>
-      {/* Main control - looks like SearchableSelect */}
-      <div className={`form-control form-control-lg d-flex flex-wrap align-items-center gap-2 ${disabled ? 'bg-light text-muted' : ''}`} style={{
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      backgroundColor: 'var(--bg-main)',
-      color: 'var(--text-main)',
-      borderColor: 'var(--border)',
-      minHeight: '50px'
-    }} onClick={() => !disabled && setIsOpen(!isOpen)}>
-        {/* Render keyword badges */}
-        {keywords.map(kw => <span key={kw} className="badge rounded-pill d-flex align-items-center gap-1 px-2 py-1 fw-normal" style={{
-        backgroundColor: 'var(--bg-section)',
-        color: 'var(--text-main)',
-        border: '1px solid var(--border)',
-        fontSize: '14px'
-      }}>
-            {kw}
-            <Icon icon="lucide:x" width="14" className="cursor-pointer hover-danger" onClick={e => {
-          e.stopPropagation();
-          onRemoveKeyword?.(kw);
-        }} />
-          </span>)}
+  const showCreateOption =
+    searchTerm.trim().length > 0 &&
+    !suggestions.find(s => (s.display_name || s.name).toLowerCase() === searchTerm.trim().toLowerCase()) &&
+    !keywords.includes(searchTerm.trim());
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      {/* Main interactive field */}
+      <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !disabled && !e.target.closest('button')) {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+          }
+        }}
+        className={`w-full min-h-[44px] px-3 py-1.5 rounded-control border border-border bg-surface text-sm flex flex-wrap items-center gap-1.5 transition-all select-none focus:outline-none focus-visible:outline-none focus:border-primary focus-visible:border-primary ${
+          disabled ? 'opacity-50 cursor-not-allowed bg-surface-muted' : 'cursor-pointer hover:border-primary/50'
+        } ${isOpen ? 'border-primary' : ''}`}
+        onClick={(e) => {
+          if (!disabled && !e.target.closest('button')) {
+            setIsOpen(!isOpen);
+          }
+        }}
+      >
+        {/* Render keyword chips */}
+        {keywords.map(kw => (
+          <span
+            key={kw}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-primary-subtle text-primary border border-primary/20 shadow-2xs"
+          >
+            <span>{kw}</span>
+            <button
+              type="button"
+              className="p-0 border-0 bg-transparent text-primary/70 hover:text-danger cursor-pointer flex items-center justify-center transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoveKeyword?.(kw);
+              }}
+              aria-label={`Remove keyword ${kw}`}
+            >
+              <Icon icon="lucide:x" width={13} />
+            </button>
+          </span>
+        ))}
 
         {/* Placeholder text */}
-        {keywords.length === 0 && <span style={{
-        color: 'var(--text-muted)'
-      }}>{resolvedPlaceholder}</span>}
+        {keywords.length === 0 && (
+          <span className="text-muted-foreground text-sm flex-1">
+            {resolvedPlaceholder}
+          </span>
+        )}
 
         {/* Right side indicators */}
-        <div className="d-flex align-items-center gap-2 flex-shrink-0 ms-auto">
-          {isSearching && <span className="spinner-border spinner-border-sm text-primary" role="status"></span>}
-          <Icon icon="lucide:chevron-down" width="18" className="text-muted" />
+        <div className="flex items-center gap-2 shrink-0 ml-auto">
+          {isSearching && <Icon icon="lucide:loader-2" width={16} className="animate-spin text-primary" />}
+          <Icon icon="lucide:chevron-down" width={16} className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </div>
       </div>
 
       {/* Dropdown panel */}
-      {isOpen && <div className="position-absolute w-100 bg-white border rounded-3 shadow mt-1 z-3" style={{
-      maxHeight: '350px',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
+      {isOpen && (
+        <div className="absolute top-full left-0 w-full bg-surface border border-border rounded-control shadow-popover mt-1.5 z-30 flex flex-col overflow-hidden max-h-72">
           {/* Search input inside dropdown */}
-          <div className="p-2 border-bottom">
-            <div className="input-group input-group-sm">
-              <span className="input-group-text bg-transparent border-end-0">
-                <Icon icon="lucide:search" width="14" className="text-muted" />
-              </span>
-              <input type="text" className="form-control border-start-0 ps-0 shadow-none" placeholder={t("common.timKiemTuKhoa")} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} onKeyDown={handleKeyDown} onClick={e => e.stopPropagation()} autoFocus />
+          <div className="p-2 border-b border-border bg-surface-muted/30">
+            <div className="relative">
+              <Icon icon="lucide:search" width={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                className="w-full h-8 pl-8 pr-2.5 rounded-sm border border-border bg-surface text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                placeholder={t("common.timKiemTuKhoa", "Type to search or add keyword...")}
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onClick={e => e.stopPropagation()}
+                autoFocus
+              />
             </div>
           </div>
 
           {/* Results list */}
-          <div className="overflow-auto py-1" style={{
-        maxHeight: '280px'
-      }}>
-            {isSearching ? <div className="p-3 text-center text-muted small">{t("common.dangTimKiem")}</div> : filteredSuggestions.length === 0 && !showCreateOption ? <div className="p-3 text-center text-muted small">
-                {searchTerm.trim() ? t("common.khongTimThayTuKhoaPhuHop") : t("common.nhapTuKhoaDeTimKiem")}
-              </div> : <>
+          <div className="overflow-y-auto py-1 max-h-60">
+            {isSearching ? (
+              <div className="p-3 text-center text-xs text-muted-foreground">
+                {t("common.dangTimKiem", "Searching keywords...")}
+              </div>
+            ) : filteredSuggestions.length === 0 && !showCreateOption ? (
+              <div className="p-3 text-center text-xs text-muted-foreground">
+                {searchTerm.trim() ? t("common.khongTimThayTuKhoaPhuHop", "No matching keywords") : t("common.nhapTuKhoaDeTimKiem", "Type keyword name and press Enter")}
+              </div>
+            ) : (
+              <>
+                {showCreateOption && (
+                  <div
+                    className="px-3 py-2 text-xs flex items-center gap-2 cursor-pointer text-primary hover:bg-primary-subtle/40 font-semibold border-b border-border/50"
+                    onClick={() => handleSelect(searchTerm.trim())}
+                  >
+                    <Icon icon="lucide:plus-circle" width={14} className="shrink-0" />
+                    <span>Add &quot;<strong>{searchTerm.trim()}</strong>&quot; as custom keyword</span>
+                  </div>
+                )}
                 {filteredSuggestions.map(kwObj => {
-            const name = kwObj.display_name || kwObj.name;
-            return <div key={kwObj.id || kwObj.keyword_id || name} className="dropdown-item px-3 py-2 d-flex align-items-center gap-2 cursor-pointer text-dark" onClick={() => handleSelect(name)}>
-                      <Icon icon="lucide:hash" width="14" className="text-muted flex-shrink-0" />
-                      <span className="text-truncate">{name}</span>
-                    </div>;
-          })}
-                {showCreateOption && <div className="dropdown-item px-3 py-2 border-top text-primary fw-medium cursor-pointer bg-light d-flex align-items-center gap-2" onClick={() => handleSelect(searchTerm.trim())}>
-                    <Icon icon="lucide:plus" width="14" />{t("common.taoTuKhoaMoi")}{searchTerm.trim()}"
-                  </div>}
-              </>}
+                  const name = kwObj.display_name || kwObj.name;
+                  return (
+                    <div
+                      key={kwObj.id || kwObj.keyword_id || name}
+                      className="px-3 py-2 text-xs flex items-center justify-between gap-2 cursor-pointer text-foreground hover:bg-surface-muted transition-colors"
+                      onClick={() => handleSelect(name)}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <Icon icon="lucide:hash" width={13} className="text-muted-foreground shrink-0" />
+                        <span className="truncate">{name}</span>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground font-mono shrink-0">
+                        {kwObj.article_count ? `${kwObj.article_count} papers` : ''}
+                      </span>
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </div>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 }

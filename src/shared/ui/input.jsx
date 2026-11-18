@@ -6,7 +6,7 @@ const Input = React.forwardRef(({ className = '', type = 'text', invalid = false
     ref={ref}
     type={type}
     className={cn(
-      'flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-sm outline-none transition placeholder:text-subtle-foreground focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:focus-visible:ring-danger/20',
+      'flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs outline-none transition placeholder:text-subtle-foreground focus:outline-none focus:border-primary focus:ring-0 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-danger',
       className,
     )}
     aria-invalid={ariaInvalid ?? (invalid || undefined)}

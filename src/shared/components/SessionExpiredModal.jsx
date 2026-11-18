@@ -9,9 +9,11 @@ import { Modal } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 import { useAuthStore } from '../../app/store/authStore';
 import { useUserStore } from '../../app/store/userStore';
 import { logoutSession } from '../../features/auth/services/authService';
+import { API_BASE_URL } from '../services/apiBase';
 import PrimaryButton from './Button/PrimaryButton';
 
 export default function SessionExpiredModal() {
@@ -19,7 +21,6 @@ export default function SessionExpiredModal() {
   const show = useAuthStore((state) => state.sessionExpiredModalVisible);
   const token = useAuthStore((state) => state.token);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const remember = useAuthStore((state) => state.remember);
   const setSessionExpiredModalVisible = useAuthStore((state) => state.setSessionExpiredModalVisible);
   const logout = useAuthStore((state) => state.logout);
   const clearEmail = useUserStore((state) => state.clearEmail);
@@ -33,19 +34,46 @@ export default function SessionExpiredModal() {
       const decoded = jwtDecode(token);
       if (decoded.exp) {
         const expiresInMs = decoded.exp * 1000 - Date.now();
-        if (expiresInMs <= 0) {
-          // Token đã hết hạn ngay lúc này
-          if (!remember) {
+
+        const trySilentRefresh = async () => {
+          try {
+            const refreshToken = useAuthStore.getState().refreshToken;
+            const refreshHeaders = {};
+            if (refreshToken) {
+              refreshHeaders['x-refresh-token'] = refreshToken;
+            }
+
+            const res = await axios.get(`${API_BASE_URL}/auth/refresh`, {
+              withCredentials: true,
+              headers: refreshHeaders,
+            });
+
+            if (res.status === 200 && res.data?.success !== false) {
+              const newToken = res.data?.data?.token || res.data?.token;
+              const newRefreshToken = res.data?.data?.refresh_token || res.data?.refresh_token || refreshToken;
+
+              if (newToken) {
+                const currentRemember = useAuthStore.getState().remember;
+                useAuthStore.getState().loginSuccess(newToken, null, currentRemember, newRefreshToken);
+                return;
+              }
+            }
+            throw new Error('Refresh failed');
+          } catch {
+            // Chỉ hiện modal khi refresh thực sự thất bại hoặc hết hạn hoàn toàn
             setSessionExpiredModalVisible(true);
           }
+        };
+
+        if (expiresInMs <= 0) {
+          // Token đã hết hạn ngay lúc này -> Thử refresh trước
+          trySilentRefresh();
         } else {
-          // Đặt timer kích hoạt modal đúng lúc token hết hạn
+          // Thử refresh tự động khi token sắp hết hạn (trước 1 phút)
+          const refreshDelay = Math.max(expiresInMs - 60000, 1000);
           timeoutId = setTimeout(() => {
-            const currentRemember = useAuthStore.getState().remember;
-            if (!currentRemember) {
-              setSessionExpiredModalVisible(true);
-            }
-          }, expiresInMs);
+            trySilentRefresh();
+          }, refreshDelay);
         }
       }
     } catch {
@@ -55,7 +83,7 @@ export default function SessionExpiredModal() {
     return () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [token, isAuthenticated, remember, setSessionExpiredModalVisible]);
+  }, [token, isAuthenticated, setSessionExpiredModalVisible]);
 
   const handleConfirm = async () => {
     // Đóng modal trước
@@ -82,7 +110,8 @@ export default function SessionExpiredModal() {
       centered
       backdrop="static"
       keyboard={false}
-      contentClassName="border-0 shadow-lg text-center"
+      dialogClassName="modal-dialog-centered"
+      contentClassName="border-0 shadow-lg text-center mx-auto"
       style={{
         backdropFilter: 'blur(8px)',
         backgroundColor: 'rgba(15, 23, 42, 0.45)',

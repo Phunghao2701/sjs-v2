@@ -8,3 +8,7 @@ export * from './form-field';
 export * from './alert';
 export * from './skeleton';
 export * from './state-panel';
+export * from './dialog';
+export * from './modal';
+export * from './table';
+export * from './tabs';

@@ -128,9 +128,9 @@ const CreateProjectPage = () => {
     <PageContainer className="max-w-[760px] py-6 sm:py-10 space-y-6">
       <PageHeader
         breadcrumbs={[
-          { label: t("author.tongQuan"), to: ROUTES.DASHBOARD },
-          { label: t("project.duAnTheoDoi"), to: ROUTES.PROJECTS },
-          { label: t("journal.taoDuAnMoi") }
+          { label: 'Workspace', to: ROUTES.DASHBOARD },
+          { label: t("project.duAnTheoDoi", "Research Projects"), to: ROUTES.PROJECTS },
+          { label: t("project.taoDuAnMoi", "Create Project") }
         ]}
         title={t("project.khoiTaoDuAnNghienCuuMoi")}
         description={t("project.thietLapKhongGianLamViecDeTuDo")}
@@ -159,7 +159,7 @@ const CreateProjectPage = () => {
                 disabled={loading}
                 autoFocus
                 required
-                className="w-full h-11 px-3.5 rounded-control border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                className="w-full h-11 px-3.5 rounded-control border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-0 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-0 transition-all"
               />
             </div>
 
@@ -239,7 +239,7 @@ const CreateProjectPage = () => {
 
             <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
               <Button type="button" variant="outline" onClick={() => navigate(-1)} disabled={loading}>
-                {t("admin.huy")}
+                {t("common.huy", "Cancel")}
               </Button>
               <Button
                 type="submit"
@@ -248,7 +248,7 @@ const CreateProjectPage = () => {
                 loadingText={t("project.dangTao")}
                 className="flex items-center gap-1.5"
               >
-                <Icon icon="lucide:check" width="16" />
+                <Icon icon="lucide:plus" width={16} />
                 <span>{t("project.taoDuAn")}</span>
               </Button>
             </div>

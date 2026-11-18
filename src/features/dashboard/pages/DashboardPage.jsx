@@ -79,13 +79,13 @@ export default function DashboardPage() {
   };
   return (
     <PageContainer>
-      <Card className="dashboard-welcome relative overflow-hidden border-l-3 border-l-primary p-4 sm:p-5">
+      <Card className="dashboard-welcome relative overflow-hidden p-4 sm:p-5 border border-border">
         <div className="flex flex-col items-start justify-between gap-5 md:flex-row md:items-center">
           <div className="min-w-0">
-            <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full bg-primary-subtle px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-primary">
-              <Icon icon="lucide:sparkles" width={14} /><span>Trending System Analytics</span>
-            </div>
             <h1 className="mb-1 text-base sm:text-lg font-bold leading-snug tracking-tight text-foreground">{t("dashboard.chaoMungBanDenVoiResearchpulse")}</h1>
+
+
+
             <p className="m-0 max-w-2xl text-sm leading-6 text-muted-foreground">{t("dashboard.khamPhaXuHuongXepHangTapChiVaC")}</p>
           </div>
           <Button onClick={handleCreateProject} size="sm" className="gap-1.5 shrink-0 text-xs">

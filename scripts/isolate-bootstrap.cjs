@@ -27,11 +27,12 @@ const rootVars = lines.slice(0, 182).join('\n');
 // 2. Components & Grid: lines 739 to 7321
 const components = lines.slice(739, 7321).join('\n');
 
-// 3. Utilities: lines 7321 to end, with all !important STRIPPED OUT
-// This allows legacy Bootstrap utility classes (d-flex, d-none, w-100, etc.) to function
-// while guaranteeing that Tailwind utility classes (which live in @layer utilities)
-// always win without any conflict or clobbering!
-const utilities = lines.slice(7321).join('\n').replace(/\s*!important/g, '');
+// 3. Utilities: lines 7321 to end
+// - Strip all !important so Tailwind utilities always win
+// - Strip all 504 Bootstrap spacing rules (.p-0..5, .m-0..5, .pt-*, .pb-*, .mt-*, .mb-*)
+//   so Tailwind's spacing scale has 100% uncontested ownership!
+const utilitiesRaw = lines.slice(7321).join('\n').replace(/\s*!important/g, '');
+const utilities = utilitiesRaw.replace(/\.(?:p|m)[xytbes]?-(?:(?:sm|md|lg|xl|xxl)-)?[0-5]\s*\{[^}]*\}/g, '');
 
 const isolated = `/* ==========================================================================
    Isolated Bootstrap 5 for Scientific Journal System FE

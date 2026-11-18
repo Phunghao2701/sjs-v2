@@ -1,5 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import AdminSidebar from './AdminSidebar';
 import AdminHeader from './AdminHeader';
 import AdminFooter from './AdminFooter';
@@ -25,18 +25,15 @@ export default function AdminLayout({ children }) {
         <AdminHeader />
 
         {/* Nội dung trang hiển thị ở giữa với framer-motion transition */}
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={location.pathname}
-            className="admin-content"
-            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? undefined : { opacity: 0 }}
-            transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
-          >
-            {children || <Outlet />}
-          </motion.main>
-        </AnimatePresence>
+        <motion.main
+          key={location.pathname}
+          className="admin-content"
+          initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+        >
+          {children || <Outlet />}
+        </motion.main>
 
         {/* Footer dưới cùng */}
         <AdminFooter />

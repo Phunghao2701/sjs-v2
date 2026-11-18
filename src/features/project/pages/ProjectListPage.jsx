@@ -260,7 +260,7 @@ const ProjectListPage = () => {
           />
           <input
             type="text"
-            className="w-full h-9 pl-9 pr-8 rounded-control border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 transition-colors"
+            className="w-full h-9 pl-9 pr-8 rounded-control border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-0 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-0 transition-colors"
             placeholder="Search projects..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -354,17 +354,21 @@ const ProjectListPage = () => {
               <Link
                 key={`recent-chip-${p.project_id || p.id}`}
                 to={`/projects/${p.project_id || p.id}`}
-                className="inline-flex items-center gap-2 rounded-control border border-border bg-surface px-3 py-1.5 text-xs text-foreground transition-colors hover:border-primary hover:bg-primary-subtle/30 no-underline shadow-xs"
+                className="group inline-flex items-center gap-2.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs transition-all hover:border-primary/50 hover:bg-surface-muted/30 shadow-2xs no-underline !no-underline"
               >
-                <Icon icon="lucide:folder" width="15" className="text-primary shrink-0" />
-                <span className="font-semibold text-foreground">{p.title}</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-muted-foreground text-[11px]">{resolveAreaNameFor(p)}</span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-muted-foreground text-[11px]">
+                <div className="size-5 rounded bg-primary-subtle text-primary flex items-center justify-center shrink-0">
+                  <Icon icon="lucide:folder" width={12} />
+                </div>
+                <span className="font-bold text-foreground group-hover:text-primary transition-colors truncate max-w-[150px]">
+                  {p.title}
+                </span>
+                <span className="text-[10px] font-medium text-muted-foreground bg-surface-muted px-1.5 py-0.5 rounded truncate max-w-[130px]">
+                  {resolveAreaNameFor(p)}
+                </span>
+                <span className="text-[10px] font-mono text-muted-foreground">
                   {p.created_at ? new Date(p.created_at).toLocaleDateString('vi-VN') : 'Recently'}
                 </span>
-                <Icon icon="lucide:arrow-right" width="13" className="text-primary" />
+                <Icon icon="lucide:arrow-right" width={12} className="text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
               </Link>
             ))}
           </div>

@@ -51,7 +51,7 @@ const InviteMemberModal = ({ show, onHide, onInvite, actionLoading }) => {
               value={role}
               onChange={(e) => setRole(e.target.value)}
               disabled={actionLoading}
-              className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full rounded-control border border-border bg-surface px-3 py-2 text-sm text-foreground shadow-xs transition-colors focus:outline-none focus:border-primary focus:ring-0 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-0 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <option value="VIEWER">Viewer ({t("project.nguoiXem", "Người xem")})</option>
               <option value="MEMBER">Member ({t("project.thanhVien", "Thành viên")})</option>

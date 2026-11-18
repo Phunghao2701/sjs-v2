@@ -1,4 +1,5 @@
-import { NavLink, Navigate, Outlet, useParams } from 'react-router-dom';
+import { NavLink, Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
 import { I18nextProvider } from 'react-i18next';
 import { DashboardProvider } from './features/dashboard/contexts/DashboardContext';
 import trendingI18n from './i18n';
@@ -17,6 +18,8 @@ const links = [
 
 export default function TrendingAnalyticsLayout() {
   const { lang = 'en', id } = useParams();
+  const location = useLocation();
+  const reduceMotion = useReducedMotion();
 
   if (!id || id === 'default-id') {
     return <Navigate to={`/${lang}/projects`} replace />;
@@ -44,7 +47,14 @@ export default function TrendingAnalyticsLayout() {
           )}
         />
         <I18nextProvider i18n={trendingI18n}>
-          <Outlet />
+          <motion.div
+            key={location.pathname}
+            initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.16, ease: 'easeOut' }}
+          >
+            <Outlet />
+          </motion.div>
         </I18nextProvider>
       </PageContainer>
     </DashboardProvider>

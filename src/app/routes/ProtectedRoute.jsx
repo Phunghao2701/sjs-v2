@@ -8,12 +8,16 @@ const ProtectedRoute = () => {
   const { t } = useTranslation();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const sessionExpiredModalVisible = useAuthStore((s) => s.sessionExpiredModalVisible);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!isAuthenticated);
   
   const location = useLocation();
   const lang = getDefaultLang();
 
   useEffect(() => {
+    if (isAuthenticated) {
+      setLoading(false);
+      return;
+    }
     const checkAuth = async () => {
       try {
         await checkAuthStatus();
@@ -22,7 +26,7 @@ const ProtectedRoute = () => {
       }
     };
     checkAuth();
-  }, []);
+  }, [isAuthenticated]);
   
   // Nếu modal thông báo hết hạn phiên đang mở -> vẫn render Outlet để modal hiển thị đè lên màn hình
   if (sessionExpiredModalVisible) {

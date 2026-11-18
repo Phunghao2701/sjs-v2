@@ -8,7 +8,8 @@ import { Button } from '../../../shared/ui/button';
 export default function JournalTable({
   journals = [],
   followedJournals = {},
-  onFollow
+  onFollow,
+  asCard = true
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -67,10 +68,9 @@ export default function JournalTable({
     );
   };
 
-  return (
-    <section className="catalog-table-card rounded-card border border-border bg-surface shadow-card overflow-hidden">
-      <div className="table-responsive">
-        <Table hover className="catalog-table align-middle mb-0 text-start w-full">
+  const tableContent = (
+    <div className="table-responsive">
+      <Table hover className="catalog-table align-middle mb-0 text-start w-full">
           <thead>
             <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
               <th className="px-4 py-3 text-start">Journal & ISSN</th>
@@ -163,6 +163,15 @@ export default function JournalTable({
           </tbody>
         </Table>
       </div>
+    );
+
+  if (!asCard) {
+    return tableContent;
+  }
+
+  return (
+    <section className="catalog-table-card rounded-card border border-border bg-surface shadow-card overflow-hidden">
+      {tableContent}
     </section>
   );
 }

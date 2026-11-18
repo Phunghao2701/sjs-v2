@@ -16,7 +16,8 @@ export default function Pagination({
   currentPage,
   limit,
   onPageChange,
-  entityName = 'items'
+  entityName = 'items',
+  className = ''
 }) {
   const { t, i18n } = useTranslation();
   const totalPages = Math.max(1, Math.ceil(totalItems / limit));
@@ -53,7 +54,7 @@ export default function Pagination({
   const displayEntity = getEntityLabel(entityName, totalItems);
 
   return (
-    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 pt-4 max-sm:flex max-sm:flex-col max-sm:items-start">
+    <div className={`grid grid-cols-[1fr_auto_1fr] items-center gap-4 max-sm:flex max-sm:flex-col max-sm:items-start w-full ${className || 'pt-4'}`}>
       <div className="text-muted-custom text-xs">
         {t('pagination.showing', 'Showing')}{' '}
         <span className="font-semibold text-main">{formatNum(startItem)}</span>{' '}

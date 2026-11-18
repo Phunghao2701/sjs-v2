@@ -241,8 +241,10 @@ body {
 
 .form-control:focus,
 .form-select:focus {
-  border-color: var(--ds-primary);
-  box-shadow: 0 0 0 0.2rem var(--ds-focus);
+  border-color: var(--ds-primary) !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
 }
 
 .form-control[aria-invalid="true"],
@@ -256,7 +258,10 @@ textarea[aria-invalid="true"] {
 .form-select[aria-invalid="true"]:focus,
 input[aria-invalid="true"]:focus,
 textarea[aria-invalid="true"]:focus {
-  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--ds-danger) 20%, transparent);
+  border-color: var(--ds-danger) !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
 }
 
 .form-check-input:checked {
@@ -439,8 +444,10 @@ textarea[aria-invalid="true"]:focus {
 }
 
 .admin-content :where(input, select, textarea, .form-control, .form-select):focus {
-  border-color: var(--ds-primary);
-  box-shadow: 0 0 0 0.2rem var(--ds-focus);
+  border-color: var(--ds-primary) !important;
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
 }
 
 .admin-content :where(.admin-table th, table thead th) {
@@ -468,17 +475,244 @@ textarea[aria-invalid="true"]:focus {
   color: var(--ds-primary-hover);
 }
 
-.app-main a:not(.btn):not([class*="nav-link"]) {
-  text-decoration: none;
+.app-main a,
+.app-main a:hover,
+.app-main a:focus,
+.app-main a:visited,
+.app-main button,
+.app-main button:hover,
+.app-main [role="button"],
+.app-main [role="button"]:hover {
+  text-decoration: none !important;
 }
 
-.app-main a:not(.btn):not([class*="nav-link"]):hover {
-  text-decoration: underline;
+.app-main a.hover-underline:hover,
+.app-main a.text-link:hover {
+  text-decoration: underline !important;
 }
 
-:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+.no-underline,
+a.no-underline,
+a.no-underline:hover,
+a.no-underline:focus {
+  text-decoration: none !important;
+}
+
+:where(button, a, [tabindex]):not(input):not(select):not(textarea):focus-visible {
   outline: 2px solid var(--ds-primary);
   outline-offset: 2px;
+}
+
+/* Form controls focus: strictly highlight ONLY the border (no double focus, no outline-offset, no ring halo) */
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  textarea,
+  select,
+  .form-control,
+  .form-select
+):focus,
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  textarea,
+  select,
+  .form-control,
+  .form-select
+):focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: var(--ds-primary, #0071BC) !important;
+  box-shadow: none !important;
+}
+
+:where(
+  input[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]),
+  textarea[aria-invalid="true"],
+  select[aria-invalid="true"],
+  .form-control.is-invalid,
+  .form-select.is-invalid
+):focus,
+:where(
+  input[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]),
+  textarea[aria-invalid="true"],
+  select[aria-invalid="true"],
+  .form-control.is-invalid,
+  .form-select.is-invalid
+):focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: var(--ds-danger, #dc2626) !important;
+  box-shadow: none !important;
+}
+
+/* ─── Bootstrap 5 Comprehensive Isolation & Harmonization ─────────── */
+
+/* 1. Neutralize Bootstrap Dropdown Caret (prevent duplicate icons & wrapping) */
+.dropdown-toggle::after {
+  display: none !important;
+}
+.dropdown-toggle-caret::after {
+  display: inline-block !important;
+}
+
+/* 2. Neutralize Bootstrap Table box-shadow and harmonize colors */
+.table {
+  --bs-table-bg: transparent;
+  --bs-table-accent-bg: transparent;
+  --bs-table-striped-bg: rgba(0, 0, 0, 0.02);
+  --bs-table-hover-bg: var(--ds-surface-muted, rgba(0, 0, 0, 0.04));
+  --bs-table-border-color: var(--border, #E4E7EC);
+  color: inherit;
+  margin-bottom: 0;
+}
+.table > :not(caption) > * > * {
+  background-color: var(--bs-table-bg);
+  box-shadow: none !important;
+  border-bottom-color: var(--border, #E4E7EC);
+}
+
+/* 3. Harmonize Bootstrap Modals with ResearchPulse tokens and ensure bulletproof centering */
+.modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 1055 !important;
+}
+
+.modal.show,
+.modal[style*="display: block"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 1rem !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.modal:not(.show):not([style*="display: block"]) {
+  display: none !important;
+}
+
+.modal-dialog {
+  position: relative !important;
+  margin: auto !important;
+  width: 100% !important;
+  max-width: var(--bs-modal-width, 500px) !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+.modal-dialog.modal-sm {
+  max-width: 380px !important;
+}
+
+.modal-dialog.modal-lg {
+  max-width: 800px !important;
+}
+
+.modal-dialog.modal-xl {
+  max-width: 1140px !important;
+}
+
+.modal-dialog-centered {
+  margin: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: auto !important;
+}
+
+.modal-content {
+  background-color: var(--ds-surface, #ffffff) !important;
+  color: var(--ds-foreground, #0D1B1C) !important;
+  border: 1px solid var(--border, #E4E7EC) !important;
+  border-radius: var(--ds-radius-card, 12px) !important;
+  box-shadow: var(--ds-shadow-popover, 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)) !important;
+  overflow: hidden;
+  width: 100% !important;
+  margin: auto !important;
+}
+.modal-header,
+.modal-footer {
+  border-color: var(--border, #E4E7EC) !important;
+  background-color: transparent !important;
+}
+.modal-backdrop.show {
+  opacity: 0.45 !important;
+}
+
+/* 4. Harmonize Bootstrap Card */
+.card {
+  background-color: var(--ds-surface, #ffffff);
+  color: var(--ds-foreground, #0D1B1C);
+  border-color: var(--border, #E4E7EC);
+  border-radius: var(--ds-radius-card, 12px);
+}
+
+/* 5. Harmonize Bootstrap Buttons */
+.btn {
+  font-family: inherit;
+  border-radius: var(--ds-radius-control, 8px);
+  font-weight: 600;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+.btn:focus,
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ds-focus, rgba(0, 113, 188, 0.25)) !important;
+}
+
+/* 6. Harmonize Form Controls and Checks */
+.form-control,
+.form-select {
+  border-radius: var(--ds-radius-control, 8px);
+  font-size: 0.875rem;
+}
+.form-check-input:focus {
+  border-color: var(--primary, #0071BC);
+  box-shadow: 0 0 0 0.2rem var(--ds-focus, rgba(0, 113, 188, 0.15));
+}
+.form-check-input:checked {
+  background-color: var(--primary, #0071BC);
+  border-color: var(--primary, #0071BC);
+}
+
+/* 7. Guaranteed Bootstrap Responsive Display Utilities for Legacy Components */
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-inline { display: inline !important; }
+.d-inline-block { display: inline-block !important; }
+.d-flex { display: flex !important; }
+.d-inline-flex { display: inline-flex !important; }
+.d-grid { display: grid !important; }
+
+@media (min-width: 576px) {
+  .d-sm-none { display: none !important; }
+  .d-sm-block { display: block !important; }
+  .d-sm-inline-block { display: inline-block !important; }
+  .d-sm-flex { display: flex !important; }
+}
+@media (min-width: 768px) {
+  .d-md-none { display: none !important; }
+  .d-md-block { display: block !important; }
+  .d-md-inline-block { display: inline-block !important; }
+  .d-md-flex { display: flex !important; }
+}
+@media (min-width: 992px) {
+  .d-lg-none { display: none !important; }
+  .d-lg-block { display: block !important; }
+  .d-lg-inline-block { display: inline-block !important; }
+  .d-lg-flex { display: flex !important; }
+}
+@media (min-width: 1200px) {
+  .d-xl-none { display: none !important; }
+  .d-xl-block { display: block !important; }
+  .d-xl-flex { display: flex !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {

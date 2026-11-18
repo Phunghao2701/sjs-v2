@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useState, useEffect, useRef } from 'react';
 import { Icon } from '@iconify/react';
+
 export default function SearchableSelect({
   options = [],
   value = '',
@@ -12,15 +13,14 @@ export default function SearchableSelect({
   fetchOptions = null,
   debounceTime = 300
 }) {
-  const {
-    t
-  } = useTranslation();
-  const resolvedPlaceholder = placeholder || t("common.chon");
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder || t("common.chon", "Select...");
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [asyncOptions, setAsyncOptions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const wrapperRef = useRef(null);
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -30,6 +30,7 @@ export default function SearchableSelect({
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [wrapperRef]);
+
   useEffect(() => {
     if (!fetchOptions) return;
     const fetchItems = async () => {
@@ -39,72 +40,113 @@ export default function SearchableSelect({
         const results = await fetchOptions(val);
         setAsyncOptions(results || []);
       } catch (err) {
-        console.error(t("common.loiFetchOptions"), err);
+        console.error(t("common.loiFetchOptions", "Error fetching options:"), err);
       } finally {
         setIsSearching(false);
       }
     };
     const timeoutId = setTimeout(fetchItems, debounceTime);
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, fetchOptions, debounceTime]);
+  }, [searchTerm, fetchOptions, debounceTime, t]);
+
   const displayOptions = fetchOptions ? asyncOptions : options;
   const allFiltered = fetchOptions ? displayOptions : displayOptions.filter(opt => (opt.label || '').toLowerCase().includes(searchTerm.toLowerCase()));
   const filteredOptions = fetchOptions ? allFiltered : allFiltered.slice(0, limit);
   const selectedOption = options.find(opt => String(opt.value) === String(value)) || asyncOptions.find(opt => String(opt.value) === String(value));
+
   const selectOption = optionValue => {
     onChange(optionValue);
     setIsOpen(false);
     setSearchTerm('');
   };
+
   const handleClear = e => {
     e.stopPropagation();
     onChange('');
   };
-  return <div className="position-relative" ref={wrapperRef}>
-      <div className={`form-control form-control-lg d-flex align-items-center gap-2 ${disabled ? 'bg-light text-muted' : ''}`} style={{
-      cursor: disabled ? 'not-allowed' : 'pointer',
-      backgroundColor: 'var(--bg-main)',
-      color: 'var(--text-main)',
-      borderColor: 'var(--border)'
-    }} onClick={() => !disabled && setIsOpen(!isOpen)}>
-        <span className="text-truncate flex-grow-1" style={{
-        color: selectedOption ? 'inherit' : 'var(--text-muted)'
-      }}>
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <div
+        role="button"
+        tabIndex={disabled ? -1 : 0}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && !disabled) {
+            e.preventDefault();
+            setIsOpen(!isOpen);
+          }
+        }}
+        className={`w-full h-11 px-3.5 rounded-control border border-border bg-surface text-sm flex items-center justify-between gap-2 transition-all select-none focus:outline-none focus-visible:outline-none focus:border-primary focus-visible:border-primary ${
+          disabled ? 'opacity-50 cursor-not-allowed bg-surface-muted' : 'cursor-pointer hover:border-primary/50'
+        } ${isOpen ? 'border-primary' : ''}`}
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+      >
+        <span className={`truncate flex-1 ${selectedOption ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>
           {selectedOption ? selectedOption.label : resolvedPlaceholder}
         </span>
         
-        <div className="d-flex align-items-center gap-2 flex-shrink-0">
-          {(loading || isSearching) && <span className="spinner-border spinner-border-sm text-primary" role="status"></span>}
-          {selectedOption && !disabled && <Icon icon="lucide:x" width="16" className="text-muted hover-danger cursor-pointer" onClick={handleClear} />}
-          <Icon icon="lucide:chevron-down" width="18" className="text-muted" />
+        <div className="flex items-center gap-2 shrink-0">
+          {(loading || isSearching) && <Icon icon="lucide:loader-2" width={16} className="animate-spin text-primary" />}
+          {selectedOption && !disabled && (
+            <button
+              type="button"
+              className="p-0.5 border-0 bg-transparent text-muted-foreground hover:text-foreground cursor-pointer rounded flex items-center justify-center"
+              onClick={handleClear}
+              aria-label="Clear selection"
+            >
+              <Icon icon="lucide:x" width={14} />
+            </button>
+          )}
+          <Icon icon="lucide:chevron-down" width={16} className={`text-muted-foreground transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
         </div>
       </div>
 
-      {isOpen && <div className="position-absolute w-100 bg-white border rounded-3 shadow mt-1 z-3" style={{
-      maxHeight: '300px',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-          <div className="p-2 border-bottom">
-            <div className="input-group input-group-sm">
-              <span className="input-group-text bg-transparent border-end-0">
-                <Icon icon="lucide:search" width="14" className="text-muted" />
-              </span>
-              <input type="text" className="form-control border-start-0 ps-0 shadow-none" placeholder={t("common.timKiem")} value={searchTerm} onChange={e => setSearchTerm(e.target.value)} onClick={e => e.stopPropagation()} autoFocus />
+      {isOpen && (
+        <div className="absolute top-full left-0 w-full bg-surface border border-border rounded-control shadow-popover mt-1.5 z-30 flex flex-col overflow-hidden max-h-72">
+          <div className="p-2 border-b border-border bg-surface-muted/30">
+            <div className="relative">
+              <Icon icon="lucide:search" width={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                className="w-full h-8 pl-8 pr-2.5 rounded-sm border border-border bg-surface text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                placeholder={t("common.timKiem", "Search...")}
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                onClick={e => e.stopPropagation()}
+                autoFocus
+              />
             </div>
           </div>
           
-          <div className="overflow-auto py-1" style={{
-        maxHeight: '250px'
-      }}>
-            {filteredOptions.length === 0 ? <div className="p-3 text-center text-muted small">
-                {isSearching ? t("common.dangTimKiem") : t("common.khongTimThayKetQuaPhuHop1")}
-              </div> : filteredOptions.map(opt => <div key={opt.value} className={`dropdown-item px-3 py-2 d-flex align-items-center gap-2 cursor-pointer ${String(opt.value) === String(value) ? 'bg-light text-primary fw-medium' : 'text-dark'}`} onClick={() => selectOption(opt.value)}>
-                  <span className="text-truncate" title={opt.label || ''}>{opt.label || ''}</span>
-                  {String(opt.value) === String(value) && <Icon icon="lucide:check" width="16" className="ms-auto text-primary" />}
-                </div>)}
-            {!fetchOptions && allFiltered.length > limit && <div className="px-3 py-2 text-muted small fst-italic text-center bg-light border-top mt-1">{t("common.dangHienThi")}{limit}{t("common.ketQuaHayNhapThemDeLoc")}</div>}
+          <div className="overflow-y-auto py-1 max-h-60">
+            {filteredOptions.length === 0 ? (
+              <div className="p-3 text-center text-xs text-muted-foreground">
+                {isSearching ? t("common.dangTimKiem", "Searching...") : t("common.khongTimThayKetQuaPhuHop1", "No matching options found")}
+              </div>
+            ) : (
+              filteredOptions.map(opt => (
+                <div
+                  key={opt.value}
+                  className={`px-3 py-2 text-xs flex items-center justify-between gap-2 cursor-pointer transition-colors ${
+                    String(opt.value) === String(value)
+                      ? 'bg-primary-subtle text-primary font-semibold'
+                      : 'text-foreground hover:bg-surface-muted'
+                  }`}
+                  onClick={() => selectOption(opt.value)}
+                >
+                  <span className="truncate" title={opt.label || ''}>{opt.label || ''}</span>
+                  {String(opt.value) === String(value) && <Icon icon="lucide:check" width={14} className="shrink-0 text-primary" />}
+                </div>
+              ))
+            )}
+            {!fetchOptions && allFiltered.length > limit && (
+              <div className="px-3 py-1.5 text-[11px] text-muted-foreground italic text-center bg-surface-muted/50 border-t border-border">
+                {t("common.dangHienThi", "Showing")} {limit} {t("common.ketQuaHayNhapThemDeLoc", "results. Type to filter...")}
+              </div>
+            )}
           </div>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 }

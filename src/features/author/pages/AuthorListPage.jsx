@@ -30,7 +30,25 @@ export default function AuthorListPage() {
     fetchAuthors,
     fetchSubjectAreas,
   } = useAuthors();
-  const [viewMode] = useState('grid');
+  const [viewMode, setViewModeState] = useState(() => {
+    return searchParams.get('view') || localStorage.getItem('author_view_mode') || 'grid';
+  });
+
+  const setViewMode = (mode) => {
+    setViewModeState(mode);
+    try {
+      localStorage.setItem('author_view_mode', mode);
+    } catch {
+      // ignore storage access errors
+    }
+    const nextParams = new URLSearchParams(searchParams);
+    if (mode === 'grid') {
+      nextParams.delete('view');
+    } else {
+      nextParams.set('view', mode);
+    }
+    setSearchParams(nextParams, { replace: true });
+  };
   const searchVal = searchParams.get('search') || '';
   const pageVal = parseInt(searchParams.get('page') || '1', 10);
   const limitVal = parseInt(searchParams.get('limit') || '10', 10);
@@ -225,6 +243,61 @@ export default function AuthorListPage() {
           </div>
         </Form>
       </Card>
+
+      {/* View Mode Toolbar: Count & Toggle (Grid / List) */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
+        <div className="text-xs text-muted-foreground">
+          {loadingAuthors ? (
+            <span className="flex items-center gap-1.5">
+              <Icon icon="lucide:loader-2" width="13" className="animate-spin text-primary" />
+              <span>{t("dangTai", "Loading authors...")}</span>
+            </span>
+          ) : (
+            <span>
+              {t("catalog.timThay", "Found ")}
+              <strong className="text-foreground font-bold">{Number(totalAuthors || 0).toLocaleString()}</strong> {t("author.tacGia", "authors")}
+              <span className="mx-1.5">•</span>
+              {t("pagination.page", "Page")} <strong className="text-foreground">{pageVal}</strong> of <strong className="text-foreground">{totalPagesCount}</strong>
+            </span>
+          )}
+        </div>
+
+        {/* View Mode Toggle: Grid vs List */}
+        <div className="flex items-center gap-1 bg-surface border border-border p-1 rounded-control shadow-2xs self-end sm:self-auto">
+          <button
+            type="button"
+            onClick={() => setViewMode('grid')}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs transition-colors border-0 cursor-pointer",
+              viewMode === 'grid'
+                ? "bg-primary text-white font-semibold shadow-xs"
+                : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+            )}
+            title={t("viewGrid", "Grid View")}
+            aria-label="Grid View"
+            aria-pressed={viewMode === 'grid'}
+          >
+            <Icon icon="lucide:layout-grid" width={14} />
+            <span>Grid</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('list')}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-sm text-xs transition-colors border-0 cursor-pointer",
+              viewMode === 'list'
+                ? "bg-primary text-white font-semibold shadow-xs"
+                : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-surface-muted"
+            )}
+            title={t("viewList", "List View")}
+            aria-label="List View"
+            aria-pressed={viewMode === 'list'}
+          >
+            <Icon icon="lucide:list" width={14} />
+            <span>List</span>
+          </button>
+        </div>
+      </div>
 
       {/* Authors List (Responsive 4 columns) */}
       <div>

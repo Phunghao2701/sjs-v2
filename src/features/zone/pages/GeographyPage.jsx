@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import useZoneStats from '../hooks/useZoneStats';
 import { getCountryArticlesApi } from '../api/zone.api';
-import GeographyTerritoryChart from '../components/GeographyTerritoryChart';
+import GeographyWorldMap from '../components/GeographyWorldMap';
 import GeographyRankingTable from '../components/GeographyRankingTable';
 import GeographyArticleList from '../components/GeographyArticleList';
 import AuthRequiredModal from '../../../shared/components/AuthRequiredModal';
@@ -178,7 +178,7 @@ export default function GeographyPage() {
         {/* Main Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
           <div className="lg:col-span-7 xl:col-span-8 min-w-0">
-            <GeographyTerritoryChart
+            <GeographyWorldMap
               data={countryStats}
               loading={loadingCountries}
               selectedCountry={selectedCountry}
@@ -209,6 +209,7 @@ export default function GeographyPage() {
               onPageChange={setArticlesPage}
               onDetailClick={handleDetailClick}
               countryName={selectedCountry.name}
+              onClose={() => setSelectedCountry(null)}
             />
           </div>
         )}

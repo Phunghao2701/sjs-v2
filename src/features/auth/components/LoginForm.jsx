@@ -30,7 +30,7 @@ export default function LoginForm({
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    remember_login: false
+    remember_login: true
   });
   const [errors, setErrors] = useState({});
 

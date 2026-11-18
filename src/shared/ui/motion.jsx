@@ -16,11 +16,11 @@ export const fadeIn = {
 };
 
 export const fadeUp = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0, y: 4 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.22, ease: 'easeOut' },
+    transition: { duration: 0.2, ease: 'easeOut' },
   },
   exit: {
     opacity: 0,
@@ -28,7 +28,7 @@ export const fadeUp = {
   },
 };
 
-export const staggerContainer = (staggerDelay = 0.04, delayChildren = 0.02) => ({
+export const staggerContainer = (staggerDelay = 0.03, delayChildren = 0.01) => ({
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -40,11 +40,11 @@ export const staggerContainer = (staggerDelay = 0.04, delayChildren = 0.02) => (
 });
 
 export const staggerItem = {
-  hidden: { opacity: 0, y: 8 },
+  hidden: { opacity: 0, y: 4 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.2, ease: 'easeOut' },
+    transition: { duration: 0.18, ease: 'easeOut' },
   },
 };
 

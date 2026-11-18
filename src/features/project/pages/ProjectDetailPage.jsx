@@ -518,29 +518,49 @@ const ProjectDetailPage = () => {
       {/* Header section */}
       <div className="space-y-4">
         {/* Key Metrics Row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-card border border-border bg-surface">
-          <div>
-            <div className="text-xs text-muted-foreground">{t("keywords.baiBaoLienQuan")}</div>
-            <div className="mt-1 text-base font-bold text-foreground">
-              {articleCount.toLocaleString('vi-VN')}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 rounded-xl border border-border bg-surface shadow-xs flex items-center justify-between">
+            <div>
+              <div className="text-xs font-medium text-muted-foreground">{t("keywords.baiBaoLienQuan")}</div>
+              <div className="mt-1 text-xl font-bold text-foreground font-mono">
+                {articleCount.toLocaleString('vi-VN')}
+              </div>
+            </div>
+            <div className="size-10 rounded-lg bg-primary-subtle text-primary flex items-center justify-center shrink-0">
+              <Icon icon="lucide:file-text" width="20" />
             </div>
           </div>
-          <div>
-            <div
-              className="text-xs text-muted-foreground"
-              title={growthYear ? `${growthYear} vs ${growthYear - 1}` : undefined}
-            >
-              {t("project.mucDoTangTruong")}
+
+          <div className="p-4 rounded-xl border border-border bg-surface shadow-xs flex items-center justify-between">
+            <div>
+              <div
+                className="text-xs font-medium text-muted-foreground"
+                title={growthYear ? `${growthYear} vs ${growthYear - 1}` : undefined}
+              >
+                {t("project.mucDoTangTruong")}
+              </div>
+              <div
+                className={`mt-1 flex items-center gap-1 text-xl font-bold font-mono ${
+                  growthRate > 0
+                    ? 'text-success'
+                    : growthRate < 0
+                    ? 'text-danger'
+                    : 'text-muted-foreground'
+                }`}
+              >
+                <span>
+                  {growthRate > 0 ? '+' : ''}
+                  {growthRate}%
+                </span>
+              </div>
             </div>
-            <div
-              className={`mt-1 flex items-center gap-1 text-base font-bold ${
-                growthRate > 0
-                  ? 'text-success'
-                  : growthRate < 0
-                  ? 'text-danger'
-                  : 'text-muted-foreground'
-              }`}
-            >
+            <div className={`size-10 rounded-lg flex items-center justify-center shrink-0 ${
+              growthRate > 0
+                ? 'bg-success/10 text-success'
+                : growthRate < 0
+                ? 'bg-danger/10 text-danger'
+                : 'bg-surface-muted text-muted-foreground'
+            }`}>
               <Icon
                 icon={
                   growthRate > 0
@@ -549,24 +569,32 @@ const ProjectDetailPage = () => {
                     ? "lucide:trending-down"
                     : "lucide:minus"
                 }
-                width="16"
+                width="20"
               />
-              <span>
-                {growthRate > 0 ? '+' : ''}
-                {growthRate}%
-              </span>
             </div>
           </div>
-          <div>
-            <div className="text-xs text-muted-foreground">{t("project.tuKhoaTheoDoi1")}</div>
-            <div className="mt-1 text-base font-bold text-foreground font-mono">
-              {keywordCount.toLocaleString('vi-VN')}
+
+          <div className="p-4 rounded-xl border border-border bg-surface shadow-xs flex items-center justify-between">
+            <div>
+              <div className="text-xs font-medium text-muted-foreground">{t("project.tuKhoaTheoDoi1")}</div>
+              <div className="mt-1 text-xl font-bold text-foreground font-mono">
+                {keywordCount.toLocaleString('vi-VN')}
+              </div>
+            </div>
+            <div className="size-10 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+              <Icon icon="lucide:key-round" width="20" />
             </div>
           </div>
-          <div>
-            <div className="text-xs text-muted-foreground">{t("project.tongSoTapChi", "Covered Journals")}</div>
-            <div className="mt-1 text-base font-bold text-foreground font-mono">
-              {formatNumber(overviewData?.summary?.totalJournals || 0)}
+
+          <div className="p-4 rounded-xl border border-border bg-surface shadow-xs flex items-center justify-between">
+            <div>
+              <div className="text-xs font-medium text-muted-foreground">{t("project.tongSoTapChi", "Covered Journals")}</div>
+              <div className="mt-1 text-xl font-bold text-foreground font-mono">
+                {formatNumber(overviewData?.summary?.totalJournals || 0)}
+              </div>
+            </div>
+            <div className="size-10 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
+              <Icon icon="lucide:book-open" width="20" />
             </div>
           </div>
         </div>

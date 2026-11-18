@@ -13,7 +13,8 @@ export default function ArticleTable({
   articles = [],
   isLoading = false,
   onDetailClick,
-  onClearFilters
+  onClearFilters,
+  asCard = true
 }) {
   const { t } = useTranslation();
 
@@ -54,25 +55,33 @@ export default function ArticleTable({
 
   // If loading and there are no items
   if (isLoading && articles.length === 0) {
+    const loadingTable = (
+      <div className="table-responsive">
+        <Table hover className="align-middle mb-0 text-start w-full">
+          <thead>
+            <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+              <th className="px-3 py-3 text-center w-10">#</th>
+              <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
+              <th className="px-3 py-3">Journal</th>
+              <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
+              <th className="px-3 py-3">DOI</th>
+              <th className="px-3 py-3">Topic / Field</th>
+              <th className="px-3 py-3 text-center">Access</th>
+              <th className="px-4 py-3 text-end">{t("article.chiTiet", "Action")}</th>
+            </tr>
+          </thead>
+          {renderSkeletons()}
+        </Table>
+      </div>
+    );
+
+    if (!asCard) {
+      return loadingTable;
+    }
+
     return (
       <section className="rounded-card border border-border bg-surface shadow-card overflow-hidden">
-        <div className="table-responsive">
-          <Table hover className="align-middle mb-0 text-start w-full">
-            <thead>
-              <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                <th className="px-3 py-3 text-center w-10">#</th>
-                <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
-                <th className="px-3 py-3">Journal</th>
-                <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
-                <th className="px-3 py-3">DOI</th>
-                <th className="px-3 py-3">Topic / Field</th>
-                <th className="px-3 py-3 text-center">Access</th>
-                <th className="px-4 py-3 text-end">{t("article.chiTiet", "Action")}</th>
-              </tr>
-            </thead>
-            {renderSkeletons()}
-          </Table>
-        </div>
+        {loadingTable}
       </section>
     );
   }
@@ -100,37 +109,68 @@ export default function ArticleTable({
   return (
     <>
       {/* 1. TABLE LAYOUT (Desktop & Tablet) */}
-      <section className="hidden md:block rounded-card border border-border bg-surface shadow-card overflow-hidden">
-        <div className="table-responsive">
-          <Table hover className="align-middle mb-0 text-start w-full">
-            <thead>
-              <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                <th className="px-3 py-3 text-center w-10">#</th>
-                <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
-                <th className="px-3 py-3">Journal</th>
-                <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
-                <th className="px-3 py-3">DOI</th>
-                <th className="px-3 py-3">Topic / Field</th>
-                <th className="px-3 py-3 text-center">Access</th>
-                <th className="px-4 py-3 text-end">{t("article.chiTiet", "Action")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/60">
-              {articles.map((article, index) => (
-                <ArticleTableRow
-                  key={article.article_id}
-                  article={article}
-                  index={index}
-                  onDetailClick={onDetailClick}
-                />
-              ))}
-            </tbody>
-          </Table>
+      {asCard ? (
+        <section className="hidden md:block rounded-card border border-border bg-surface shadow-card overflow-hidden">
+          <div className="table-responsive">
+            <Table hover className="align-middle mb-0 text-start w-full">
+              <thead>
+                <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                  <th className="px-3 py-3 text-center w-10">#</th>
+                  <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
+                  <th className="px-3 py-3">Journal</th>
+                  <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
+                  <th className="px-3 py-3">DOI</th>
+                  <th className="px-3 py-3">Topic / Field</th>
+                  <th className="px-3 py-3 text-center">Access</th>
+                  <th className="px-4 py-3 text-end">{t("article.chiTiet", "Action")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {articles.map((article, index) => (
+                  <ArticleTableRow
+                    key={article.article_id}
+                    article={article}
+                    index={index}
+                    onDetailClick={onDetailClick}
+                  />
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        </section>
+      ) : (
+        <div className="hidden md:block">
+          <div className="table-responsive">
+            <Table hover className="align-middle mb-0 text-start w-full">
+              <thead>
+                <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                  <th className="px-3 py-3 text-center w-10">#</th>
+                  <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
+                  <th className="px-3 py-3">Journal</th>
+                  <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
+                  <th className="px-3 py-3">DOI</th>
+                  <th className="px-3 py-3">Topic / Field</th>
+                  <th className="px-3 py-3 text-center">Access</th>
+                  <th className="px-4 py-3 text-end">{t("article.chiTiet", "Action")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {articles.map((article, index) => (
+                  <ArticleTableRow
+                    key={article.article_id}
+                    article={article}
+                    index={index}
+                    onDetailClick={onDetailClick}
+                  />
+                ))}
+              </tbody>
+            </Table>
+          </div>
         </div>
-      </section>
+      )}
 
       {/* 2. CARD LAYOUT (Mobile) */}
-      <div className="block md:hidden space-y-3">
+      <div className={`block md:hidden ${asCard ? 'space-y-3' : 'p-3 space-y-3 bg-surface'}`}>
         {articles.map((article, index) => {
           return (
             <Card

@@ -49,7 +49,7 @@ a,
 a:hover,
 a:focus,
 a:visited {
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 a.underline,
@@ -830,4 +830,46 @@ select.account-form-input {
   margin-bottom: 0.375rem;
 }
 .po-meta__sep { opacity: 0.7; }
+
+/* ─── Global Form Controls Focus: Highlight ONLY Border (No Double Focus) ─── */
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  textarea,
+  select,
+  .form-control,
+  .form-select
+):focus,
+:where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  textarea,
+  select,
+  .form-control,
+  .form-select
+):focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: var(--primary, #0071BC) !important;
+  box-shadow: none !important;
+}
+
+:where(
+  input[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]),
+  textarea[aria-invalid="true"],
+  select[aria-invalid="true"],
+  .form-control.is-invalid,
+  .form-select.is-invalid
+):focus,
+:where(
+  input[aria-invalid="true"]:not([type="checkbox"]):not([type="radio"]),
+  textarea[aria-invalid="true"],
+  select[aria-invalid="true"],
+  .form-control.is-invalid,
+  .form-select.is-invalid
+):focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-color: #dc2626 !important;
+  box-shadow: none !important;
+}
+
 

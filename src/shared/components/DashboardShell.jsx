@@ -32,7 +32,15 @@ export default function DashboardShell({ children }) {
   const base = `/${lang}`;
   const activePath = location.pathname.replace(/\/$/, '').split('/').at(-1);
   const activeItem = items.find(({ path }) => path === activePath);
-  const pageTitle = activeItem ? t(`navigation.${activeItem.path}`, activeItem.label) : t('navigation.projects', 'Projects');
+  const pageTitle = activeItem
+    ? t(`navigation.${activeItem.path}`, activeItem.label)
+    : activePath === 'profile'
+    ? t('navigation.account', 'Profile')
+    : t('navigation.projects', 'Projects');
+
+  // Group project sub-routes so navigating between analytics tabs does not remount the parent layout
+  const projectSubRouteMatch = location.pathname.match(/^(\/[^/]+\/project\/[^/]+)/);
+  const shellKey = projectSubRouteMatch ? projectSubRouteMatch[1] : location.pathname;
 
   // Ensure window and sidebar always scroll to top on page navigation
   useEffect(() => {
@@ -77,10 +85,10 @@ export default function DashboardShell({ children }) {
             to={`${base}/${path}`}
             onClick={() => setMobileOpen(false)}
             className={({ isActive }) =>
-              `group flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control border-l-3 px-2.5 py-1.5 text-left text-xs transition-colors ${
+              `group flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control px-2.5 py-1.5 text-left text-xs transition-colors ${
                 isActive
-                  ? 'border-primary bg-primary-subtle font-semibold !text-primary'
-                  : 'border-transparent font-medium !text-muted-foreground hover:bg-surface-muted hover:!text-foreground'
+                  ? 'bg-primary-subtle font-semibold !text-primary'
+                  : 'font-medium !text-muted-foreground hover:bg-surface-muted hover:!text-foreground'
               }`
             }
           >
@@ -123,8 +131,8 @@ export default function DashboardShell({ children }) {
 
       {/* Main Content Column */}
       <div className="flex flex-1 flex-col min-w-0">
-        <header className="app-topbar sticky top-0 z-[var(--ds-z-sticky)] flex max-md:hidden min-h-14 items-center border-b border-border bg-surface/95 px-4 md:px-6 backdrop-blur">
-          <div className="w-full max-w-[1360px] mx-auto flex items-center justify-between">
+        <header className="app-topbar sticky top-0 z-[var(--ds-z-sticky)] flex max-md:hidden min-h-14 items-center border-b border-border bg-surface/95 px-4 sm:px-6 lg:px-8 backdrop-blur">
+          <div className="w-full flex items-center justify-between">
             <div className="flex min-w-0 items-center gap-2 text-xs sm:text-sm">
               <span className="text-muted-foreground">{t('navigation.workspace', 'Workspace')}</span>
               <span aria-hidden="true" className="text-subtle-foreground">/</span>
@@ -144,18 +152,15 @@ export default function DashboardShell({ children }) {
         </header>
 
         <DashboardShellContext.Provider value>
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={location.pathname}
-              className="app-main flex-1 min-w-0"
-              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduceMotion ? undefined : { opacity: 0 }}
-              transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
-            >
-              {children}
-            </motion.main>
-          </AnimatePresence>
+          <motion.main
+            key={shellKey}
+            className="app-main flex-1 min-w-0"
+            initial={reduceMotion ? false : { opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: reduceMotion ? 0 : 0.18, ease: 'easeOut' }}
+          >
+            {children}
+          </motion.main>
         </DashboardShellContext.Provider>
       </div>
 

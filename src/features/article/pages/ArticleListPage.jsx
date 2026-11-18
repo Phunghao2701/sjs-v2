@@ -7,6 +7,7 @@ import ArticleFilterBar from '../components/ArticleFilterBar';
 import ArticleTable from '../components/ArticleTable';
 import AdminPagination from '../../../shared/components/Pagination';
 import { Button } from '../../../shared/ui/button';
+import { Card } from '../../../shared/ui/card';
 import { Badge } from '../../../shared/ui/badge';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
 import '../Article.css';
@@ -78,29 +79,41 @@ export default function ArticleListPage() {
       {/* Thẻ thống kê chuẩn hóa (Scimago / Scopus grade) */}
       <ArticleStatsCards stats={stats} isLoading={isLoading} />
 
-      {/* Thanh lọc & Sắp xếp tích hợp */}
-      <ArticleFilterBar filters={filters} updateFilters={updateFilters} clearFilters={clearFilters} />
+      {/* Unified Article Section: Filter + Table + Pagination in ONE Card */}
+      <Card className="rounded-card border border-border bg-surface shadow-card overflow-hidden">
+        {/* Thanh lọc & Sắp xếp tích hợp */}
+        <ArticleFilterBar
+          asCard={false}
+          filters={filters}
+          updateFilters={updateFilters}
+          clearFilters={clearFilters}
+        />
 
-      {/* Bảng dữ liệu */}
-      <ArticleTable
-        articles={articles}
-        isLoading={isLoading}
-        onDetailClick={handleDetailClick}
-        onClearFilters={clearFilters}
-      />
-
-      {/* Phân trang */}
-      {total > 0 && totalPages > 1 && (
-        <div className="pt-2">
-          <AdminPagination
-            totalItems={total}
-            currentPage={currentPage}
-            limit={10}
-            onPageChange={handlePageChange}
-            entityName="bài báo"
+        {/* Bảng dữ liệu */}
+        <div className="border-t border-border">
+          <ArticleTable
+            asCard={false}
+            articles={articles}
+            isLoading={isLoading}
+            onDetailClick={handleDetailClick}
+            onClearFilters={clearFilters}
           />
         </div>
-      )}
+
+        {/* Phân trang Footer */}
+        {total > 0 && totalPages > 1 && (
+          <div className="border-t border-border px-4 py-3 bg-surface">
+            <AdminPagination
+              totalItems={total}
+              currentPage={currentPage}
+              limit={10}
+              onPageChange={handlePageChange}
+              entityName="bài báo"
+              className="pt-0"
+            />
+          </div>
+        )}
+      </Card>
 
       {/* Warning Auth Modal */}
       <Modal

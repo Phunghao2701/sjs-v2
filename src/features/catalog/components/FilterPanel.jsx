@@ -27,7 +27,8 @@ export default function FilterPanel({
   isOaDiamond = false,
   onOaDiamondToggle,
   onClearAll,
-  loading = false
+  loading = false,
+  asCard = true
 }) {
   const { t } = useTranslation();
   const [menuSearch, setMenuSearch] = useState({});
@@ -270,8 +271,8 @@ export default function FilterPanel({
     );
   };
 
-  return (
-    <Card className="p-4 border-border bg-surface shadow-xs space-y-3.5">
+  const content = (
+    <div className="p-4 bg-surface space-y-3.5">
       {/* 1. Main Search Bar Row */}
       <form onSubmit={onSearchSubmit} className="flex items-center gap-2.5">
         <div className="relative flex-1">
@@ -286,7 +287,7 @@ export default function FilterPanel({
             value={searchInput}
             onChange={(e) => setSearchInput?.(e.target.value)}
             placeholder={t("catalog.searchInTable", "Search journals by title, ISSN, publisher, or subject area...")}
-            className="w-full h-11 pl-10 pr-9 rounded-control border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 transition-colors shadow-2xs"
+            className="w-full h-11 pl-10 pr-9 rounded-control border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-0 focus-visible:outline-none focus-visible:border-primary focus-visible:ring-0 transition-colors shadow-2xs"
           />
           {searchInput && (
             <button
@@ -398,6 +399,16 @@ export default function FilterPanel({
           ))}
         </div>
       )}
+    </div>
+  );
+
+  if (!asCard) {
+    return content;
+  }
+
+  return (
+    <Card className="border-border bg-surface shadow-xs">
+      {content}
     </Card>
   );
 }
