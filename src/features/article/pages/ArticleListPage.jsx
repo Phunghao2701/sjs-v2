@@ -74,7 +74,7 @@ export default function ArticleListPage() {
 
         {/* Unified Article Section: Filter + Table + Pagination in ONE Card */}
         <motion.div variants={fadeUp}>
-          <Card className="rounded-card border border-border bg-surface shadow-card overflow-hidden">
+          <Card className="rounded-card border border-border bg-surface shadow-card">
             {/* Thanh lọc & Sắp xếp tích hợp */}
             <ArticleFilterBar
               asCard={false}

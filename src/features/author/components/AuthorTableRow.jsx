@@ -65,11 +65,10 @@ export default function AuthorTableRow({
   return (
     <motion.tr
       onClick={handleRowClick}
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.15, ease: 'easeOut' }}
-      whileHover={{ backgroundColor: 'var(--ds-surface-muted, rgba(241, 245, 249, 0.6))' }}
-      className="group border-b border-border transition-colors cursor-pointer"
+      className="group border-b border-border transition-colors hover:bg-surface-muted/60 cursor-pointer"
     >
       {/* 1. # Rank (Clean plain number, no circle) */}
       <td className="py-3 px-4 w-12 text-center text-xs font-semibold text-muted-foreground tabular-nums">

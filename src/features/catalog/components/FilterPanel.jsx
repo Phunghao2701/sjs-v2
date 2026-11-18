@@ -4,185 +4,6 @@ import { Icon } from '@iconify/react';
 import { Card } from '../../../shared/ui/card';
 import { Button } from '../../../shared/ui/button';
 
-/**
- * Clean searchable dropdown component for filter selectors within the filter panel
- */
-function SearchableFilterSelect({
-  label,
-  icon,
-  value,
-  selectedLabel,
-  options = [],
-  placeholder = 'All',
-  searchable = true,
-  disabled = false,
-  emptyLabel = 'No options',
-  onSelect,
-  onClear,
-}) {
-  const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
-  const [keyword, setKeyword] = useState('');
-  const containerRef = useRef(null);
-
-  useEffect(() => {
-    function handleClickOutside(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setIsOpen(false);
-      }
-    }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
-
-  const filteredOptions = useMemo(() => {
-    if (!keyword.trim()) return options;
-    const term = keyword.toLowerCase();
-    return options.filter((o) => (o.label || '').toLowerCase().includes(term));
-  }, [options, keyword]);
-
-  return (
-    <div className="space-y-1.5" ref={containerRef}>
-      <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-        {icon && <Icon icon={icon} width={13} className="text-muted-foreground/80" />}
-        <span>{label}</span>
-      </label>
-
-      <div className="relative">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => {
-            if (!disabled) {
-              setIsOpen((prev) => !prev);
-              setKeyword('');
-            }
-          }}
-          className={`w-full h-9 px-3 text-xs rounded-control border text-left flex items-center justify-between gap-2 transition-colors cursor-pointer select-none ${
-            disabled
-              ? 'opacity-50 cursor-not-allowed bg-surface-muted/50 border-border text-muted-foreground'
-              : selectedLabel
-                ? 'border-primary text-primary bg-primary-subtle/50 font-semibold ring-1 ring-primary/20'
-                : 'border-border bg-surface text-foreground hover:bg-surface-muted/40 hover:border-foreground/30'
-          }`}
-        >
-          <span className="truncate">{selectedLabel || placeholder}</span>
-          <div className="flex items-center gap-1 shrink-0 text-muted-foreground">
-            {selectedLabel && !disabled && (
-              <span
-                role="button"
-                tabIndex={0}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClear?.();
-                }}
-                className="hover:text-foreground p-0.5 rounded cursor-pointer"
-                title="Clear"
-              >
-                <Icon icon="lucide:x" width={12} />
-              </span>
-            )}
-            <Icon
-              icon="lucide:chevron-down"
-              width={13}
-              className={`transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
-            />
-          </div>
-        </button>
-
-        {isOpen && !disabled && (
-          <div className="absolute left-0 top-full mt-1 w-full min-w-[240px] max-w-[360px] bg-surface border border-border rounded-lg shadow-popover z-50 p-2 animate-in fade-in-0 duration-100">
-            {searchable && (
-              <div className="relative mb-2">
-                <Icon
-                  icon="lucide:search"
-                  width={13}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
-                />
-                <input
-                  type="search"
-                  value={keyword}
-                  onChange={(e) => setKeyword(e.target.value)}
-                  placeholder={t("article.searchValues", "Filter options...")}
-                  autoFocus
-                  className="w-full h-8 pl-7 pr-2 text-xs rounded-control border border-border bg-surface text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-            )}
-
-            <div className="max-h-48 overflow-y-auto space-y-0.5">
-              <button
-                type="button"
-                onClick={() => {
-                  onClear?.();
-                  setIsOpen(false);
-                }}
-                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-control text-xs text-left cursor-pointer border-0 transition-colors ${
-                  !selectedLabel
-                    ? 'bg-primary-subtle text-primary font-bold'
-                    : 'text-foreground hover:bg-surface-muted bg-transparent'
-                }`}
-              >
-                <span
-                  className={`size-3.5 rounded border flex items-center justify-center shrink-0 ${
-                    !selectedLabel ? 'border-primary bg-primary text-white' : 'border-border'
-                  }`}
-                >
-                  {!selectedLabel && <Icon icon="lucide:check" width={10} />}
-                </span>
-                <span className="truncate font-medium">{placeholder}</span>
-              </button>
-
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((opt) => {
-                  const isSelected = String(value || '') === String(opt.value);
-                  return (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      title={opt.title || opt.label}
-                      onClick={() => {
-                        if (isSelected) {
-                          onClear?.();
-                        } else {
-                          onSelect?.(opt.value);
-                        }
-                        setIsOpen(false);
-                      }}
-                      className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-control text-xs text-left cursor-pointer border-0 transition-colors ${
-                        isSelected
-                          ? 'bg-primary-subtle text-primary font-bold'
-                          : 'text-foreground hover:bg-surface-muted bg-transparent'
-                      }`}
-                    >
-                      <span
-                        className={`size-3.5 rounded border flex items-center justify-center shrink-0 ${
-                          isSelected ? 'border-primary bg-primary text-white' : 'border-border'
-                        }`}
-                      >
-                        {isSelected && <Icon icon="lucide:check" width={10} />}
-                      </span>
-                      <span className="truncate">{opt.label}</span>
-                    </button>
-                  );
-                })
-              ) : (
-                <div className="text-center py-3 text-xs text-muted-foreground">
-                  {emptyLabel}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export default function FilterPanel({
   searchInput = '',
   setSearchInput,
@@ -206,18 +27,20 @@ export default function FilterPanel({
   onOaDiamondToggle,
   onClearAll,
   loading = false,
-  asCard = true
+  asCard = true,
+  sort = 'metric',
+  onSortChange,
 }) {
   const { t } = useTranslation();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterDropdownRef = useRef(null);
 
-  const hasSelectedArea = selectedAreas.length > 0;
+  const hasSelectedArea = selectedAreas.length > 0 && selectedAreas[0] !== 'all';
   const accessValue = selectedAccess[0] || 'all';
   const currentYear = new Date().getFullYear();
   const yearOptions = Array.from({ length: currentYear - 2014 }, (_, i) => currentYear - i);
 
-  // Close filter dropdown when clicking outside or pressing Escape
+  // Close filter dropdown on click outside or Escape
   useEffect(() => {
     function handleClickOutside(event) {
       if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
@@ -249,43 +72,15 @@ export default function FilterPanel({
     return area ? cleanLabel(area.display_name) : '';
   };
 
-  const getCategoryLabel = (cat) => {
-    return cleanLabel(cat.display_name);
-  };
-
   const visibleCategories = useMemo(() => {
     if (!hasSelectedArea) return [];
     return subjectCategories.filter(cat => !cat.subject_area_id || selectedAreas.includes(String(cat.subject_area_id)));
   }, [hasSelectedArea, selectedAreas, subjectCategories]);
 
-  const zoneOptions = zones.map(zone => ({
-    value: String(zone.zone_id),
-    label: zone.name,
-    title: zone.name
-  }));
-
-  const filterOptions = {
-    area: subjectAreas.map(area => ({
-      value: String(area.subject_area_id),
-      label: cleanLabel(area.display_name),
-      title: area.display_name
-    })),
-    category: visibleCategories.map(cat => ({
-      value: String(cat.subject_category_id),
-      label: getCategoryLabel(cat),
-      title: cat.display_name
-    })),
-    zone: zoneOptions,
-    year: yearOptions.map(year => ({
-      value: String(year),
-      label: String(year)
-    }))
-  };
-
   const selectedLabels = {
     area: selectedAreas[0] ? getAreaLabel(selectedAreas[0]) : '',
-    category: selectedCategories[0] ? filterOptions.category.find(option => option.value === String(selectedCategories[0]))?.label || '' : '',
-    zone: selectedZone ? zoneOptions.find(option => option.value === String(selectedZone))?.label || '' : '',
+    category: selectedCategories[0] ? (visibleCategories.find(c => String(c.subject_category_id) === String(selectedCategories[0]))?.display_name || '') : '',
+    zone: selectedZone ? (zones.find(z => String(z.zone_id) === String(selectedZone))?.name || '') : '',
     quartile: selectedQuartiles[0] || '',
     year: selectedYear || ''
   };
@@ -317,7 +112,7 @@ export default function FilterPanel({
     activeChips.push({
       id: 'category',
       label: t("catalog.subjectCategory", "Category"),
-      value: selectedLabels.category,
+      value: cleanLabel(selectedLabels.category),
       onClear: () => onCategorySelect('all')
     });
   }
@@ -353,6 +148,14 @@ export default function FilterPanel({
       label: 'Access',
       value: 'Open Access',
       onClear: () => onAccessSelect('all')
+    });
+  }
+  if (sort && sort !== 'metric') {
+    activeChips.push({
+      id: 'sort',
+      label: 'Sort',
+      value: sort === 'name' ? 'Name (A-Z)' : sort,
+      onClear: () => onSortChange?.('metric')
     });
   }
   if (isOaDiamond) {
@@ -395,7 +198,7 @@ export default function FilterPanel({
           )}
         </div>
 
-        {/* 2. Single Filter Button with Dropdown Panel */}
+        {/* 2. Single Filter Button with Floating Dropdown Panel */}
         <div className="relative" ref={filterDropdownRef}>
           <button
             type="button"
@@ -426,211 +229,310 @@ export default function FilterPanel({
             />
           </button>
 
-          {/* Dropdown Panel: Bảng các filter */}
+          {/* Floating Dropdown Panel: Bảng các filter (hoàn toàn tự do, không bị bó hẹp trong card) */}
           {isFilterOpen && (
-            <div className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-[580px] md:w-[680px] max-w-[95vw] bg-surface border border-border rounded-xl shadow-popover z-50 overflow-hidden flex flex-col animate-in fade-in-0 zoom-in-95 duration-150">
-              {/* Filter Panel Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-muted/30">
-                <div className="flex items-center gap-2">
-                  <div className="size-7 rounded-lg bg-primary-subtle text-primary flex items-center justify-center">
-                    <Icon icon="lucide:sliders-horizontal" width={14} />
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                      <span>{t("catalog.filterTitle", "Filters")}</span>
-                      {activeFilterCount > 0 && (
-                        <span className="text-[10px] font-semibold text-primary bg-primary-subtle px-1.5 py-0.5 rounded-full">
-                          {activeFilterCount} {t("catalog.active", "active")}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-[11px] text-muted-foreground m-0">
-                      {t("catalog.filterSubtitle", "Refine journal catalog by subject area, region, quartile, and access.")}
-                    </p>
-                  </div>
-                </div>
+            <>
+              {/* Click interceptor backdrop on mobile/tablet */}
+              <div
+                className="fixed inset-0 z-40 bg-black/10 backdrop-blur-[0.5px] sm:bg-transparent"
+                onClick={() => setIsFilterOpen(false)}
+                aria-hidden="true"
+              />
 
-                <div className="flex items-center gap-2">
-                  {activeFilterCount > 0 && (
+              <div
+                className="absolute right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-[560px] md:w-[640px] max-w-[95vw] bg-surface border border-border rounded-xl shadow-2xl z-50 flex flex-col animate-in fade-in-0 zoom-in-95 duration-150"
+                style={{ zIndex: 60 }}
+              >
+                {/* Filter Panel Header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-muted/30">
+                  <div className="flex items-center gap-2">
+                    <div className="size-7 rounded-lg bg-primary-subtle text-primary flex items-center justify-center">
+                      <Icon icon="lucide:sliders-horizontal" width={14} />
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                        <span>{t("catalog.filterTitle", "Filters")}</span>
+                        {activeFilterCount > 0 && (
+                          <span className="text-[10px] font-semibold text-primary bg-primary-subtle px-1.5 py-0.5 rounded-full">
+                            {activeFilterCount} {t("catalog.active", "active")}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground m-0">
+                        {t("catalog.filterSubtitle", "Refine journal catalog by subject area, region, quartile, and access.")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {activeFilterCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={onClearAll}
+                        className="text-xs text-danger hover:underline font-semibold flex items-center gap-1 border-0 bg-transparent p-1 cursor-pointer"
+                      >
+                        <Icon icon="lucide:rotate-ccw" width={12} />
+                        <span>{t("resetAll", "Reset")}</span>
+                      </button>
+                    )}
                     <button
                       type="button"
-                      onClick={onClearAll}
-                      className="text-xs text-danger hover:underline font-semibold flex items-center gap-1 border-0 bg-transparent p-1 cursor-pointer"
+                      onClick={() => setIsFilterOpen(false)}
+                      className="size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-muted flex items-center justify-center border-0 bg-transparent cursor-pointer transition-colors"
+                      aria-label="Close filters"
                     >
-                      <Icon icon="lucide:rotate-ccw" width={12} />
-                      <span>{t("resetAll", "Reset")}</span>
+                      <Icon icon="lucide:x" width={16} />
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => setIsFilterOpen(false)}
-                    className="size-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-surface-muted flex items-center justify-center border-0 bg-transparent cursor-pointer transition-colors"
-                    aria-label="Close filters"
-                  >
-                    <Icon icon="lucide:x" width={16} />
-                  </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Filter Panel Body: Bảng các filter theo Grid */}
-              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[65vh] overflow-y-auto">
-                {/* 1. Subject Area */}
-                <SearchableFilterSelect
-                  label={t("catalog.subjectArea", "Subject area")}
-                  icon="lucide:book-open"
-                  value={selectedAreas[0]}
-                  selectedLabel={selectedLabels.area}
-                  options={filterOptions.area}
-                  placeholder={t("catalog.allSubjectAreas", "All Subject Areas")}
-                  disabled={loading}
-                  onSelect={onAreaSelect}
-                  onClear={() => onAreaSelect('all')}
-                  emptyLabel={t("catalog.noAreas", "No areas found")}
-                />
+                {/* Filter Panel Body: Bảng các filter theo Grid rõ ràng */}
+                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+                  {/* 1. Subject Area */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Icon icon="lucide:book-open" width={13} className="text-muted-foreground/80" />
+                      <span>{t("catalog.subjectArea", "Subject area")}</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedAreas[0] || 'all'}
+                        onChange={(e) => onAreaSelect(e.target.value)}
+                        disabled={loading}
+                        className={`w-full h-9 pl-3 pr-8 text-xs rounded-control border bg-surface transition-colors cursor-pointer appearance-none ${
+                          selectedAreas[0] && selectedAreas[0] !== 'all'
+                            ? 'border-primary text-primary bg-primary-subtle/50 font-semibold ring-1 ring-primary/20'
+                            : 'border-border text-foreground hover:bg-surface-muted/40'
+                        }`}
+                      >
+                        <option value="all">{t("catalog.allSubjectAreas", "All Subject Areas")}</option>
+                        {subjectAreas.map((area) => (
+                          <option key={area.subject_area_id} value={String(area.subject_area_id)}>
+                            {cleanLabel(area.display_name)}
+                          </option>
+                        ))}
+                      </select>
+                      <Icon icon="lucide:chevron-down" width={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
 
-                {/* 2. Subject Category */}
-                <SearchableFilterSelect
-                  label={t("catalog.subjectCategory", "Subject category")}
-                  icon="lucide:layers"
-                  value={selectedCategories[0]}
-                  selectedLabel={selectedLabels.category}
-                  options={filterOptions.category}
-                  placeholder={hasSelectedArea ? t("catalog.allCategories", "All Categories") : t("catalog.chonSubjectAreaTruoc", "Select Subject Area first")}
-                  disabled={loading || !hasSelectedArea}
-                  onSelect={onCategorySelect}
-                  onClear={() => onCategorySelect('all')}
-                  emptyLabel={hasSelectedArea ? t("catalog.khongCoCategoryPhuHop", "No categories found") : t("catalog.chonSubjectAreaTruoc", "Select Subject Area first")}
-                />
+                  {/* 2. Subject Category */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Icon icon="lucide:layers" width={13} className="text-muted-foreground/80" />
+                      <span>{t("catalog.subjectCategory", "Subject category")}</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedCategories[0] || 'all'}
+                        onChange={(e) => onCategorySelect(e.target.value)}
+                        disabled={loading || !hasSelectedArea}
+                        className={`w-full h-9 pl-3 pr-8 text-xs rounded-control border bg-surface transition-colors cursor-pointer appearance-none ${
+                          !hasSelectedArea
+                            ? 'opacity-50 cursor-not-allowed bg-surface-muted/50 text-muted-foreground'
+                            : selectedCategories[0] && selectedCategories[0] !== 'all'
+                              ? 'border-primary text-primary bg-primary-subtle/50 font-semibold ring-1 ring-primary/20'
+                              : 'border-border text-foreground hover:bg-surface-muted/40'
+                        }`}
+                      >
+                        <option value="all">
+                          {hasSelectedArea
+                            ? t("catalog.allCategories", "All Categories")
+                            : t("catalog.chonSubjectAreaTruoc", "Select Subject Area first")}
+                        </option>
+                        {visibleCategories.map((cat) => (
+                          <option key={cat.subject_category_id} value={String(cat.subject_category_id)}>
+                            {cleanLabel(cat.display_name)}
+                          </option>
+                        ))}
+                      </select>
+                      <Icon icon="lucide:chevron-down" width={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
 
-                {/* 3. Zone / Country */}
-                <SearchableFilterSelect
-                  label={t("catalog.zoneCountry", "Zone / Country")}
-                  icon="lucide:globe"
-                  value={selectedZone}
-                  selectedLabel={selectedLabels.zone}
-                  options={filterOptions.zone}
-                  placeholder={t("catalog.allZones", "All Zones / Countries")}
-                  disabled={loading}
-                  onSelect={onZoneSelect}
-                  onClear={() => onZoneSelect('all')}
-                  emptyLabel={t("catalog.noZones", "No countries found")}
-                />
+                  {/* 3. Zone / Country */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Icon icon="lucide:globe" width={13} className="text-muted-foreground/80" />
+                      <span>{t("catalog.zoneCountry", "Zone / Country")}</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedZone || 'all'}
+                        onChange={(e) => onZoneSelect(e.target.value)}
+                        disabled={loading}
+                        className={`w-full h-9 pl-3 pr-8 text-xs rounded-control border bg-surface transition-colors cursor-pointer appearance-none ${
+                          selectedZone && selectedZone !== 'all'
+                            ? 'border-primary text-primary bg-primary-subtle/50 font-semibold ring-1 ring-primary/20'
+                            : 'border-border text-foreground hover:bg-surface-muted/40'
+                        }`}
+                      >
+                        <option value="all">{t("catalog.allZones", "All Zones / Countries")}</option>
+                        {zones.map((zone) => (
+                          <option key={zone.zone_id} value={String(zone.zone_id)}>
+                            {zone.name}
+                          </option>
+                        ))}
+                      </select>
+                      <Icon icon="lucide:chevron-down" width={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
 
-                {/* 4. Publication Year */}
-                <SearchableFilterSelect
-                  label={t("catalog.rankingYear", "Ranking Year")}
-                  icon="lucide:calendar"
-                  value={selectedYear}
-                  selectedLabel={selectedLabels.year}
-                  options={filterOptions.year}
-                  placeholder={t("catalog.allYears", "All Years")}
-                  disabled={loading}
-                  onSelect={onYearSelect}
-                  onClear={() => onYearSelect('all')}
-                  emptyLabel={t("catalog.noYears", "No years available")}
-                />
+                  {/* 4. Publication Year */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Icon icon="lucide:calendar" width={13} className="text-muted-foreground/80" />
+                      <span>{t("catalog.rankingYear", "Ranking Year")}</span>
+                    </label>
+                    <div className="relative">
+                      <select
+                        value={selectedYear || 'all'}
+                        onChange={(e) => onYearSelect(e.target.value)}
+                        disabled={loading}
+                        className={`w-full h-9 pl-3 pr-8 text-xs rounded-control border bg-surface transition-colors cursor-pointer appearance-none ${
+                          selectedYear && selectedYear !== 'all'
+                            ? 'border-primary text-primary bg-primary-subtle/50 font-semibold ring-1 ring-primary/20'
+                            : 'border-border text-foreground hover:bg-surface-muted/40'
+                        }`}
+                      >
+                        <option value="all">{t("catalog.allYears", "All Years")}</option>
+                        {yearOptions.map((year) => (
+                          <option key={year} value={String(year)}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                      <Icon icon="lucide:chevron-down" width={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                    </div>
+                  </div>
 
-                {/* 5. Quartile Selection Buttons */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <Icon icon="lucide:award" width={13} className="text-muted-foreground/80" />
-                    <span>{t("catalog.quartileRanking", "Quartile Ranking (SJR)")}</span>
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {['Q1', 'Q2', 'Q3', 'Q4'].map((q) => {
-                      const isSelected = selectedQuartiles.includes(q);
-                      const quartileStyles = {
-                        Q1: isSelected ? 'bg-emerald-600 text-white font-bold border-emerald-700 shadow-xs' : 'border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20',
-                        Q2: isSelected ? 'bg-blue-600 text-white font-bold border-blue-700 shadow-xs' : 'border-blue-500/30 text-blue-700 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20',
-                        Q3: isSelected ? 'bg-amber-600 text-white font-bold border-amber-700 shadow-xs' : 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20',
-                        Q4: isSelected ? 'bg-rose-600 text-white font-bold border-rose-700 shadow-xs' : 'border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20',
-                      };
-                      return (
-                        <button
-                          key={q}
-                          type="button"
-                          onClick={() => onQuartileSelect(q)}
-                          className={`h-9 rounded-control border text-xs font-semibold transition-all flex items-center justify-center cursor-pointer ${quartileStyles[q]}`}
-                          aria-pressed={isSelected}
+                  {/* 5. Quartile Selection Buttons */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Icon icon="lucide:award" width={13} className="text-muted-foreground/80" />
+                      <span>{t("catalog.quartileRanking", "Quartile Ranking (SJR)")}</span>
+                    </label>
+                    <div className="grid grid-cols-4 gap-2">
+                      {['Q1', 'Q2', 'Q3', 'Q4'].map((q) => {
+                        const isSelected = selectedQuartiles.includes(q);
+                        const quartileStyles = {
+                          Q1: isSelected ? 'bg-emerald-600 text-white font-bold border-emerald-700 shadow-xs' : 'border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20',
+                          Q2: isSelected ? 'bg-blue-600 text-white font-bold border-blue-700 shadow-xs' : 'border-blue-500/30 text-blue-700 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20',
+                          Q3: isSelected ? 'bg-amber-600 text-white font-bold border-amber-700 shadow-xs' : 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20',
+                          Q4: isSelected ? 'bg-rose-600 text-white font-bold border-rose-700 shadow-xs' : 'border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20',
+                        };
+                        return (
+                          <button
+                            key={q}
+                            type="button"
+                            onClick={() => onQuartileSelect(q)}
+                            className={`h-9 rounded-control border text-xs font-semibold transition-all flex items-center justify-center cursor-pointer ${quartileStyles[q]}`}
+                            aria-pressed={isSelected}
+                          >
+                            {q}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 6. Access Type Checkboxes */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                      <Icon icon="lucide:unlock" width={13} className="text-muted-foreground/80" />
+                      <span>{t("catalog.accessType", "Access Type")}</span>
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <label className={`flex items-center gap-2 p-2 rounded-control border text-xs font-medium cursor-pointer transition-colors ${
+                        accessValue === 'open_access'
+                          ? 'border-primary bg-primary-subtle/50 text-primary font-semibold'
+                          : 'border-border bg-surface text-foreground hover:bg-surface-muted/50'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={accessValue === 'open_access'}
+                          onChange={() => onAccessSelect(accessValue === 'open_access' ? 'all' : 'open_access')}
+                          className="size-3.5 rounded border-border text-primary accent-primary cursor-pointer"
+                        />
+                        <span>Open Access</span>
+                      </label>
+
+                      <label className={`flex items-center gap-2 p-2 rounded-control border text-xs font-medium cursor-pointer transition-colors ${
+                        isOaDiamond
+                          ? 'border-primary bg-primary-subtle/50 text-primary font-semibold'
+                          : 'border-border bg-surface text-foreground hover:bg-surface-muted/50'
+                      }`}>
+                        <input
+                          type="checkbox"
+                          checked={isOaDiamond}
+                          onChange={() => onOaDiamondToggle && onOaDiamondToggle(!isOaDiamond)}
+                          className="size-3.5 rounded border-border text-primary accent-primary cursor-pointer"
+                        />
+                        <span>OA Diamond</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* 7. Sort By */}
+                  {onSortChange && (
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                        <Icon icon="lucide:arrow-up-down" width={13} className="text-muted-foreground/80" />
+                        <span>{t("catalog.sapXep", "Sort By")}</span>
+                      </label>
+                      <div className="relative">
+                        <select
+                          value={sort || 'metric'}
+                          onChange={(e) => onSortChange(e.target.value)}
+                          className={`w-full h-9 pl-3 pr-8 text-xs rounded-control border bg-surface transition-colors cursor-pointer appearance-none ${
+                            sort && sort !== 'metric'
+                              ? 'border-primary text-primary bg-primary-subtle/50 font-semibold ring-1 ring-primary/20'
+                              : 'border-border text-foreground hover:bg-surface-muted/40'
+                          }`}
                         >
-                          {q}
-                        </button>
-                      );
-                    })}
-                  </div>
+                          <option value="metric">{t("catalog.macDinh", "SJR Metric (Default)")}</option>
+                          <option value="name">{t("catalog.tenAz", "Journal Name (A-Z)")}</option>
+                        </select>
+                        <Icon icon="lucide:chevron-down" width={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* 6. Access Type Checkboxes */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
-                    <Icon icon="lucide:unlock" width={13} className="text-muted-foreground/80" />
-                    <span>{t("catalog.accessType", "Access Type")}</span>
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <label className={`flex items-center gap-2 p-2 rounded-control border text-xs font-medium cursor-pointer transition-colors ${
-                      accessValue === 'open_access'
-                        ? 'border-primary bg-primary-subtle/50 text-primary font-semibold'
-                        : 'border-border bg-surface text-foreground hover:bg-surface-muted/50'
-                    }`}>
-                      <input
-                        type="checkbox"
-                        checked={accessValue === 'open_access'}
-                        onChange={() => onAccessSelect(accessValue === 'open_access' ? 'all' : 'open_access')}
-                        className="size-3.5 rounded border-border text-primary accent-primary cursor-pointer"
-                      />
-                      <span>Open Access</span>
-                    </label>
-
-                    <label className={`flex items-center gap-2 p-2 rounded-control border text-xs font-medium cursor-pointer transition-colors ${
-                      isOaDiamond
-                        ? 'border-primary bg-primary-subtle/50 text-primary font-semibold'
-                        : 'border-border bg-surface text-foreground hover:bg-surface-muted/50'
-                    }`}>
-                      <input
-                        type="checkbox"
-                        checked={isOaDiamond}
-                        onChange={() => onOaDiamondToggle && onOaDiamondToggle(!isOaDiamond)}
-                        className="size-3.5 rounded border-border text-primary accent-primary cursor-pointer"
-                      />
-                      <span>OA Diamond</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Filter Panel Footer */}
-              <div className="flex items-center justify-between px-4 py-2.5 border-t border-border bg-surface-muted/30">
-                <span className="text-[11px] text-muted-foreground">
-                  {activeFilterCount > 0
-                    ? `${activeFilterCount} ${t("catalog.filtersApplied", "filters selected")}`
-                    : t("catalog.noFilterApplied", "No filters applied")}
-                </span>
-                <div className="flex items-center gap-2">
-                  {activeFilterCount > 0 && (
+                {/* Filter Panel Footer */}
+                <div className="flex items-center justify-between px-4 py-2.5 border-t border-border bg-surface-muted/30">
+                  <span className="text-[11px] text-muted-foreground">
+                    {activeFilterCount > 0
+                      ? `${activeFilterCount} ${t("catalog.filtersApplied", "filters selected")}`
+                      : t("catalog.noFilterApplied", "No filters applied")}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    {activeFilterCount > 0 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={onClearAll}
+                        className="h-8 text-xs font-medium"
+                      >
+                        {t("resetAll", "Reset")}
+                      </Button>
+                    )}
                     <Button
                       type="button"
-                      variant="outline"
                       size="sm"
-                      onClick={onClearAll}
-                      className="h-8 text-xs font-medium"
+                      onClick={() => {
+                        setIsFilterOpen(false);
+                        onSearchSubmit?.();
+                      }}
+                      className="h-8 px-4 text-xs font-semibold"
                     >
-                      {t("resetAll", "Reset")}
+                      {t("catalog.applyFilters", "Apply")}
                     </Button>
-                  )}
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      setIsFilterOpen(false);
-                      onSearchSubmit?.();
-                    }}
-                    className="h-8 px-4 text-xs font-semibold"
-                  >
-                    {t("catalog.applyFilters", "Apply")}
-                  </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
         </div>
 

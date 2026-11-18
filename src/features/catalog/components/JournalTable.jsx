@@ -73,7 +73,7 @@ export default function JournalTable({
     <div className="table-responsive">
       <Table hover className="catalog-table align-middle mb-0 text-start w-full">
           <thead>
-            <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+            <tr className="border-b border-border bg-surface-muted/60 text-[12px] text-muted-foreground font-semibold">
               <th className="px-4 py-3 text-start">Journal & ISSN</th>
               <th className="px-3 py-3 text-start">Publisher & Region</th>
               <th className="px-3 py-3 text-center">Quartile</th>
@@ -82,14 +82,14 @@ export default function JournalTable({
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">
-            {journals.map((journal, idx) => {
+            {journals.map((journal) => {
               const id = journal.id || journal.journal_id;
               return (
                 <motion.tr
                   key={id}
-                  initial={{ opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.15, delay: Math.min(idx * 0.02, 0.2) }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.15 }}
                   onClick={() => navigate(`/journals/${id}`)}
                   className="cursor-pointer transition-colors hover:bg-primary-subtle/20 group"
                 >

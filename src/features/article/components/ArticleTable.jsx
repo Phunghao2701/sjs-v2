@@ -23,14 +23,11 @@ export default function ArticleTable({
     <tbody>
       {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
         <tr key={i} className="border-b border-border/60">
-          <td className="px-3 py-3.5 text-center w-10">
-            <Skeleton className="h-3.5 w-4 rounded mx-auto" />
-          </td>
-          <td className="px-4 py-3.5">
+          <td className="px-4 py-3.5 text-left">
             <Skeleton className="h-4 w-4/5 rounded mb-2" />
             <Skeleton className="h-3 w-1/2 rounded" />
           </td>
-          <td className="px-3 py-3.5">
+          <td className="px-3 py-3.5 text-left">
             <Skeleton className="h-3.5 w-28 rounded" />
           </td>
           <td className="px-3 py-3.5 text-center">
@@ -56,10 +53,9 @@ export default function ArticleTable({
       <div className="table-responsive">
         <Table hover className="align-middle mb-0 text-start w-full">
           <thead>
-            <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-              <th className="px-3 py-3 text-center w-10">#</th>
-              <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
-              <th className="px-3 py-3">Journal</th>
+            <tr className="border-b border-border bg-surface-muted/60 text-[12px] text-muted-foreground font-semibold">
+              <th className="px-4 py-3 text-left">{t("article.tenBaiBao", "Article Title")}</th>
+              <th className="px-3 py-3 text-left">Journal</th>
               <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
               <th className="px-3 py-3">DOI</th>
               <th className="px-3 py-3">Topic / Field</th>
@@ -110,15 +106,13 @@ export default function ArticleTable({
           <div className="table-responsive">
             <Table hover className="align-middle mb-0 text-start w-full">
               <thead>
-                <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                  <th className="px-3 py-3 text-center w-10">#</th>
-                  <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
-                  <th className="px-3 py-3">Journal</th>
+                <tr className="border-b border-border bg-surface-muted/60 text-[12px] text-muted-foreground font-semibold">
+                  <th className="px-4 py-3 text-left">{t("article.tenBaiBao", "Article Title")}</th>
+                  <th className="px-3 py-3 text-left">Journal</th>
                   <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
                   <th className="px-3 py-3">DOI</th>
                   <th className="px-3 py-3">Topic / Field</th>
-                  <th className="px-3 py-3 text-center">Access</th>
-                  <th className="px-4 py-3 text-end">{t("article.chiTiet", "Action")}</th>
+                  <th className="px-4 py-3 text-center">Access</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -139,15 +133,13 @@ export default function ArticleTable({
           <div className="table-responsive">
             <Table hover className="align-middle mb-0 text-start w-full">
               <thead>
-                <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                  <th className="px-3 py-3 text-center w-10">#</th>
-                  <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
-                  <th className="px-3 py-3">Journal</th>
+                <tr className="border-b border-border bg-surface-muted/60 text-[12px] text-muted-foreground font-semibold">
+                  <th className="px-4 py-3 text-left">{t("article.tenBaiBao", "Article Title")}</th>
+                  <th className="px-3 py-3 text-left">Journal</th>
                   <th className="px-3 py-3 text-center">{t("article.nam1", "Year")}</th>
                   <th className="px-3 py-3">DOI</th>
                   <th className="px-3 py-3">Topic / Field</th>
-                  <th className="px-3 py-3 text-center">Access</th>
-                  <th className="px-4 py-3 text-end">{t("article.chiTiet", "Action")}</th>
+                  <th className="px-4 py-3 text-center">Access</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">

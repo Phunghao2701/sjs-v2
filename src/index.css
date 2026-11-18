@@ -28,6 +28,10 @@
   --glow-accent: rgba(0, 113, 188, 0.08);
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 html,
 body {
   background-color: var(--bg-main);
@@ -42,6 +46,12 @@ body {
   transition:
     background-color 0.3s ease,
     color 0.3s ease;
+}
+
+/* Prevent table wrappers from flashing vertical scrollbars during layout shifts or animations */
+.table-responsive,
+.overflow-x-auto {
+  overflow-y: hidden !important;
 }
 
 /* ─── Neutralize Bootstrap 5 Default Link Underlines ─────────────────── */

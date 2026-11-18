@@ -217,12 +217,7 @@ export default function AuthorListPage() {
           {statCards.map((stat, idx) => (
             <MotionItem key={idx}>
               <Card className="p-3 sm:p-3.5 flex flex-col justify-between relative overflow-hidden group h-full">
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate">{stat.label}</span>
-                  <div className={cn("size-7 rounded-lg flex items-center justify-center shrink-0", stat.iconBg, stat.iconColor)}>
-                    <Icon icon={stat.icon} width="14" height="14" />
-                  </div>
-                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground truncate block">{stat.label}</span>
                 <div className="mt-1">
                   <div className="text-lg sm:text-xl font-bold tracking-tight text-foreground tabular-nums">{stat.value}</div>
                   <div className="text-[11px] text-muted-foreground mt-0.5 truncate" title={stat.desc}>{stat.desc}</div>
@@ -234,7 +229,7 @@ export default function AuthorListPage() {
 
         {/* Unified Author Section: Search Header + Results Toolbar + Table/Grid Content + Pagination Footer in ONE Card */}
         <motion.div variants={fadeUp}>
-          <Card className="rounded-card border border-border bg-surface shadow-card overflow-hidden">
+          <Card className="rounded-card border border-border bg-surface shadow-card">
             {/* 1. Integrated Search & Filter Header (gộp section search vào table) */}
             <div className="p-3 sm:p-3.5 bg-surface">
               <form onSubmit={handleSearchSubmit}>
@@ -323,35 +318,7 @@ export default function AuthorListPage() {
               </form>
             </div>
 
-            {/* 2. Results Counter Toolbar (đồng bộ như Catalog / Article) */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5 border-t border-border bg-surface-muted/30">
-              <div className="text-xs text-muted-foreground">
-                <span>{t("article.timThay", "Found")} </span>
-                <strong className="text-foreground font-semibold">{totalAuthors.toLocaleString()}</strong>
-                <span> {t("author.tacGia", "authors")}</span>
-                {totalAuthors > 0 && (
-                  <span> &bull; Page <strong className="text-foreground font-semibold">{pageVal}</strong> of <strong className="text-foreground font-semibold">{totalPagesCount}</strong></span>
-                )}
-              </div>
-
-              {(searchVal || periodVal || subjectAreaVal || sortVal !== 'articles') && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchInput('');
-                    const nextParams = new URLSearchParams();
-                    nextParams.set('page', '1');
-                    setSearchParams(nextParams);
-                  }}
-                  className="text-xs text-danger hover:underline font-semibold flex items-center gap-1 border-0 bg-transparent p-0 cursor-pointer"
-                >
-                  <Icon icon="lucide:rotate-ccw" width={12} />
-                  <span>{t("resetAllFilters", "Reset all filters")}</span>
-                </button>
-              )}
-            </div>
-
-            {/* 3. Table / Grid content */}
+            {/* 2. Table / Grid content */}
             <div className="border-t border-border">
               <AnimatePresence mode="wait">
                 <motion.div

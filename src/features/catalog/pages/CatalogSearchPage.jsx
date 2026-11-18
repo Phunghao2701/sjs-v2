@@ -72,7 +72,7 @@ export default function CatalogSearchPage() {
 
         {/* 2. Unified Container: Filter + Toolbar + Table + Pagination */}
         <motion.div variants={fadeUp}>
-          <Card className="rounded-card border border-border bg-surface shadow-card overflow-hidden">
+          <Card className="rounded-card border border-border bg-surface shadow-card">
         {/* Filter Toolbar Panel */}
         <FilterPanel
           asCard={false}
@@ -98,56 +98,9 @@ export default function CatalogSearchPage() {
           onOaDiamondToggle={handleOaDiamondToggle}
           onClearAll={handleClearAll}
           loading={loadingFilters}
+          sort={sort}
+          onSortChange={handleSortChange}
         />
-
-        {/* Toolbar: Results Counter + Sort Options */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-2.5 border-t border-border bg-surface-muted/30">
-          <div className="text-xs text-muted-foreground">
-            {loadingJournals ? (
-              <span className="flex items-center gap-1.5">
-                <Icon icon="lucide:loader-2" width="14" className="animate-spin text-primary" />
-                <span>{t("catalog.dangTimKiemTapChi", "Searching journals database...")}</span>
-              </span>
-            ) : (
-              <span>
-                {t("catalog.timThay", "Found ")}
-                <strong className="text-foreground font-bold">{Number(total || 0).toLocaleString()}</strong> {t("catalog.tapChiCount", "journals")}
-                <span className="mx-1.5">•</span>
-                {t("pagination.page", "Page")} <strong className="text-foreground">{page}</strong> of <strong className="text-foreground">{totalPages}</strong>
-              </span>
-            )}
-          </div>
-
-          {/* Sort Dropdown */}
-          <Dropdown align="end">
-            <Dropdown.Toggle
-              variant="light"
-              id="sort-dropdown"
-              className="h-8 px-3 rounded-control border border-border bg-surface text-foreground text-xs font-medium flex items-center gap-1.5 shadow-2xs"
-            >
-              <Icon icon="lucide:arrow-up-down" width="13" className="text-muted-foreground" />
-              <span>
-                {sort === 'metric' && t("catalog.macDinh", "Sort: SJR Metric")}
-                {sort === 'name' && t("catalog.tenAz", "Sort: Name (A-Z)")}
-              </span>
-              <Icon icon="lucide:chevron-down" width="12" className="text-muted-foreground" />
-            </Dropdown.Toggle>
-            <Dropdown.Menu className="border border-border bg-surface shadow-popover rounded-card p-1 text-xs">
-              <Dropdown.Item
-                onClick={() => handleSortChange('metric')}
-                className={`rounded-control text-xs py-1.5 px-3 ${sort === 'metric' ? 'bg-primary-subtle text-primary font-bold' : ''}`}
-              >
-                {t("catalog.macDinh", "Sort: SJR Metric (Default)")}
-              </Dropdown.Item>
-              <Dropdown.Item
-                onClick={() => handleSortChange('name')}
-                className={`rounded-control text-xs py-1.5 px-3 ${sort === 'name' ? 'bg-primary-subtle text-primary font-bold' : ''}`}
-              >
-                {t("catalog.tenAz", "Sort: Name (A-Z)")}
-              </Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
 
         {/* Table Result Area */}
         <div className="border-t border-border">

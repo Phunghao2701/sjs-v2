@@ -64,19 +64,13 @@ export default function ArticleTableRow({
   return (
     <motion.tr
       onClick={() => onDetailClick(article.article_id)}
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       transition={{ duration: 0.15, ease: 'easeOut' }}
-      whileHover={{ backgroundColor: 'var(--ds-primary-subtle, rgba(224, 242, 254, 0.3))' }}
-      className="cursor-pointer transition-colors group text-start"
+      className="cursor-pointer transition-colors hover:bg-primary-subtle/20 group text-start"
     >
-      {/* Index */}
-      <td className="px-3 py-3.5 text-center text-xs font-mono text-muted-foreground w-10">
-        {index + 1}
-      </td>
-
       {/* Article Title & Abstract */}
-      <td className="px-4 py-3.5 max-w-md">
+      <td className="px-4 py-3.5 max-w-md text-left">
         <div className="font-bold text-foreground group-hover:text-primary transition-colors text-sm line-clamp-2 leading-snug">
           <LatexText text={article.title} />
         </div>
@@ -88,7 +82,7 @@ export default function ArticleTableRow({
       </td>
 
       {/* Journal Name */}
-      <td className="px-3 py-3.5 max-w-[200px]">
+      <td className="px-3 py-3.5 max-w-[200px] text-left">
         {journalName ? (
           <div
             onClick={(e) => handleJournalClick(e, journalId)}

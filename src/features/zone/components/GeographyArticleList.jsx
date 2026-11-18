@@ -175,7 +175,7 @@ export default function GeographyArticleList({
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border bg-surface-muted/60 text-xs text-muted-foreground uppercase font-bold tracking-wider">
+              <tr className="border-b border-border bg-surface-muted/60 text-[12px] text-muted-foreground font-semibold">
                 <th className="px-3 py-3 text-center w-12">#</th>
                 <th className="px-4 py-3">{t("article.tenBaiBao", "Article Title")}</th>
                 <th className="px-3 py-3 w-48">Journal</th>
@@ -207,7 +207,7 @@ export default function GeographyArticleList({
           <div className="overflow-x-auto w-full hidden md:block">
             <table className="w-full text-left border-collapse table-auto">
               <thead>
-                <tr className="border-b border-border bg-surface-muted/60 text-[11px] text-muted-foreground uppercase font-bold tracking-wider">
+                <tr className="border-b border-border bg-surface-muted/60 text-[12px] text-muted-foreground font-semibold">
                   <th className="px-3 py-3 text-center w-12">#</th>
                   <th className="px-4 py-3 min-w-[280px]">{t("article.tenBaiBao", "Article Title")}</th>
                   <th className="px-3 py-3 w-48">Journal</th>
