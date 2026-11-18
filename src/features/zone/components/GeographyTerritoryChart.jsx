@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useMemo } from 'react';
 import Icon from '../../../shared/components/Icon';
+import { Skeleton } from '../../../shared/ui/skeleton';
 
 // Helper function to map country code to circle-flags icon code
 const getCountryFlagCode = (item) => {
@@ -25,7 +26,6 @@ const getCountryFlagCode = (item) => {
   return isoMap[rawCode] || (rawCode.length === 2 ? rawCode : 'un');
 };
 
-// Component biểu đồ dạng Horizontal Bar Chart hiển thị Top 10 Quốc gia
 export default function GeographyTerritoryChart({
   data = [],
   loading = false,
@@ -33,9 +33,7 @@ export default function GeographyTerritoryChart({
   onSelectCountry,
   selectedYear = 'All'
 }) {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
 
   // Top 10 countries sorted by article count
   const top10 = useMemo(() => {
@@ -49,165 +47,121 @@ export default function GeographyTerritoryChart({
     return max > 0 ? max : 1;
   }, [top10]);
 
-  const gridTicks = useMemo(() => {
-    if (maxVal === 1) return [0, 1];
-    return [0, Math.round(maxVal * 0.25), Math.round(maxVal * 0.5), Math.round(maxVal * 0.75), maxVal];
-  }, [maxVal]);
-
   return (
-    <div className="p-4 journal-dark-card h-100 d-flex flex-column">
+    <div className="rounded-xl border border-border bg-surface p-5 shadow-xs flex flex-col h-full min-w-0">
       {/* Header */}
-      <div className="d-flex align-items-center justify-content-between mb-4">
-        <div>
-          <h3 className="font-display fw-bold text-main mb-0" style={{ fontSize: '16px' }}>
+      <div className="flex items-center justify-between gap-3 pb-3 border-b border-border/70">
+        <div className="min-w-0">
+          <h3 className="text-base font-bold text-foreground tracking-tight m-0 truncate">
             {t("zone.top10QuocGiaCoSanLuongArticleCa", "Top 10 Countries by Article Output")}
           </h3>
-          <p className="text-muted-custom mb-0 mt-1" style={{ fontSize: '13px' }}>
-            {t("zone.phanBoSoLuongBaiBaoKhoaHocXuat")}
+          <p className="text-xs text-muted-foreground mt-0.5 mb-0 truncate">
+            {t("zone.phanBoSoLuongBaiBaoKhoaHocXuat", "Distribution of scientific publications worldwide")}
           </p>
         </div>
-        <span
-          className="px-2 py-1 rounded text-muted-custom"
-          style={{
-            fontSize: '13px',
-            backgroundColor: 'var(--bg-chip)',
-            fontWeight: 500,
-            alignSelf: 'flex-start'
-          }}
-        >
-          {selectedYear === 'All' ? t("zone.tatCaCacNam") : `Thống kê ${selectedYear}`}
+        <span className="px-2.5 py-1 rounded-full bg-surface-muted text-xs font-semibold text-muted-foreground whitespace-nowrap shrink-0">
+          {selectedYear === 'All' ? t("zone.tatCaCacNam", "All Years") : `Năm ${selectedYear}`}
         </span>
       </div>
 
       {loading ? (
-        <div className="d-flex flex-column gap-3 justify-content-center flex-grow-1" style={{ minHeight: '380px' }}>
+        <div className="space-y-3.5 py-4 flex-1 flex flex-col justify-around min-h-[420px]">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-            <div key={i} className="d-flex align-items-center gap-3">
-              <div className="skeleton-shimmer rounded-circle" style={{ width: '28px', height: '28px' }} />
-              <div className="skeleton-shimmer rounded" style={{ width: '100px', height: '18px' }} />
-              <div className="skeleton-shimmer flex-grow-1 rounded" style={{ height: '32px' }} />
+            <div key={i} className="flex items-center gap-3">
+              <Skeleton className="size-6 rounded-full shrink-0" />
+              <Skeleton className="h-4 w-32 shrink-0" />
+              <Skeleton className="h-7 flex-1 rounded-md" />
+              <Skeleton className="h-4 w-12 shrink-0" />
             </div>
           ))}
         </div>
       ) : top10.length === 0 ? (
-        <div
-          className="d-flex align-items-center justify-content-center flex-grow-1 text-muted-custom py-5"
-          style={{ minHeight: '380px', fontSize: '14px' }}
-        >
-          {t("topic.khongCoDuLieu")}
+        <div className="flex flex-col items-center justify-center flex-1 text-muted-foreground py-16 text-sm">
+          <Icon icon="lucide:globe" width="40" className="opacity-40 mb-2" />
+          <span>{t("topic.khongCoDuLieu", "No geographic data available")}</span>
         </div>
       ) : (
-        <div className="d-flex flex-column flex-grow-1 justify-content-between pt-2">
-          
-          {/* Main Horizontal Bars Area */}
-          <div className="position-relative d-flex flex-column gap-2.5 flex-grow-1 justify-content-around">
-            
-            {/* Vertical Background Gridlines */}
-            <div
-              className="position-absolute h-100 d-flex justify-content-between pe-2"
-              style={{
-                left: '191px',
-                right: 0,
-                top: 0,
-                pointerEvents: 'none',
-                zIndex: 0
-              }}
-            >
-              {gridTicks.map((_, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    borderRight: '1px dashed rgba(0, 0, 0, 0.07)',
-                    height: '100%'
-                  }}
-                />
-              ))}
-            </div>
+        <div className="pt-3 space-y-2.5 flex-1 flex flex-col justify-around">
+          {top10.map((item, index) => {
+            const val = Number(item.article_count) || 0;
+            const widthPercent = maxVal > 0 ? (val / maxVal) * 100 : 0;
+            const flagCode = getCountryFlagCode(item);
+            const isSelected = selectedCountry?.zone_id === item.zone_id;
+            const rank = index + 1;
 
-            {/* Horizontal Rows */}
-            {top10.map((item, index) => {
-              const val = Number(item.article_count) || 0;
-              const widthPercent = maxVal > 0 ? (val / maxVal) * 100 : 0;
-              const displayWidth = Math.max(widthPercent, 12);
-              const flagCode = getCountryFlagCode(item);
-              const isSelected = selectedCountry?.zone_id === item.zone_id;
+            return (
+              <div
+                key={item.zone_id || index}
+                onClick={() => onSelectCountry?.(item)}
+                className={`group flex items-center gap-2.5 sm:gap-3 p-1.5 sm:p-2 rounded-lg border transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-primary-subtle/50 border-primary shadow-xs'
+                    : 'border-transparent hover:bg-surface-muted/60 hover:border-border/60'
+                }`}
+              >
+                {/* Rank Badge */}
+                <span className={`w-5 text-center text-xs font-mono font-bold shrink-0 ${
+                  rank <= 3 ? 'text-primary' : 'text-muted-foreground'
+                }`}>
+                  {rank}
+                </span>
 
-              return (
-                <div
-                  key={item.zone_id || index}
-                  onClick={() => onSelectCountry?.(item)}
-                  className={`d-flex align-items-center gap-3 w-100 bar-row-container position-relative z-1 py-1 ${
-                    isSelected ? 'is-selected' : ''
-                  }`}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {/* Left Column: Flag + Country Name & Code */}
-                  <div className="d-flex align-items-center" style={{ width: '175px', flexShrink: 0, gap: '10px' }}>
-                    <div className="flex-shrink-0 d-flex align-items-center justify-content-center flag-wrapper">
-                      <Icon icon={`circle-flags:${flagCode}`} width={24} height={24} className="shadow-sm rounded-circle" />
-                    </div>
-                    <div className="d-flex flex-column min-w-0">
-                      <span
-                        className="text-main fw-bold font-display text-truncate"
-                        style={{ fontSize: '14px' }}
-                        title={item.name}
-                      >
-                        {item.name || item.code}
-                      </span>
-                      <span className="text-muted-custom font-display text-xs" style={{ fontSize: '13px' }}>
-                        {item.code || item.iso_code || '—'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Right Column: Horizontal Bar */}
-                  <div className="flex-grow-1 position-relative d-flex align-items-center" style={{ height: '34px' }}>
-                    {/* Background Bar Track */}
-                    <div
-                      className="position-absolute w-100 h-100 rounded-3"
-                      style={{ backgroundColor: 'var(--bg-chip)', opacity: 0.5, zIndex: 0 }}
-                    />
-
-                    {/* The Fill Bar */}
-                    <div
-                      className={`geography-chart-bar-horizontal rounded-3 d-flex align-items-center ${
-                        widthPercent >= 38 ? 'justify-content-end px-3' : 'justify-content-start'
-                      } position-relative ${isSelected ? 'is-active' : ''}`}
-                      style={{
-                        width: `${Math.max(widthPercent, 3)}%`,
-                        height: '100%',
-                        zIndex: 1,
-                        transition: 'width 0.6s cubic-bezier(0.16, 1, 0.3, 1)'
-                      }}
+                {/* Country Flag & Label */}
+                <div className="w-[140px] sm:w-[160px] md:w-[175px] shrink-0 min-w-0 flex items-center gap-2.5">
+                  <Icon
+                    icon={`circle-flags:${flagCode}`}
+                    width={22}
+                    height={22}
+                    className="rounded-full shrink-0 shadow-2xs"
+                  />
+                  <div className="min-w-0 flex-1 truncate">
+                    <span
+                      className="block truncate text-xs sm:text-sm font-semibold text-foreground group-hover:text-primary transition-colors leading-tight"
+                      title={item.name}
                     >
-                      {/* Value Label INSIDE when bar is wide enough */}
-                      {widthPercent >= 38 && (
-                        <span
-                          className="fw-bold font-display text-white text-nowrap bar-value-inside"
-                          style={{ fontSize: '13px', letterSpacing: '0.01em' }}
-                        >
-                          {val > 0 ? val.toLocaleString() : '0'}
-                        </span>
-                      )}
-                    </div>
+                      {item.name || item.code}
+                    </span>
+                    <span className="block text-[10px] text-muted-foreground font-mono uppercase mt-0.5">
+                      {item.code || item.iso_code || '—'}
+                    </span>
+                  </div>
+                </div>
 
-                    {/* Value Label OUTSIDE when bar is narrow to prevent truncation */}
-                    {widthPercent < 38 && (
-                      <span
-                        className="ps-2 fw-bold font-display text-foreground text-nowrap position-relative"
-                        style={{ fontSize: '13px', letterSpacing: '0.01em', zIndex: 2 }}
-                      >
-                        {val > 0 ? val.toLocaleString() : '0'}
+                {/* Horizontal Bar Track & Fill */}
+                <div className="flex-1 min-w-0 h-6 sm:h-7 rounded-md bg-surface-muted/70 relative flex items-center overflow-hidden">
+                  <div
+                    className={`h-full rounded-md transition-all duration-500 ease-out flex items-center ${
+                      isSelected
+                        ? 'bg-gradient-to-r from-primary to-primary-hover shadow-sm'
+                        : 'bg-gradient-to-r from-primary/85 to-primary group-hover:from-primary group-hover:to-primary-hover'
+                    }`}
+                    style={{ width: `${Math.max(widthPercent, 2)}%` }}
+                  >
+                    {/* Number inside when bar is wide */}
+                    {widthPercent >= 35 && (
+                      <span className="ml-auto pr-2 text-[11px] font-bold text-white font-mono whitespace-nowrap">
+                        {val.toLocaleString()}
                       </span>
                     )}
                   </div>
-                </div>
-              );
-            })}
 
-          </div>
+                  {/* Number outside when bar is narrow to prevent cut-off */}
+                  {widthPercent < 35 && (
+                    <span className="pl-2 text-[11px] font-bold text-foreground font-mono whitespace-nowrap">
+                      {val.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+
+                {/* Percentage Share */}
+                <span className="w-12 sm:w-14 text-right text-xs font-mono font-semibold text-muted-foreground shrink-0">
+                  {widthPercent.toFixed(1)}%
+                </span>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
   );
-}
+}
