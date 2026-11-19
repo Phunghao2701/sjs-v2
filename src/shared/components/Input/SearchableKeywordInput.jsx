@@ -10,7 +10,8 @@ export default function SearchableKeywordInput({
   placeholder,
   disabled = false,
   debounceTime = 300,
-  subjectAreaId = null
+  subjectAreaId = null,
+  subjectCategoryId = null
 }) {
   const { t } = useTranslation();
   const resolvedPlaceholder = placeholder || t("common.chonTuKhoa", "Select or type a keyword...");
@@ -61,7 +62,9 @@ export default function SearchableKeywordInput({
       setIsSearching(true);
       try {
         const queryParams = { search: val, limit: 20 };
-        if (subjectAreaId) {
+        if (subjectCategoryId) {
+          queryParams.subject_category_id = subjectCategoryId;
+        } else if (subjectAreaId) {
           queryParams.subject_area_id = subjectAreaId;
         }
         const res = await keywordApi.getKeywords(queryParams);
@@ -75,7 +78,7 @@ export default function SearchableKeywordInput({
     };
     const timeoutId = setTimeout(fetchSuggestions, debounceTime);
     return () => clearTimeout(timeoutId);
-  }, [searchTerm, isOpen, debounceTime, subjectAreaId, t]);
+  }, [searchTerm, isOpen, debounceTime, subjectAreaId, subjectCategoryId, t]);
 
   const handleSelect = kwName => {
     if (kwName && onAddKeyword) {

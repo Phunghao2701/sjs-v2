@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { NavLink, Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { FiBarChart2, FiFileText, FiFolder, FiGlobe, FiMenu, FiSearch, FiUsers, FiX, FiLogOut } from 'react-icons/fi';
+import { Icon } from '@iconify/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createContext } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -130,6 +131,24 @@ export default function DashboardShell({ children }) {
   const { logout } = useAuth();
   const reduceMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('trending_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('trending_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
   const drawerCloseRef = useRef(null);
   const sidebarRef = useRef(null);
   const base = `/${lang}`;
@@ -174,60 +193,102 @@ export default function DashboardShell({ children }) {
     };
   }, [mobileOpen]);
 
-  const renderSidebar = (showLogo = true) => (
-    <aside className="app-sidebar flex min-h-full flex-col border-r border-border bg-surface" aria-label="Primary navigation">
-      {showLogo && (
-        <div className="h-14 min-h-14 flex items-center border-b border-border px-4 box-border">
-          <Link to={`${base}/dashboard`} className="flex items-center no-underline text-inherit">
-            <Logo size={26} fontSize="0.95rem" />
-          </Link>
-        </div>
-      )}
-      <div className="flex flex-1 flex-col p-3">
-        <nav className="flex flex-col gap-0.5">
-          {items.map(({ label, path, icon: Icon }) => (
-            <NavLink
-              key={path}
-              to={`${base}/${path}`}
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `group flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control px-2.5 py-1.5 text-left text-xs transition-colors ${
-                  isActive
-                    ? 'bg-primary-subtle font-semibold !text-primary'
-                    : 'font-medium !text-muted-foreground hover:bg-surface-muted hover:!text-foreground'
-                }`
-              }
+  const renderSidebar = (showLogo = true, isMobile = false) => {
+    const isCollapsed = collapsed && !isMobile;
+    return (
+      <aside className="app-sidebar flex min-h-full flex-col border-r border-border bg-surface" aria-label="Primary navigation">
+        {showLogo && (
+          <div className={`h-14 min-h-14 flex items-center border-b border-border box-border ${isCollapsed ? 'justify-center px-2' : 'justify-between px-3.5'}`}>
+            {isCollapsed ? (
+              <button
+                type="button"
+                onClick={toggleCollapsed}
+                className="group relative size-9 rounded-control flex items-center justify-center hover:bg-surface-muted transition-colors cursor-pointer border-0 bg-transparent"
+                title="Expand sidebar"
+                aria-label="Expand sidebar"
+              >
+                <div className="group-hover:hidden">
+                  <Logo size={26} fontSize="0.95rem" showText={false} />
+                </div>
+                <div className="hidden group-hover:flex text-muted-foreground group-hover:text-foreground">
+                  <Icon icon="lucide:panel-left-open" width={18} />
+                </div>
+              </button>
+            ) : (
+              <>
+                <Link to={`${base}/dashboard`} className="flex items-center no-underline text-inherit overflow-hidden">
+                  <Logo size={26} fontSize="0.95rem" showText={true} />
+                </Link>
+                <button
+                  type="button"
+                  onClick={toggleCollapsed}
+                  className="size-7 rounded-control flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-surface-muted transition-colors cursor-pointer border-0 bg-transparent shrink-0"
+                  title="Collapse sidebar"
+                  aria-label="Collapse sidebar"
+                >
+                  <Icon icon="lucide:panel-left-close" width={17} />
+                </button>
+              </>
+            )}
+          </div>
+        )}
+        <div className={`flex flex-1 flex-col ${isCollapsed ? 'p-2' : 'p-3'}`}>
+          <nav className="flex flex-col gap-0.5">
+            {items.map(({ label, path, icon: ItemIcon }) => (
+              <NavLink
+                key={path}
+                to={`${base}/${path}`}
+                onClick={() => setMobileOpen(false)}
+                title={isCollapsed ? t(`navigation.${path}`, label) : undefined}
+                className={({ isActive }) =>
+                  `group flex h-9 min-h-[36px] w-full items-center rounded-control transition-colors ${
+                    isCollapsed ? 'justify-center px-0' : 'gap-2.5 px-2.5 py-1.5'
+                  } text-left text-xs ${
+                    isActive
+                      ? 'bg-primary-subtle font-semibold !text-primary'
+                      : 'font-medium !text-muted-foreground hover:bg-surface-muted hover:!text-foreground'
+                  }`
+                }
+              >
+                <ItemIcon aria-hidden="true" className="shrink-0 text-base" />
+                {!isCollapsed && <span className="truncate">{t(`navigation.${path}`, label)}</span>}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-2">
+            <button
+              type="button"
+              title={isCollapsed ? t('navigation.account', 'Account') : undefined}
+              className={`flex h-9 min-h-[36px] w-full items-center rounded-control border-0 bg-transparent text-left text-xs font-semibold text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground cursor-pointer ${
+                isCollapsed ? 'justify-center px-0' : 'gap-2.5 px-2.5 py-1.5'
+              }`}
+              onClick={() => {
+                setMobileOpen(false);
+                navigate(`${base}/profile`);
+              }}
             >
-              <Icon aria-hidden="true" className="shrink-0 text-base" />
-              <span>{t(`navigation.${path}`, label)}</span>
-            </NavLink>
-          ))}
-        </nav>
-        <div className="mt-auto flex flex-col gap-0.5 border-t border-border pt-2">
-          <button
-            type="button"
-            className="flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control border-0 bg-transparent px-2.5 py-1.5 text-left text-xs font-semibold text-muted-foreground transition-colors hover:bg-surface-muted hover:text-foreground cursor-pointer"
-            onClick={() => {
-              setMobileOpen(false);
-              navigate(`${base}/profile`);
-            }}
-          >
-            <FiUsers aria-hidden="true" className="text-base" /> <span>{t('navigation.account', 'Account')}</span>
-          </button>
-          <button
-            type="button"
-            className="flex h-9 min-h-[36px] w-full items-center gap-2.5 rounded-control border-0 bg-transparent px-2.5 py-1.5 text-left text-xs font-semibold text-muted-foreground transition-colors hover:bg-danger-subtle hover:text-danger cursor-pointer"
-            onClick={() => {
-              setMobileOpen(false);
-              logout();
-            }}
-          >
-            <FiLogOut aria-hidden="true" className="text-base" /> <span>{t('navigation.signOut', 'Sign out')}</span>
-          </button>
+              <FiUsers aria-hidden="true" className="text-base shrink-0" />
+              {!isCollapsed && <span className="truncate">{t('navigation.account', 'Account')}</span>}
+            </button>
+            <button
+              type="button"
+              title={isCollapsed ? t('navigation.signOut', 'Sign out') : undefined}
+              className={`flex h-9 min-h-[36px] w-full items-center rounded-control border-0 bg-transparent text-left text-xs font-semibold text-muted-foreground transition-colors hover:bg-danger-subtle hover:text-danger cursor-pointer ${
+                isCollapsed ? 'justify-center px-0' : 'gap-2.5 px-2.5 py-1.5'
+              }`}
+              onClick={() => {
+                setMobileOpen(false);
+                logout();
+              }}
+            >
+              <FiLogOut aria-hidden="true" className="text-base shrink-0" />
+              {!isCollapsed && <span className="truncate">{t('navigation.signOut', 'Sign out')}</span>}
+            </button>
+          </div>
         </div>
-      </div>
-    </aside>
-  );
+      </aside>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground md:flex">
@@ -238,36 +299,36 @@ export default function DashboardShell({ children }) {
       </header>
 
       {/* Desktop Sticky Sidebar (Flex item, zero margin needed for main) */}
-      <div className="hidden md:block w-[230px] shrink-0">
-        <div ref={sidebarRef} className="sticky top-0 h-screen overflow-y-auto overflow-x-hidden">{renderSidebar(true)}</div>
+      <div className={`hidden md:block shrink-0 transition-[width] duration-200 ease-in-out ${collapsed ? 'w-[64px]' : 'w-[230px]'}`}>
+        <div ref={sidebarRef} className="sticky top-0 h-screen overflow-y-auto overflow-x-hidden">{renderSidebar(true, false)}</div>
       </div>
 
       {/* Main Content Column */}
       <div className="flex flex-1 flex-col min-w-0">
         <header className="app-topbar sticky top-0 z-[var(--ds-z-sticky)] flex max-md:hidden h-14 min-h-14 items-center border-b border-border bg-surface/95 px-4 sm:px-6 lg:px-8 backdrop-blur box-border">
-          <div className="w-full flex items-center justify-between">
+          <div className="w-full flex items-center justify-between gap-4">
             <nav aria-label="Breadcrumb" className="flex min-w-0 items-center gap-1.5 text-xs sm:text-sm">
-              {headerBreadcrumbs.map((crumb, idx) => {
-                const isLast = idx === headerBreadcrumbs.length - 1;
-                return (
-                  <div key={idx} className="flex items-center gap-1.5 min-w-0">
-                    {idx > 0 && <span aria-hidden="true" className="text-subtle-foreground/60 select-none">/</span>}
-                    {crumb.to && !isLast ? (
-                      <Link
-                        to={crumb.to}
-                        className="text-muted-foreground hover:text-foreground transition-colors truncate no-underline font-medium"
-                      >
-                        {crumb.label}
-                      </Link>
-                    ) : (
-                      <span className={`truncate ${isLast ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
-                        {crumb.label}
-                      </span>
-                    )}
-                  </div>
-                );
-              })}
-            </nav>
+                {headerBreadcrumbs.map((crumb, idx) => {
+                  const isLast = idx === headerBreadcrumbs.length - 1;
+                  return (
+                    <div key={idx} className="flex items-center gap-1.5 min-w-0">
+                      {idx > 0 && <span aria-hidden="true" className="text-subtle-foreground/60 select-none">/</span>}
+                      {crumb.to && !isLast ? (
+                        <Link
+                          to={crumb.to}
+                          className="text-muted-foreground hover:text-foreground transition-colors truncate no-underline font-medium"
+                        >
+                          {crumb.label}
+                        </Link>
+                      ) : (
+                        <span className={`truncate ${isLast ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>
+                          {crumb.label}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </nav>
             <div className="flex items-center gap-2.5">
               <button type="button" onClick={() => navigate(`${base}/search`)} className="flex h-9 min-w-[210px] items-center gap-2 rounded-control border border-border bg-background px-3 text-left text-xs text-muted-foreground transition-colors" aria-label={t('navigation.search', 'Search')}>
                 <FiSearch aria-hidden="true" />
@@ -300,7 +361,7 @@ export default function DashboardShell({ children }) {
           <motion.div className="fixed inset-0 z-[var(--ds-z-overlay)] bg-foreground/35 md:hidden" initial={reduceMotion ? false : { opacity: 0 }} animate={{ opacity: 1 }} exit={reduceMotion ? undefined : { opacity: 0 }} onClick={() => setMobileOpen(false)}>
             <motion.div data-mobile-nav-panel role="dialog" aria-modal="true" aria-label={t('navigation.menu', 'Main navigation')} className="h-full w-[min(82vw,280px)] bg-surface shadow-popover flex flex-col" initial={reduceMotion ? false : { x: -280 }} animate={{ x: 0 }} exit={reduceMotion ? undefined : { x: -280 }} transition={{ type: 'tween', duration: reduceMotion ? 0 : 0.2, ease: 'easeOut' }} onClick={(event) => event.stopPropagation()}>
               <div className="flex h-14 min-h-14 items-center justify-between border-b border-border px-4 box-border"><Logo size={26} fontSize="0.95rem" /><Button ref={drawerCloseRef} variant="ghost" size="icon" aria-label={t('navigation.close', 'Close navigation')} onClick={() => setMobileOpen(false)}><FiX /></Button></div>
-              <div className="flex-1 overflow-y-auto">{renderSidebar(false)}</div>
+              <div className="flex-1 overflow-y-auto">{renderSidebar(false, true)}</div>
             </motion.div>
           </motion.div>
         )}

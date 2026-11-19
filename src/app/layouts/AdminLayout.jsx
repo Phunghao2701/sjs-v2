@@ -16,6 +16,23 @@ export default function AdminLayout({ children }) {
   const location = useLocation();
   const reduceMotion = useReducedMotion();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('trending_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('trending_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground md:flex">
@@ -34,9 +51,9 @@ export default function AdminLayout({ children }) {
       </header>
 
       {/* Desktop Sticky Sidebar */}
-      <div className="hidden md:block w-[230px] shrink-0">
+      <div className={`hidden md:block shrink-0 transition-[width] duration-200 ease-in-out ${collapsed ? 'w-[64px]' : 'w-[230px]'}`}>
         <div className="sticky top-0 h-screen overflow-y-auto overflow-x-hidden">
-          <AdminSidebar />
+          <AdminSidebar collapsed={collapsed} onToggleCollapse={toggleCollapsed} />
         </div>
       </div>
 
@@ -83,7 +100,7 @@ export default function AdminLayout({ children }) {
                 </Button>
               </div>
               <div className="flex-1 overflow-y-auto">
-                <AdminSidebar onNavigate={() => setMobileOpen(false)} />
+                <AdminSidebar onNavigate={() => setMobileOpen(false)} isMobile={true} />
               </div>
             </motion.div>
           </motion.div>

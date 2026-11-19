@@ -28,11 +28,11 @@ export default function useProjects() {
   const isLoading = queryLoading || mutationLoading;
   const error = (queryError ? queryError.message : null) || mutationError;
 
-  const createProject = useCallback(async (projectData) => {
+  const createProject = useCallback(async (projectData, requestConfig) => {
     setMutationLoading(true);
     setMutationError(null);
     try {
-      const response = await createProjectApi(projectData);
+      const response = await createProjectApi(projectData, requestConfig);
       if (response.data && response.data.success !== false) {
         queryClient.invalidateQueries({ queryKey: ['projects', 'list'] });
         return response.data.data;

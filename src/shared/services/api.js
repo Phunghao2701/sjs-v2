@@ -17,6 +17,7 @@ import { API_BASE_URL } from './apiBase';
  */
 const api = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -40,6 +41,7 @@ api.interceptors.request.use(
 // Axios instance for public endpoints (does not send cookies or tokens)
 export const publicApi = axios.create({
   baseURL: API_BASE_URL,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -107,16 +109,14 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshHeaders = {};
-        if (refreshToken) {
-          refreshHeaders['x-refresh-token'] = refreshToken;
-        }
-
         const res = await axios.get(
           `${API_BASE_URL}/auth/refresh`,
           {
             withCredentials: true,
-            headers: refreshHeaders,
+            // The Worker refreshes from its HTTP-only cookie. Sending the token
+            // in a custom header triggers a CORS preflight that production/local
+            // Worker CORS policies intentionally do not allow.
+            timeout: 10000,
           }
         );
 

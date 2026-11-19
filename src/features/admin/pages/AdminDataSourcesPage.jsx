@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Icon from '../../../shared/components/Icon';
 import api from '../../../shared/services/api';
 import { Alert } from '../../../shared/ui/alert';
@@ -6,138 +6,35 @@ import { Button } from '../../../shared/ui/button';
 import { PageHeader } from '../../../shared/ui/page-layout';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { Card } from '../../../shared/ui/card';
+import { useScimagoImportStore } from '../../../app/store/scimagoImportStore';
 
 const statusPath = '/admin/integrations/openalex';
-const importPath = '/admin/imports/scimago';
-const IMPORT_SESSION_STORAGE_KEY = 'admin.scimagoImportSession';
-const MAX_IMPORT_BYTES = 50 * 1024 * 1024;
-const MAX_CHUNK_BYTES = 256 * 1024;
-const MAX_CHUNK_ROWS = 50;
-const MAX_CHUNK_ATTEMPTS = 8;
-const MAX_RETRY_DELAY_MS = 30000;
-
-function splitCsvRecords(text) {
-  const input = String(text || '').replace(/^\uFEFF/, '');
-  const records = [];
-  let start = 0;
-  let quoted = false;
-  for (let index = 0; index < input.length; index += 1) {
-    const char = input[index];
-    if (char === '"') {
-      if (quoted && input[index + 1] === '"') index += 1;
-      else quoted = !quoted;
-      continue;
-    }
-    if (!quoted && (char === '\n' || char === '\r')) {
-      const end = char === '\r' && input[index + 1] === '\n' ? ++index + 1 : index + 1;
-      const record = input.slice(start, end);
-      if (record.trim()) records.push(record);
-      start = end;
-    }
-  }
-  if (quoted) throw new Error('The SCImago CSV contains an unclosed quoted field.');
-  const lastRecord = input.slice(start);
-  if (lastRecord.trim()) records.push(lastRecord);
-  if (!records.length) throw new Error('The SCImago CSV is empty.');
-  return records;
-}
-
-function makeCsvBatches(records) {
-  const batches = [];
-  let rows = [];
-  let size = 0;
-  for (const record of records) {
-    const bytes = new TextEncoder().encode(record).byteLength;
-    if (bytes > MAX_CHUNK_BYTES) throw new Error('A single SCImago row exceeds the 256 KB batch limit.');
-    if (rows.length && (rows.length >= MAX_CHUNK_ROWS || size + bytes > MAX_CHUNK_BYTES)) {
-      batches.push(rows.join(''));
-      rows = [];
-      size = 0;
-    }
-    rows.push(record);
-    size += bytes;
-  }
-  if (rows.length) batches.push(rows.join(''));
-  return batches;
-}
-
-function readStoredImportSession() {
-  try {
-    const stored = JSON.parse(window.sessionStorage.getItem(IMPORT_SESSION_STORAGE_KEY) || 'null');
-    if (!stored?.importId || !Array.isArray(stored.uploadedIndexes)) return null;
-    return { ...stored, uploadedBatches: new Set(stored.uploadedIndexes) };
-  } catch {
-    return null;
-  }
-}
-
-function storeImportSession(session) {
-  try {
-    window.sessionStorage.setItem(IMPORT_SESSION_STORAGE_KEY, JSON.stringify({
-      importId: session.importId,
-      fileName: session.fileName,
-      fileSize: session.fileSize,
-      fileLastModified: session.fileLastModified,
-      year: session.year,
-      uploadedIndexes: [...session.uploadedBatches],
-    }));
-  } catch {
-    // Import can still continue in memory if browser storage is unavailable.
-  }
-}
-
-async function postChunkWithRetry(url, body, onRetry) {
-  let lastError;
-  for (let attempt = 1; attempt <= MAX_CHUNK_ATTEMPTS; attempt += 1) {
-    try {
-      return await api.post(url, body);
-    } catch (error) {
-      lastError = error;
-      const status = error.response?.status;
-      const transient = !status || status === 408 || status === 429 || status >= 500;
-      if (!transient) throw error;
-      if (attempt < MAX_CHUNK_ATTEMPTS) {
-        const delay = Math.min(2000 * (2 ** (attempt - 1)), MAX_RETRY_DELAY_MS);
-        const jitter = Math.floor(Math.random() * 500);
-        onRetry?.({ attempt: attempt + 1, error, delay: delay + jitter });
-        await new Promise(resolve => window.setTimeout(resolve, delay + jitter));
-      }
-    }
-  }
-  throw lastError;
-}
-
-async function uploadCsvBatches(importId, batches, uploadedBatches, onProgress, onBatchUploaded) {
-  let completed = uploadedBatches.size;
-  for (let batchIndex = 0; batchIndex < batches.length; batchIndex += 1) {
-    if (uploadedBatches.has(batchIndex)) continue;
-    await postChunkWithRetry(`${importPath}/${importId}/chunks`, {
-      batch_index: batchIndex,
-      csv: batches[batchIndex],
-    }, ({ attempt, error, delay }) => {
-      onProgress({ completed, batchIndex, attempt, delay, error });
-    });
-    uploadedBatches.add(batchIndex);
-    onBatchUploaded?.(batchIndex);
-    completed += 1;
-    onProgress({ completed, batchIndex, attempt: 0, delay: 0 });
-    // A small gap prevents a long import from continuously hammering Firestore-backed routes.
-    if (batchIndex < batches.length - 1) await new Promise(resolve => window.setTimeout(resolve, 100));
-  }
-}
 
 export default function AdminDataSourcesPage() {
-  const importSessionRef = useRef(null);
   const [keyStatus, setKeyStatus] = useState(null);
   const [apiKey, setApiKey] = useState('');
   const [loadingKey, setLoadingKey] = useState(true);
   const [savingKey, setSavingKey] = useState(false);
   const [clearingKey, setClearingKey] = useState(false);
   const [file, setFile] = useState(null);
-  const [year, setYear] = useState(new Date().getFullYear() - 1);
-  const [importing, setImporting] = useState(false);
-  const [importProgress, setImportProgress] = useState(null);
   const [message, setMessage] = useState(null);
+
+  const {
+    isImporting,
+    fileName: activeFileName,
+    fileSize: activeFileSize,
+    year,
+    setYear,
+    importProgress,
+    message: importMessage,
+    dismissMessage: dismissImportMessage,
+    canResume,
+    startImport,
+    resumeImport,
+    pauseImport,
+    clearSession,
+    init: initImportStore,
+  } = useScimagoImportStore();
 
   const loadKeyStatus = async () => {
     setLoadingKey(true);
@@ -157,7 +54,10 @@ export default function AdminDataSourcesPage() {
     }
   };
 
-  useEffect(() => { loadKeyStatus(); }, []);
+  useEffect(() => {
+    loadKeyStatus();
+    initImportStore();
+  }, []);
 
   const saveKey = async (event) => {
     event.preventDefault();
@@ -185,89 +85,11 @@ export default function AdminDataSourcesPage() {
     } finally { setClearingKey(false); }
   };
 
-  const importScimago = async (event) => {
+  const handleImportSubmit = async (event) => {
     event.preventDefault();
-    const form = event.currentTarget;
     if (!file) return;
-    if (file.size > MAX_IMPORT_BYTES) {
-      setMessage({ type: 'danger', text: 'The SCImago CSV must be 50 MB or smaller.' });
-      return;
-    }
-    setImporting(true); setMessage(null); setImportProgress({ percent: 0, completed: 0, total: 0, phase: 'Reading CSV...' });
-    try {
-      let session = importSessionRef.current || readStoredImportSession();
-      const sameFile = session
-        && session.fileName === file.name
-        && session.fileSize === file.size
-        && session.fileLastModified === file.lastModified
-        && session.year === Number(year);
-
-      if (!sameFile || !session.batches) {
-        const records = splitCsvRecords(await file.text());
-        if (records.length < 2) throw new Error('The SCImago CSV must contain a header and at least one data row.');
-        const header = records.shift();
-        const batches = makeCsvBatches(records);
-        if (sameFile) {
-          session = { ...session, batches };
-        } else {
-          setImportProgress({ percent: 0, completed: 0, total: batches.length, phase: 'Starting import...' });
-          const startResponse = await api.post(importPath, { file_name: file.name, header, year: Number(year) });
-          const started = startResponse.data?.data || startResponse.data;
-          if (!started?.import_id) throw new Error('The Worker did not return an import ID.');
-          session = {
-            importId: started.import_id,
-            uploadedBatches: new Set(),
-            fileName: file.name,
-            fileSize: file.size,
-            fileLastModified: file.lastModified,
-            year: Number(year),
-          };
-        }
-        session.batches = batches;
-        importSessionRef.current = session;
-        storeImportSession(session);
-      }
-
-      const { importId, batches, uploadedBatches } = session;
-      const describeProgress = ({ completed, batchIndex, attempt, delay, maxConcurrency }) => {
-        setImportProgress({
-          percent: Math.round((completed / batches.length) * 95),
-          completed,
-          total: batches.length,
-          phase: attempt
-            ? `Connection interrupted at batch ${batchIndex + 1}; retry ${attempt}/${MAX_CHUNK_ATTEMPTS} in ${Math.ceil(delay / 1000)}s...`
-            : `Importing batch ${batchIndex + 1} of ${batches.length}...`,
-        });
-      };
-      setImportProgress({
-        percent: Math.round((uploadedBatches.size / batches.length) * 95),
-        completed: uploadedBatches.size,
-        total: batches.length,
-        phase: uploadedBatches.size ? 'Resuming the unfinished batches...' : `Importing in order, one batch at a time...`,
-      });
-      await uploadCsvBatches(importId, batches, uploadedBatches, describeProgress, () => storeImportSession(session));
-      const completeResponse = await api.post(`${importPath}/${importId}/complete`, { total_chunks: batches.length });
-      const result = completeResponse.data?.data || completeResponse.data;
-      setImportProgress({ percent: 100, completed: batches.length, total: batches.length, phase: 'Import complete' });
-      setMessage({ type: 'success', text: `Import complete: ${result.imported || 0} journal records processed; ${result.unmatched || 0} ISSNs did not match the journal catalog.` });
-      importSessionRef.current = null;
-      window.sessionStorage.removeItem(IMPORT_SESSION_STORAGE_KEY);
-      setFile(null);
-      form.reset();
-    } catch (error) {
-      setImportProgress(progress => progress ? { ...progress, phase: 'Import failed' } : null);
-      const message = error.response?.data?.message
-        || (!error.response && error.message === 'Network Error'
-          ? 'Worker connection failed without a readable response (the browser reports a network/CORS error).'
-          : error.message)
-        || 'Could not import the SCImago file.';
-      setMessage({
-        type: 'danger',
-        text: importSessionRef.current
-          ? `${message} Completed batches are saved. Click Import rankings again to resume safely from this file.`
-          : message,
-      });
-    } finally { setImporting(false); }
+    startImport(file, year);
+    setFile(null);
   };
 
   return (
@@ -346,48 +168,109 @@ export default function AdminDataSourcesPage() {
               </div>
             </div>
             <Alert variant="info" className="mb-4 text-xs">Choose the SCImago Journal Rank CSV export. The file should include journal title, ISSN, SJR, and SJR Best Quartile. A Year column is used when present; otherwise the selected year is applied.</Alert>
-            <form onSubmit={importScimago} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">SCImago CSV file</label>
-                  <input
-                    type="file"
-                    accept=".csv,text/csv"
-                    disabled={importing}
-                    onChange={event => {
-                      const nextFile = event.target.files?.[0] || null;
-                      const stored = readStoredImportSession();
-                      const canResume = nextFile && stored
-                        && stored.fileName === nextFile.name
-                        && stored.fileSize === nextFile.size
-                        && stored.fileLastModified === nextFile.lastModified;
-                      setFile(nextFile);
-                      importSessionRef.current = canResume ? stored : null;
-                      if (!canResume) window.sessionStorage.removeItem(IMPORT_SESSION_STORAGE_KEY);
-                      setMessage(null);
-                      setImportProgress(null);
-                    }}
-                    className="w-full text-xs text-foreground file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:opacity-90 cursor-pointer"
-                  />
+
+            {importMessage && (
+              <Alert
+                variant={importMessage.type === 'danger' ? 'destructive' : importMessage.type}
+                className="mb-4 text-xs"
+                onDismiss={dismissImportMessage}
+              >
+                {importMessage.text}
+              </Alert>
+            )}
+
+            {canResume && !isImporting && (
+              <div className="mb-4 p-3 rounded-lg border border-amber-500/30 bg-amber-500/10 text-xs text-foreground space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                    <Icon icon="lucide:alert-circle" width="16" />
+                    Unfinished import session detected
+                  </span>
+                  <span className="text-[11px] text-muted-foreground">
+                    Batch {importProgress?.completed || 0}/{importProgress?.total || 0} ({importProgress?.percent || 0}%)
+                  </span>
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">Ranking year</label>
-                  <input
-                    type="number"
-                    min="1990"
-                    max="2100"
-                    value={year}
-                    onChange={event => setYear(event.target.value)}
-                    className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
-                  />
+                <p className="text-muted-foreground">
+                  File: <strong>{activeFileName}</strong> · Ranking year: {year}
+                </p>
+                <div className="flex gap-2 pt-1">
+                  <Button size="sm" onClick={resumeImport}>
+                    Resume import
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={clearSession}>
+                    Discard &amp; start new
+                  </Button>
                 </div>
               </div>
-              {file && <div className="text-xs text-muted-foreground">Selected: <strong>{file.name}</strong> · {(file.size / 1024 / 1024).toFixed(2)} MB</div>}
-              {importProgress && <div className="space-y-1" aria-live="polite"><div className="flex justify-between text-xs text-muted-foreground"><span>{importProgress.phase}</span><span>{importProgress.percent}%{importProgress.total ? ` · Batch ${importProgress.completed}/${importProgress.total}` : ''}</span></div><div className="h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={importProgress.percent} aria-label="SCImago import progress"><div className="h-full bg-primary transition-all" style={{ width: `${importProgress.percent}%` }} /></div></div>}
-              <div className="admin-data-sources__actions pt-2">
-                <Button type="submit" disabled={!file || importing} isLoading={importing} loadingText="Importing in batches…">Import rankings</Button>
+            )}
+
+            {isImporting ? (
+              <div className="space-y-4 py-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    Importing: <strong className="text-foreground">{activeFileName}</strong>
+                    {activeFileSize ? ` · ${(activeFileSize / 1024 / 1024).toFixed(2)} MB` : ''}
+                  </span>
+                  <span className="font-semibold text-primary">{importProgress?.percent || 0}%</span>
+                </div>
+
+                <div className="space-y-1.5" aria-live="polite">
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{importProgress?.phase || 'Processing batches…'}</span>
+                    <span>{importProgress?.total ? `Batch ${importProgress.completed}/${importProgress.total}` : ''}</span>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={importProgress?.percent || 0}>
+                    <div
+                      className="h-full bg-primary transition-all duration-300"
+                      style={{ width: `${importProgress?.percent || 0}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button disabled isLoading loadingText="Importing in batches…">
+                    Importing in batches…
+                  </Button>
+                  <Button variant="outline" onClick={pauseImport}>
+                    Pause import
+                  </Button>
+                </div>
               </div>
-            </form>
+            ) : (
+              <form onSubmit={handleImportSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">SCImago CSV file</label>
+                    <input
+                      type="file"
+                      accept=".csv,text/csv"
+                      disabled={isImporting}
+                      onChange={event => {
+                        const nextFile = event.target.files?.[0] || null;
+                        setFile(nextFile);
+                        dismissImportMessage();
+                      }}
+                      className="w-full text-xs text-foreground file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-primary-foreground hover:file:opacity-90 cursor-pointer"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5">Ranking year</label>
+                    <input
+                      type="number"
+                      min="1990"
+                      max="2100"
+                      value={year}
+                      onChange={event => setYear(Number(event.target.value))}
+                      className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+                {file && <div className="text-xs text-muted-foreground">Selected: <strong>{file.name}</strong> · {(file.size / 1024 / 1024).toFixed(2)} MB</div>}
+                <div className="admin-data-sources__actions pt-2">
+                  <Button type="submit" disabled={!file || isImporting}>Import rankings</Button>
+                </div>
+              </form>
+            )}
           </div>
         </Card>
       </div>

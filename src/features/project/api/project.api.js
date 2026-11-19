@@ -18,8 +18,8 @@ export const getProjectsApi = () => {
  * @param {Object} data - { title, subject_area, subject_category_ids, journal_ids }
  * @returns {Promise} Axios promise
  */
-export const createProjectApi = (data) => {
-  return api.post('/projects', data);
+export const createProjectApi = (data, config) => {
+  return api.post('/projects', data, config);
 };
 
 /**
@@ -27,8 +27,8 @@ export const createProjectApi = (data) => {
  * @param {number|string} id - Project ID
  * @returns {Promise} Axios promise
  */
-export const getProjectByIdApi = (id) => {
-  return api.get(`/projects/${id}`);
+export const getProjectByIdApi = (id, config) => {
+  return api.get(`/projects/${id}`, config);
 };
 
 /**

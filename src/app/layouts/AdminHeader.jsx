@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Icon } from '@iconify/react';
 import { useUserStore } from '../store/userStore';
 import { useAuthStore } from '../store/authStore';
+import { useScimagoImportStore } from '../store/scimagoImportStore';
 import { Button } from '../../shared/ui/button';
 
 function getAdminBreadcrumbs(pathname, lang, t) {
@@ -90,6 +91,7 @@ export default function AdminHeader({ onOpenMobile }) {
   const base = `/${lang}`;
 
   const user = useAuthStore((state) => state.user);
+  const { isImporting, importProgress } = useScimagoImportStore();
   const email = useUserStore((state) => state.email) || 'admin@researchpulse.org';
   const name = email.split('@')[0];
   const formattedName = name.charAt(0).toUpperCase() + name.slice(1);
@@ -156,6 +158,20 @@ export default function AdminHeader({ onOpenMobile }) {
 
         {/* Right: Search + Notifications + Admin Profile */}
         <div className="flex items-center gap-2.5 shrink-0">
+          {/* Active SCImago Import Indicator */}
+          {isImporting && (
+            <Link
+              to={`/${lang}/admin/data-sources`}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 text-xs font-medium border border-primary/25 transition-colors no-underline shadow-2xs"
+              title={`SCImago Import in progress: ${importProgress?.percent || 0}%`}
+            >
+              <span className="size-2 rounded-full bg-primary animate-pulse shrink-0" />
+              <span className="truncate max-w-[150px] sm:max-w-[220px]">
+                Importing: {importProgress?.percent || 0}%{importProgress?.total ? ` (${importProgress.completed}/${importProgress.total})` : ''}
+              </span>
+            </Link>
+          )}
+
           {/* Quick Search */}
           <div className="hidden sm:flex items-center gap-2 h-9 min-w-[220px] rounded-control border border-border bg-background px-3 text-xs text-muted-foreground transition-colors shadow-2xs">
             <Icon icon="lucide:search" width={14} className="shrink-0 text-muted-foreground pointer-events-none" />

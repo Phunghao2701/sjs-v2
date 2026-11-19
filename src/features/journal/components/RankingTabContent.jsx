@@ -1,22 +1,88 @@
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from "react-i18next";
-/**
- * File source thuộc hệ thống FE ResearchPulse.
- *
- * File: features\journal\components\RankingTabContent.jsx
- */
 import { Row, Col } from '../../../shared/ui/layout-grid';
 import { Table } from '../../../shared/ui/table';
 import { Icon } from '@iconify/react';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { StatePanel } from '../../../shared/ui/state-panel';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+} from 'recharts';
+
+const CustomTooltip = ({ active, payload }) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="rounded-lg border border-border bg-surface p-2.5 shadow-md text-xs">
+        <p className="font-semibold text-foreground mb-1">Year {data.year}</p>
+        <div className="flex items-center justify-between gap-3 text-primary font-medium">
+          <span>Works:</span>
+          <span className="font-bold font-mono">{Number(data.works || 0).toLocaleString()}</span>
+        </div>
+        {data.citations !== undefined && data.citations !== null && (
+          <div className="flex items-center justify-between gap-3 text-muted-foreground mt-0.5">
+            <span>Citations:</span>
+            <span className="font-mono">{Number(data.citations || 0).toLocaleString()}</span>
+          </div>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function RankingTabContent({
   rankingHistory = [],
   metricName = 'Impact Factor',
   loading
 }) {
-  const {
-    t
-  } = useTranslation();
+  const { t } = useTranslation();
+  const [timeRange, setTimeRange] = useState('10Y');
+
+  // Chronological list (oldest to newest)
+  const fullChartData = useMemo(() => {
+    return [...rankingHistory]
+      .filter(item => item && item.year && !isNaN(Number(item.year)))
+      .sort((a, b) => a.year - b.year);
+  }, [rankingHistory]);
+
+  // Reverse chronological for table (newest to oldest)
+  const tableData = useMemo(() => {
+    return [...rankingHistory]
+      .filter(item => item && item.year && !isNaN(Number(item.year)))
+      .sort((a, b) => b.year - a.year);
+  }, [rankingHistory]);
+
+  // Filtered chart data based on selected time range
+  const filteredChartData = useMemo(() => {
+    if (fullChartData.length === 0) return [];
+    if (timeRange === 'ALL' || fullChartData.length <= 10) {
+      return fullChartData.map(d => ({
+        year: d.year,
+        works: Number(d.value || 0),
+        citations: Number(d.cited_by_count || 0),
+      }));
+    }
+
+    const latestYear = Math.max(...fullChartData.map(d => d.year));
+    const rangeSpan = timeRange === '20Y' ? 20 : 10;
+    const cutoff = latestYear - rangeSpan + 1;
+
+    return fullChartData
+      .filter(d => d.year >= cutoff)
+      .map(d => ({
+        year: d.year,
+        works: Number(d.value || 0),
+        citations: Number(d.cited_by_count || 0),
+      }));
+  }, [fullChartData, timeRange]);
+
   if (loading) {
     return (
       <Row className="gy-4">
@@ -35,145 +101,149 @@ export default function RankingTabContent({
       </Row>
     );
   }
+
   if (!rankingHistory || rankingHistory.length === 0) {
     return (
       <StatePanel
         variant="neutral"
         icon={<Icon icon="lucide:line-chart" width="32" className="text-muted-foreground" />}
-        title={t("journal.chuaCoDuLieuLichSuXepHangChoTa")}
-        description={t("journal.duLieuXepHangSeHienThiODay", "Dữ liệu lịch sử xếp hạng sẽ hiển thị tại đây khi có thông tin.")}
+        title={t("journal.chuaCoDuLieuLichSuXepHangChoTa", "No ranking history available")}
+        description={t("journal.duLieuXepHangSeHienThiODay", "Ranking history data will appear here when available.")}
       />
     );
   }
 
-  // Sort chronological for chart (oldest to newest)
-  const chartData = [...rankingHistory].sort((a, b) => a.year - b.year);
-  // Sort reverse chronological for table (newest to oldest)
-  const tableData = [...rankingHistory].sort((a, b) => b.year - a.year);
-
-  // SVG Chart Calculations
-  const chartHeight = 260;
-  const chartWidth = 500;
-  const paddingLeft = 40;
-  const paddingRight = 20;
-  const paddingTop = 20;
-  const paddingBottom = 30;
-  const graphHeight = chartHeight - paddingTop - paddingBottom;
-  const graphWidth = chartWidth - paddingLeft - paddingRight;
-
-  // Find max value for scaling
-  const validValues = chartData.map(d => d.value).filter(v => typeof v === 'number' && !isNaN(v));
-  const maxValue = validValues.length > 0 ? Math.max(...validValues) : 10;
-  const yMax = Math.ceil(maxValue / 5) * 5; // round to next multiple of 5
-
-  // Generate Y axis ticks
-  const yTicks = [];
-  for (let i = 0; i <= yMax; i += yMax / 5) {
-    yTicks.push(Math.round(i * 10) / 10);
-  }
-
-  // Calculate coordinates
-  const getX = index => {
-    return paddingLeft + index * (graphWidth / (chartData.length - 1 || 1));
-  };
-  const getY = value => {
-    if (value === null || value === undefined) return chartHeight - paddingBottom;
-    const ratio = value / yMax;
-    return chartHeight - paddingBottom - ratio * graphHeight;
-  };
-  return <Row className="gy-4 align-items-stretch">
+  return (
+    <Row className="gy-4 align-items-stretch">
+      {/* Left Column: Publication Activity Area Chart */}
       <Col lg={7} className="d-flex flex-column">
-        <section className="journal-surface p-4 h-100 d-flex flex-column">
-          <h2 className="journal-section-title">
-            {t("journal.hoatDongOpenAlex", "OpenAlex publication activity")}</h2>
+        <section className="journal-surface p-4 h-100 d-flex flex-column rounded-card border border-border bg-surface">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h2 className="journal-section-title text-base font-semibold text-foreground mb-0">
+              {t("journal.hoatDongOpenAlex", "OpenAlex publication activity")}
+            </h2>
 
-          <div className="flex-grow-1 d-flex justify-content-center align-items-center overflow-auto py-2">
-            <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} width="100%" style={{
-            minWidth: '400px',
-            height: 'auto'
-          }}>
-              <defs>
-                <linearGradient id="line-area-fill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.02" />
-                </linearGradient>
-              </defs>
+            {fullChartData.length > 10 && (
+              <div className="flex items-center gap-1 bg-surface-muted/60 p-1 rounded-lg border border-border/60 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setTimeRange('10Y')}
+                  className={`px-2.5 py-1 rounded font-medium transition-colors ${
+                    timeRange === '10Y'
+                      ? 'bg-primary text-primary-foreground shadow-2xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  10Y
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimeRange('20Y')}
+                  className={`px-2.5 py-1 rounded font-medium transition-colors ${
+                    timeRange === '20Y'
+                      ? 'bg-primary text-primary-foreground shadow-2xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  20Y
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTimeRange('ALL')}
+                  className={`px-2.5 py-1 rounded font-medium transition-colors ${
+                    timeRange === 'ALL'
+                      ? 'bg-primary text-primary-foreground shadow-2xs font-semibold'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  All ({fullChartData.length}y)
+                </button>
+              </div>
+            )}
+          </div>
 
-              {yTicks.map((tick, idx) => {
-              const y = getY(tick);
-              return <g key={idx}>
-                    <line x1={paddingLeft} y1={y} x2={chartWidth - paddingRight} y2={y} stroke="var(--border)" strokeWidth="1" />
-                    <text x={paddingLeft - 8} y={y + 4} fill="var(--text-muted)" fontSize="10" textAnchor="end" fontWeight="500">
-                      {tick}
-                    </text>
-                  </g>;
-            })}
-
-              {(() => {
-              const points = chartData.map((d, idx) => ({
-                ...d,
-                x: getX(idx),
-                y: getY(d.value)
-              })).filter(d => d.value !== null && d.value !== undefined && !Number.isNaN(Number(d.value)));
-              if (points.length === 0) return null;
-              const linePoints = points.map(point => `${point.x},${point.y}`).join(' ');
-              const areaPoints = `${paddingLeft},${chartHeight - paddingBottom} ${linePoints} ${chartWidth - paddingRight},${chartHeight - paddingBottom}`;
-              return <g className="chart-line-group">
-                    {points.length > 1 && <>
-                        <polygon points={areaPoints} fill="url(#line-area-fill)" />
-                        <polyline points={linePoints} fill="none" stroke="var(--primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                      </>}
-
-                    {points.map((point, idx) => <g key={idx}>
-                        <circle cx={point.x} cy={point.y} r="6" fill="var(--bg-card)" stroke="var(--primary)" strokeWidth="3" />
-                        <circle cx={point.x} cy={point.y} r="3" fill="var(--primary)" />
-                        <text x={point.x} y={point.y - 12} fill="var(--primary)" fontSize="10" fontWeight="bold" textAnchor="middle">
-                          {point.value}
-                        </text>
-                      </g>)}
-                  </g>;
-            })()}
-
-              <line x1={paddingLeft} y1={chartHeight - paddingBottom} x2={chartWidth - paddingRight} y2={chartHeight - paddingBottom} stroke="var(--border)" strokeWidth="1.5" />
-
-              {chartData.map((d, idx) => {
-              const x = getX(idx);
-              return <text key={idx} x={x} y={chartHeight - paddingBottom + 18} fill="var(--text-muted)" fontSize="11" textAnchor="middle" fontWeight="500">
-                    {d.year}
-                  </text>;
-            })}
-            </svg>
+          <div className="flex-1 w-full min-h-[280px] h-[280px] mt-1">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={filteredChartData} margin={{ top: 12, right: 12, left: -10, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="openalex-area-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--primary, #0071BC)" stopOpacity={0.25} />
+                    <stop offset="95%" stopColor="var(--primary, #0071BC)" stopOpacity={0.02} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.6} />
+                <XAxis
+                  dataKey="year"
+                  axisLine={{ stroke: 'var(--border)' }}
+                  tickLine={false}
+                  minTickGap={25}
+                  tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }}
+                />
+                <YAxis
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'var(--text-muted)', fontSize: 11, fontWeight: 500 }}
+                  tickFormatter={(val) => (val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val)}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Area
+                  type="monotone"
+                  dataKey="works"
+                  name="Works"
+                  stroke="var(--primary, #0071BC)"
+                  strokeWidth={2.5}
+                  fill="url(#openalex-area-fill)"
+                  dot={
+                    filteredChartData.length <= 15
+                      ? { r: 3.5, fill: 'var(--primary, #0071BC)', strokeWidth: 1.5, stroke: '#fff' }
+                      : false
+                  }
+                  activeDot={{ r: 5, fill: 'var(--primary, #0071BC)', stroke: '#fff', strokeWidth: 2 }}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </section>
       </Col>
 
+      {/* Right Column: Works and Citations by Year Table */}
       <Col lg={5} className="d-flex flex-column">
-        <section className="journal-surface p-4 h-100 d-flex flex-column">
-          <h2 className="journal-section-title">{t("journal.soBaiBaoVaTrichDanTheoNam", "Works and citations by year")}</h2>
+        <section className="journal-surface p-4 h-100 d-flex flex-column rounded-card border border-border bg-surface">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="journal-section-title text-base font-semibold text-foreground mb-0">
+              {t("journal.soBaiBaoVaTrichDanTheoNam", "Works and citations by year")}
+            </h2>
+            <span className="text-[11px] text-muted-foreground">
+              {tableData.length} {t("journal.years", "years recorded")}
+            </span>
+          </div>
 
-          <div className="table-responsive flex-grow-1">
-            <Table borderless className="journal-ranking-table align-middle mb-0 text-start">
-              <thead>
-                <tr>
-                  <th>{t("article.nam")}</th>
-                  <th>{t("journal.baiBao", "Works")}</th>
-                  <th>{t("journal.trichDan", "Citations")}</th>
+          <div className="table-responsive flex-grow-1 max-h-[300px] overflow-y-auto border rounded-md border-border/60">
+            <Table borderless hover className="journal-ranking-table align-middle mb-0 text-start w-full">
+              <thead className="sticky top-0 bg-surface z-10 border-b border-border shadow-2xs">
+                <tr className="text-xs text-muted-foreground font-semibold">
+                  <th className="py-2.5 px-3">{t("article.nam", "Year")}</th>
+                  <th className="py-2.5 px-3 text-end">{t("journal.baiBao", "Works")}</th>
+                  <th className="py-2.5 px-3 text-end">{t("journal.trichDan", "Citations")}</th>
                 </tr>
               </thead>
-              <tbody>
-                {tableData.map((row, idx) => <tr key={idx}>
-                    <td className="journal-number">{row.year}</td>
-                    <td className="journal-number">
-                      {row.value !== null && row.value !== undefined ? row.value : <span className="journal-muted-dash">N/A</span>}
+              <tbody className="divide-y divide-border/40 text-xs">
+                {tableData.map((row, idx) => (
+                  <tr key={idx} className="hover:bg-primary-subtle/10 transition-colors">
+                    <td className="py-2 px-3 font-semibold text-foreground">{row.year}</td>
+                    <td className="py-2 px-3 text-end font-mono font-medium text-foreground">
+                      {row.value != null ? Number(row.value).toLocaleString() : '—'}
                     </td>
-                    <td>
-                      {row.cited_by_count ?? 0}
+                    <td className="py-2 px-3 text-end font-mono text-muted-foreground">
+                      {row.cited_by_count != null ? Number(row.cited_by_count).toLocaleString() : '0'}
                     </td>
-                  </tr>)}
+                  </tr>
+                ))}
               </tbody>
             </Table>
           </div>
         </section>
       </Col>
-    </Row>;
+    </Row>
+  );
 }

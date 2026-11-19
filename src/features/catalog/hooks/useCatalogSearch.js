@@ -55,6 +55,10 @@ export function useCatalogSearch(currentUser) {
   const selectedQuartilesStr = selectedQuartiles.join(',');
 
   useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  useEffect(() => {
     hydrateFromQuery({
       keyword: search,
       page,
@@ -143,6 +147,8 @@ export function useCatalogSearch(currentUser) {
             : undefined,
         quartiles: selectedQuartiles.join(',') || undefined,
         ranking_year: selectedYear || undefined,
+        country_code: selectedZone || undefined,
+        country: selectedZone || undefined,
         country_ids: selectedZone || undefined,
         is_oa_diamond: isOaDiamond ? true : undefined,
       };
@@ -155,7 +161,8 @@ export function useCatalogSearch(currentUser) {
         throw new Error(response.data?.message || 'Lỗi không xác định từ server');
       }
     },
-    staleTime: 300000, // 5 minutes
+    staleTime: 60000, // 1 minute
+    refetchOnMount: true,
     retry: 1,
   });
 
