@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Icon from "../../../shared/components/Icon";
 
@@ -98,6 +98,19 @@ export default function AuthorResearchNetwork({ network }) {
     setZoom((current) => Math.min(2.5, Math.max(0.65, current * factor)));
   };
 
+  const handleWheel = useCallback((event) => {
+    event.preventDefault();
+    setZoom((current) => Math.min(2.5, Math.max(0.65, current * (event.deltaY < 0 ? 1.12 : 1 / 1.12))));
+  }, []);
+
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return undefined;
+
+    svg.addEventListener("wheel", handleWheel, { passive: false });
+    return () => svg.removeEventListener("wheel", handleWheel);
+  }, [handleWheel]);
+
   const resetView = () => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
@@ -136,10 +149,6 @@ export default function AuthorResearchNetwork({ network }) {
           onPointerMove={updateGesture}
           onPointerUp={endGesture}
           onPointerCancel={endGesture}
-          onWheel={(event) => {
-            event.preventDefault();
-            changeZoom(event.deltaY < 0 ? 1.12 : 1 / 1.12);
-          }}
           onClick={(event) => {
             if (event.target === svgRef.current && !draggedRef.current) setSelectedNode(null);
             draggedRef.current = false;
