@@ -10,7 +10,7 @@ const importPath = '/admin/imports/scimago';
 const IMPORT_SESSION_STORAGE_KEY = 'admin.scimagoImportSession';
 const MAX_IMPORT_BYTES = 50 * 1024 * 1024;
 const MAX_CHUNK_BYTES = 2 * 1024 * 1024;
-const MAX_CHUNK_ROWS = 250;
+const MAX_CHUNK_ROWS = 500;
 const MAX_CHUNK_ATTEMPTS = 5;
 const MAX_RETRY_DELAY_MS = 3000;
 
@@ -19,11 +19,18 @@ function isFirestoreQuotaExceeded(error) {
     && Number(error.response?.data?.details?.status) === 429;
 }
 
+function isD1WriteLimitExceeded(error) {
+  return error.response?.data?.code === 'SCIMAGO_D1_DAILY_WRITE_LIMIT';
+}
+
 function isFirestoreRequestFailure(error) {
   return error.response?.data?.code === 'FIRESTORE_REQUEST_FAILED';
 }
 
 function getImportErrorMessage(error, fallback) {
+  if (isD1WriteLimitExceeded(error)) {
+    return 'Cloudflare D1 daily write limit reached. Import stopped without retrying; resume this saved import after the quota resets.';
+  }
   if (isFirestoreQuotaExceeded(error)) {
     return 'Firestore quota exceeded while processing this batch. The import stopped to avoid repeated retries. Completed batches are saved; resume after the quota resets.';
   }
@@ -107,11 +114,11 @@ async function postChunkWithRetry(url, body, onRetry, signal) {
       return await api.post(url, body, { signal, timeout: 60_000 });
     } catch (error) {
       if (signal?.aborted || error.name === 'CanceledError' || error.name === 'AbortError') {
-        throw new Error('Import aborted by user.');
+        throw new Error('Import aborted by user.', { cause: error });
       }
       lastError = error;
       const status = error.response?.status;
-      if (isFirestoreRequestFailure(error)) throw error;
+      if (isFirestoreRequestFailure(error) || isD1WriteLimitExceeded(error)) throw error;
       const transient = !status || status === 408 || status === 429 || status >= 500;
       if (!transient) throw error;
       if (attempt < MAX_CHUNK_ATTEMPTS) {
@@ -346,7 +353,7 @@ export const useScimagoImportStore = create((set, get) => ({
     set({ status: 'importing', isImporting: true });
     let completed = uploadedBatches.size;
     const totalBatches = batches.length;
-    const CONCURRENCY = 2;
+    const CONCURRENCY = 3;
 
     const pendingIndexes = [];
     for (let i = 0; i < totalBatches; i += 1) {
@@ -354,30 +361,37 @@ export const useScimagoImportStore = create((set, get) => ({
     }
 
     let cursor = 0;
+    let stopAfterD1Quota = false;
     const worker = async () => {
       while (cursor < pendingIndexes.length) {
         if (signal?.aborted) throw new Error('Import aborted by user.');
+        if (stopAfterD1Quota) return;
         const batchIndex = pendingIndexes[cursor++];
         if (batchIndex === undefined) break;
 
-        await postChunkWithRetry(
-          `${importPath}/${importId}/chunks`,
-          {
-            batch_index: batchIndex,
-            csv: batches[batchIndex],
-          },
-          ({ attempt, delay }) => {
-            set({
-              importProgress: {
-                percent: Math.round((completed / totalBatches) * 95),
-                completed,
-                total: totalBatches,
-                phase: `Connection retry ${attempt}/${MAX_CHUNK_ATTEMPTS} for batch ${batchIndex + 1} in ${Math.ceil(delay / 1000)}s...`,
-              },
-            });
-          },
-          signal
-        );
+        try {
+          await postChunkWithRetry(
+            `${importPath}/${importId}/chunks`,
+            {
+              batch_index: batchIndex,
+              csv: batches[batchIndex],
+            },
+            ({ attempt, delay }) => {
+              set({
+                importProgress: {
+                  percent: Math.round((completed / totalBatches) * 95),
+                  completed,
+                  total: totalBatches,
+                  phase: `Connection retry ${attempt}/${MAX_CHUNK_ATTEMPTS} for batch ${batchIndex + 1} in ${Math.ceil(delay / 1000)}s...`,
+                },
+              });
+            },
+            signal
+          );
+        } catch (error) {
+          if (isD1WriteLimitExceeded(error)) stopAfterD1Quota = true;
+          throw error;
+        }
 
         uploadedBatches.add(batchIndex);
         completed += 1;
@@ -417,7 +431,7 @@ export const useScimagoImportStore = create((set, get) => ({
                 uploadedIndexes: nextUploadedIndexes,
               })
             );
-          } catch {}
+          } catch { /* Ignore unavailable session storage. */ }
         }
       }
     };
@@ -447,7 +461,7 @@ export const useScimagoImportStore = create((set, get) => ({
     await clearImportSessionFromDb();
     try {
       window.sessionStorage.removeItem(IMPORT_SESSION_STORAGE_KEY);
-    } catch {}
+    } catch { /* Ignore unavailable session storage. */ }
 
     set({
       status: 'completed',
@@ -495,7 +509,7 @@ export const useScimagoImportStore = create((set, get) => ({
     await clearImportSessionFromDb();
     try {
       window.sessionStorage.removeItem(IMPORT_SESSION_STORAGE_KEY);
-    } catch {}
+    } catch { /* Ignore unavailable session storage. */ }
 
     set({
       status: 'idle',

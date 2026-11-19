@@ -198,13 +198,29 @@ export function useJournalDetail(journalId, currentUser) {
   useEffect(() => {
     if (rankingHistory.length > 0 && journal && !journal.metric_value) {
       const latest = rankingHistory[0]; // Already sorted descending by year
-      setJournal(prev => ({
-        ...prev,
-        quartile: latest.quartile || prev.quartile || 'Q1',
-        metric_value: latest.value || prev.metric_value,
-        metric_name: 'SJR Score',
-        metric_year: String(latest.year)
-      }));
+      const quartile = latest.quartile || journal.quartile || 'Q1';
+      const metricValue = latest.value ?? journal.metric_value;
+      const metricYear = String(latest.year);
+
+      // A zero metric is valid; avoid repeatedly cloning journal when no
+      // enrichment fields changed (which otherwise creates a render loop).
+      if (
+        journal.quartile === quartile &&
+        journal.metric_value === metricValue &&
+        journal.metric_name === 'SJR Score' &&
+        journal.metric_year === metricYear
+      ) return;
+
+      setJournal(prev => {
+        if (!prev || prev.metric_value) return prev;
+        return {
+          ...prev,
+          quartile,
+          metric_value: latest.value ?? prev.metric_value,
+          metric_name: 'SJR Score',
+          metric_year: metricYear
+        };
+      });
     }
   }, [rankingHistory, journal]);
 

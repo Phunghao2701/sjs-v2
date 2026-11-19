@@ -18,6 +18,12 @@ export default function AdminDataSourcesPage() {
   const [clearingKey, setClearingKey] = useState(false);
   const [file, setFile] = useState(null);
   const [message, setMessage] = useState(null);
+  const [showImportSummary, setShowImportSummary] = useState(false);
+  const [loadingImportSummary, setLoadingImportSummary] = useState(false);
+  const [importSummaryError, setImportSummaryError] = useState('');
+  const [importSummaryYears, setImportSummaryYears] = useState([]);
+  const [importSummaryNotice, setImportSummaryNotice] = useState('');
+  const [deletingImportYear, setDeletingImportYear] = useState(null);
 
   const {
     isImporting,
@@ -90,6 +96,45 @@ export default function AdminDataSourcesPage() {
     if (!file) return;
     startImport(file, year);
     setFile(null);
+  };
+
+  const toggleImportSummary = async () => {
+    if (showImportSummary) {
+      setShowImportSummary(false);
+      return;
+    }
+    setShowImportSummary(true);
+    setLoadingImportSummary(true);
+    setImportSummaryError('');
+    try {
+      const response = await api.get('/admin/imports/scimago/summary');
+      const result = response.data?.data || response.data;
+      setImportSummaryYears(result?.years || []);
+    } catch (error) {
+      setImportSummaryError(error.response?.data?.message || 'Could not load the imported SCImago data summary.');
+      setImportSummaryYears([]);
+    } finally {
+      setLoadingImportSummary(false);
+    }
+  };
+
+  const deleteImportYear = async (year) => {
+    if (!window.confirm(`Delete all SCImago ranking data and import history for ${year}? Journal records and shared metrics will be kept.`)) return;
+    setDeletingImportYear(year);
+    setImportSummaryError('');
+    setImportSummaryNotice('');
+    try {
+      const response = await api.delete(`/admin/imports/scimago/${year}`);
+      const result = response.data?.data || response.data;
+      setImportSummaryNotice(`Deleted ${Number(result?.ranking_values_deleted || 0).toLocaleString()} ranking values for ${year}.`);
+      const summaryResponse = await api.get('/admin/imports/scimago/summary');
+      const summary = summaryResponse.data?.data || summaryResponse.data;
+      setImportSummaryYears(summary?.years || []);
+    } catch (error) {
+      setImportSummaryError(error.response?.data?.message || `Could not delete SCImago data for ${year}.`);
+    } finally {
+      setDeletingImportYear(null);
+    }
   };
 
   return (
@@ -167,7 +212,67 @@ export default function AdminDataSourcesPage() {
                 <p className="text-xs text-muted-foreground">Import SJR, best quartile, and H-index values used by deep analytics.</p>
               </div>
             </div>
-            <Alert variant="info" className="mb-4 text-xs">Choose the SCImago Journal Rank CSV export. The file should include journal title, ISSN, SJR, and SJR Best Quartile. A Year column is used when present; otherwise the selected year is applied.</Alert>
+            <Alert variant="info" className="mb-4 text-xs">Choose the SCImago Journal Rank CSV export. The file should include journal title, ISSN, SJR, and SJR Best Quartile. A Year column is used when present; otherwise the selected year is applied. Rankings and import history are stored directly in Cloudflare D1.</Alert>
+
+            <div className="mb-4 space-y-2">
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" size="sm" variant="outline" onClick={toggleImportSummary}>
+                  <Icon icon="lucide:chart-column-increasing" width="16" />
+                  {showImportSummary ? 'Hide import summary' : 'View imported years'}
+                </Button>
+              </div>
+              {showImportSummary && (
+                <div className="mt-3 overflow-hidden rounded-lg border border-border bg-surface" aria-live="polite">
+                  <div className="border-b border-border px-3 py-2">
+                    <h4 className="text-sm font-semibold text-foreground">Imported SCImago data by year</h4>
+                    <p className="text-xs text-muted-foreground">Counts reflect ranking records currently stored in D1.</p>
+                  </div>
+                  {loadingImportSummary ? (
+                    <p className="px-3 py-4 text-sm text-muted-foreground">Loading yearly totals…</p>
+                  ) : importSummaryError ? (
+                    <Alert variant="destructive" className="m-3 text-xs">{importSummaryError}</Alert>
+                  ) : importSummaryYears.length === 0 ? (
+                    <p className="px-3 py-4 text-sm text-muted-foreground">No imported ranking data is available in D1 yet.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      {importSummaryNotice && <Alert variant="success" className="m-3 text-xs">{importSummaryNotice}</Alert>}
+                      <table className="w-full min-w-[680px] text-left text-xs">
+                        <thead className="bg-surface-muted/50 text-muted-foreground">
+                          <tr>
+                            <th className="px-3 py-2 font-semibold">Year</th>
+                            <th className="px-3 py-2 text-right font-semibold">Ranking values</th>
+                            <th className="px-3 py-2 text-right font-semibold">Journals</th>
+                            <th className="px-3 py-2 text-right font-semibold">Metrics</th>
+                            <th className="px-3 py-2 text-right font-semibold">CSV rows</th>
+                            <th className="px-3 py-2 text-right font-semibold">Completed batches</th>
+                            <th className="px-3 py-2 text-right font-semibold">Status</th>
+                            <th className="px-3 py-2 text-right font-semibold">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {importSummaryYears.map(item => (
+                            <tr key={item.year} className="border-t border-border">
+                              <td className="px-3 py-2 font-semibold text-foreground">{item.year}</td>
+                              <td className="px-3 py-2 text-right tabular-nums">{Number(item.ranking_values || 0).toLocaleString()}</td>
+                              <td className="px-3 py-2 text-right tabular-nums">{Number(item.journals || 0).toLocaleString()}</td>
+                              <td className="px-3 py-2 text-right tabular-nums">{Number(item.metrics || 0).toLocaleString()}</td>
+                              <td className="px-3 py-2 text-right tabular-nums">{Number(item.imported_rows || 0).toLocaleString()}</td>
+                              <td className="px-3 py-2 text-right tabular-nums">{Number(item.completed_batches || 0).toLocaleString()}</td>
+                              <td className="px-3 py-2 text-right">{String(item.status || '').replaceAll('_', ' ').toLowerCase()}</td>
+                              <td className="px-3 py-2 text-right">
+                                <Button type="button" size="sm" variant="outline" className="h-7 px-2 text-destructive" disabled={deletingImportYear !== null} isLoading={deletingImportYear === item.year} loadingText="Deleting…" onClick={() => deleteImportYear(item.year)}>
+                                  Delete
+                                </Button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {importMessage && (
               <Alert
