@@ -1,13 +1,13 @@
 ﻿import Icon from "../../../shared/components/Icon";
 import AuthorAvatar from "./AuthorAvatar";
+import { Link, useParams } from "react-router-dom";
 
 /**
  * @file AuthorCollaborators.jsx
  * @description Frequent academic collaborators list.
  */
 export default function AuthorCollaborators({ collaborators = [] }) {
-  if (!collaborators || collaborators.length === 0) return null;
-
+  const { lang = "en" } = useParams();
   return (
     <div className="ap-section" id="collaborators">
       <div className="ap-section-header">
@@ -15,12 +15,21 @@ export default function AuthorCollaborators({ collaborators = [] }) {
           <Icon icon="lucide:users" width="16" className="ap-section-icon" />
           <h2 className="ap-section-title">Frequent Collaborators</h2>
         </div>
-        <span className="ap-section-badge">{collaborators.length} primary co-authors</span>
+        <span className="ap-section-badge">{collaborators.length} co-authors in loaded works</span>
       </div>
 
-      <div className="ap-collab-grid">
-        {collaborators.map((c) => (
-          <div key={c.id} className="ap-collab-card">
+      {collaborators.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Co-author details are not available for the loaded publications.</p>
+      ) : <div className="ap-collab-grid">
+        {collaborators.map((c) => {
+          const Card = c.id ? Link : "div";
+          return (
+          <Card
+            key={c.id || c.name}
+            {...(c.id ? { to: `/${lang}/authors/${encodeURIComponent(c.id)}` } : {})}
+            className={`ap-collab-card${c.id ? " is-link" : ""}`}
+            aria-label={c.id ? `View ${c.name}'s researcher profile` : undefined}
+          >
             <div className="ap-collab-avatar">
               <AuthorAvatar name={c.name} size="md" bgColor={c.avatarColor} />
             </div>
@@ -42,9 +51,9 @@ export default function AuthorCollaborators({ collaborators = [] }) {
                 <span>joint publications</span>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          </Card>
+        );})}
+      </div>}
     </div>
   );
 }

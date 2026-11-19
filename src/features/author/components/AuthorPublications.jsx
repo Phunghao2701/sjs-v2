@@ -1,11 +1,13 @@
-﻿import { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Icon from "../../../shared/components/Icon";
+import { Link, useParams } from "react-router-dom";
 
 /**
  * @file AuthorPublications.jsx
  * @description Searchable, filterable scientific publication catalogue.
  */
 export default function AuthorPublications({ publications = [] }) {
+  const { lang = "en" } = useParams();
   const [searchTerm, setSearchTerm] = useState("");
   const [sortBy, setSortBy] = useState("recent"); // "recent" | "cited" | "title"
   const [selectedJournal, setSelectedJournal] = useState("ALL");
@@ -41,7 +43,7 @@ export default function AuthorPublications({ publications = [] }) {
         (p) =>
           p.title?.toLowerCase().includes(q) ||
           p.journal?.toLowerCase().includes(q) ||
-          p.authors?.some((a) => a.toLowerCase().includes(q)) ||
+          p.authors?.some((author) => (typeof author === "string" ? author : author.name)?.toLowerCase().includes(q)) ||
           p.tags?.some((t) => t.toLowerCase().includes(q))
       );
     }
@@ -172,18 +174,36 @@ export default function AuthorPublications({ publications = [] }) {
           </div>
         ) : (
           paginated.map((pub) => (
-            <div key={pub.id} className="ap-pub-card">
+            <div key={pub.id || `${pub.title}-${pub.year}`} className="ap-pub-card">
               <div className="ap-pub-top-meta">
                 <span className="ap-pub-journal">{pub.journal}</span>
                 <span className="ap-pub-divider">·</span>
                 <span className="ap-pub-year">{pub.year}</span>
               </div>
 
-              <h3 className="ap-pub-title">{pub.title}</h3>
+              <h3 className="ap-pub-title">
+                {pub.doi ? (
+                  <a href={pub.doi.startsWith("http") ? pub.doi : `https://doi.org/${pub.doi}`} target="_blank" rel="noreferrer">
+                    {pub.title}
+                  </a>
+                ) : pub.id ? (
+                  <Link to={`/${lang}/articles/${encodeURIComponent(pub.id)}`}>{pub.title}</Link>
+                ) : pub.title}
+              </h3>
 
               <div className="ap-pub-authors">
                 <Icon icon="lucide:users" width="12" className="me-1" />
-                <span>{pub.authors?.join(" · ")}</span>
+                <span>
+                  {pub.authors?.map((author, index) => {
+                    const name = typeof author === "string" ? author : author.name;
+                    return (
+                      <span key={`${author.id || name}-${index}`}>
+                        {index > 0 ? " · " : ""}
+                        {author.id ? <Link to={`/${lang}/authors/${encodeURIComponent(author.id)}`}>{name}</Link> : name}
+                      </span>
+                    );
+                  })}
+                </span>
               </div>
 
               <div className="ap-pub-footer">
@@ -213,10 +233,17 @@ export default function AuthorPublications({ publications = [] }) {
                 </div>
 
                 <div className="ap-pub-actions">
-                  <span className="ap-pub-view-link">
-                    <span>View Paper</span>
-                    <Icon icon="lucide:chevron-right" width="12" />
-                  </span>
+                  {pub.doi ? (
+                    <a className="ap-pub-view-link" href={pub.doi.startsWith("http") ? pub.doi : `https://doi.org/${pub.doi}`} target="_blank" rel="noreferrer">
+                      <span>View Paper</span>
+                      <Icon icon="lucide:chevron-right" width="12" />
+                    </a>
+                  ) : pub.id ? (
+                    <Link className="ap-pub-view-link" to={`/${lang}/articles/${encodeURIComponent(pub.id)}`}>
+                      <span>View Paper</span>
+                      <Icon icon="lucide:chevron-right" width="12" />
+                    </Link>
+                  ) : null}
                 </div>
               </div>
             </div>

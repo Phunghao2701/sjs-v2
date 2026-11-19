@@ -10,7 +10,7 @@ export default function AuthorResearchImpact({ metrics, trend = [] }) {
 
   if (!trend || trend.length === 0) return null;
 
-  const maxVal = Math.max(...trend.map((d) => (metricMode === "citations" ? d.citations : d.publications)));
+  const maxVal = Math.max(1, ...trend.map((d) => (metricMode === "citations" ? d.citations : d.publications)));
   const totalCitations = metrics?.citations || 0;
   const totalPubs = metrics?.publications || 1;
   const avgCitationsPerPaper = Math.round(totalCitations / totalPubs);
@@ -21,10 +21,13 @@ export default function AuthorResearchImpact({ metrics, trend = [] }) {
     return num.toLocaleString();
   };
 
-  const chartHeight = 110;
+  const chartHeight = 190;
+  const chartTop = 24;
+  const plotHeight = chartHeight - chartTop;
   const barWidth = 26;
   const gap = 12;
   const svgWidth = trend.length * (barWidth + gap);
+  const yearRange = `${trend[0]?.year ?? ""} – ${trend[trend.length - 1]?.year ?? ""}`;
 
   return (
     <div className="ap-section">
@@ -54,7 +57,7 @@ export default function AuthorResearchImpact({ metrics, trend = [] }) {
       <div className="ap-impact-body">
         {/* Left: Key Analytics Cards */}
         <div className="ap-impact-stats-grid">
-          <div className="ap-impact-stat-card highlight">
+          <div className="ap-impact-stat-card">
             <div className="ap-impact-stat-label">Total Citations</div>
             <div className="ap-impact-stat-number">{fmt(metrics?.citations)}</div>
             <div className="ap-impact-stat-sub">Across all scientific databases</div>
@@ -83,7 +86,7 @@ export default function AuthorResearchImpact({ metrics, trend = [] }) {
         <div className="ap-impact-chart-box">
           <div className="ap-impact-chart-header">
             <span className="ap-impact-chart-caption">
-              Annual {metricMode === "citations" ? "Citations" : "Publications Output"} (2018 – 2026)
+              Annual {metricMode === "citations" ? "Citations" : "Publications Output"} ({yearRange})
             </span>
             <span className="ap-impact-chart-note">2026 data partial</span>
           </div>
@@ -91,19 +94,19 @@ export default function AuthorResearchImpact({ metrics, trend = [] }) {
           <div className="ap-impact-svg-wrap">
             <svg
               width="100%"
-              height="150"
+              height="230"
               viewBox={`0 0 ${svgWidth} ${chartHeight + 35}`}
               preserveAspectRatio="xMidYMid meet"
               className="ap-impact-svg"
             >
               {/* Horizontal grid lines */}
-              <line x1="0" y1="1" x2={svgWidth} y2="1" stroke="var(--border)" strokeDasharray="3 3" />
-              <line x1="0" y1={chartHeight / 2} x2={svgWidth} y2={chartHeight / 2} stroke="var(--border)" strokeDasharray="3 3" />
+              <line x1="0" y1={chartTop} x2={svgWidth} y2={chartTop} stroke="var(--border)" strokeDasharray="3 3" />
+              <line x1="0" y1={chartTop + plotHeight / 2} x2={svgWidth} y2={chartTop + plotHeight / 2} stroke="var(--border)" strokeDasharray="3 3" />
               <line x1="0" y1={chartHeight} x2={svgWidth} y2={chartHeight} stroke="var(--border)" />
 
               {trend.map((d, i) => {
                 const val = metricMode === "citations" ? d.citations : d.publications;
-                const h = Math.max(6, (val / maxVal) * chartHeight);
+                const h = Math.max(6, (val / maxVal) * plotHeight);
                 const x = i * (barWidth + gap);
                 const y = chartHeight - h;
                 const isCurrentYear = d.year === 2026;

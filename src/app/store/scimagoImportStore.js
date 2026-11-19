@@ -11,8 +11,31 @@ const IMPORT_SESSION_STORAGE_KEY = 'admin.scimagoImportSession';
 const MAX_IMPORT_BYTES = 50 * 1024 * 1024;
 const MAX_CHUNK_BYTES = 2 * 1024 * 1024;
 const MAX_CHUNK_ROWS = 250;
-const MAX_CHUNK_ATTEMPTS = 8;
-const MAX_RETRY_DELAY_MS = 30000;
+const MAX_CHUNK_ATTEMPTS = 5;
+const MAX_RETRY_DELAY_MS = 3000;
+
+function isFirestoreQuotaExceeded(error) {
+  return error.response?.data?.code === 'FIRESTORE_REQUEST_FAILED'
+    && Number(error.response?.data?.details?.status) === 429;
+}
+
+function isFirestoreRequestFailure(error) {
+  return error.response?.data?.code === 'FIRESTORE_REQUEST_FAILED';
+}
+
+function getImportErrorMessage(error, fallback) {
+  if (isFirestoreQuotaExceeded(error)) {
+    return 'Firestore quota exceeded while processing this batch. The import stopped to avoid repeated retries. Completed batches are saved; resume after the quota resets.';
+  }
+  if (isFirestoreRequestFailure(error)) {
+    return `Firestore rejected this batch (HTTP ${error.response?.data?.details?.status || 'unknown'}). The import stopped instead of retrying the same failed operation.`;
+  }
+  return error.response?.data?.message
+    || (!error.response && error.message === 'Network Error'
+      ? 'Worker connection failed without a readable response (network or CORS issue).'
+      : error.message)
+    || fallback;
+}
 
 function splitCsvRecords(text) {
   const input = String(text || '').replace(/^\uFEFF/, '');
@@ -81,18 +104,19 @@ async function postChunkWithRetry(url, body, onRetry, signal) {
       throw new Error('Import aborted by user.');
     }
     try {
-      return await api.post(url, body, { signal });
+      return await api.post(url, body, { signal, timeout: 60_000 });
     } catch (error) {
       if (signal?.aborted || error.name === 'CanceledError' || error.name === 'AbortError') {
         throw new Error('Import aborted by user.');
       }
       lastError = error;
       const status = error.response?.status;
+      if (isFirestoreRequestFailure(error)) throw error;
       const transient = !status || status === 408 || status === 429 || status >= 500;
       if (!transient) throw error;
       if (attempt < MAX_CHUNK_ATTEMPTS) {
-        const delay = Math.min(2000 * (2 ** (attempt - 1)), MAX_RETRY_DELAY_MS);
-        const jitter = Math.floor(Math.random() * 500);
+        const delay = Math.min(1000 * attempt, MAX_RETRY_DELAY_MS);
+        const jitter = Math.floor(Math.random() * 200);
         onRetry?.({ attempt: attempt + 1, error, delay: delay + jitter });
         await new Promise((resolve) => window.setTimeout(resolve, delay + jitter));
       }
@@ -256,12 +280,7 @@ export const useScimagoImportStore = create((set, get) => ({
         return;
       }
 
-      const errMsg =
-        error.response?.data?.message ||
-        (!error.response && error.message === 'Network Error'
-          ? 'Worker connection failed without a readable response (network or CORS issue).'
-          : error.message) ||
-        'Could not import the SCImago file.';
+      const errMsg = getImportErrorMessage(error, 'Could not import the SCImago file.');
 
       set({
         status: 'failed',
@@ -309,12 +328,7 @@ export const useScimagoImportStore = create((set, get) => ({
         return;
       }
 
-      const errMsg =
-        error.response?.data?.message ||
-        (!error.response && error.message === 'Network Error'
-          ? 'Worker connection failed without a readable response.'
-          : error.message) ||
-        'Could not resume import.';
+      const errMsg = getImportErrorMessage(error, 'Could not resume import.');
 
       set({
         status: 'failed',
@@ -332,7 +346,7 @@ export const useScimagoImportStore = create((set, get) => ({
     set({ status: 'importing', isImporting: true });
     let completed = uploadedBatches.size;
     const totalBatches = batches.length;
-    const CONCURRENCY = 4;
+    const CONCURRENCY = 2;
 
     const pendingIndexes = [];
     for (let i = 0; i < totalBatches; i += 1) {

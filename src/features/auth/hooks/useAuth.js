@@ -7,6 +7,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../../app/store/authStore';
 import { useUserStore } from '../../../app/store/userStore';
+import { useScimagoImportStore } from '../../../app/store/scimagoImportStore';
 import {
   deleteCurrentAccount,
   fetchCurrentProfile,
@@ -113,10 +114,16 @@ export default function useAuth() {
    * Đăng xuất: gọi BE clear session/cookie, sau đó xóa state FE.
    */
   const logout = useCallback(async () => {
-    await logoutSession();
+    const importStore = useScimagoImportStore.getState();
+    if (importStore.isImporting) importStore.pauseImport();
     clearAuthState();
     clearEmail();
     navigate('/login', { replace: true });
+    try {
+      await logoutSession();
+    } catch {
+      // Local sign-out is complete even if the Worker is unavailable.
+    }
   }, [clearAuthState, clearEmail, navigate]);
 
   /**

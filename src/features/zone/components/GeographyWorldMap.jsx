@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { ComposableMap, Geographies, Geography, ZoomableGroup } from 'react-simple-maps';
 import Icon from '../../../shared/components/Icon';
 import { Skeleton } from '../../../shared/ui/skeleton';
+import './GeographyWorldMap.css';
 
 const geoUrl = '/data/countries-110m.json';
 
@@ -454,7 +455,7 @@ export default function GeographyWorldMap({
                           fill={getGeoFill(geo, country)}
                           stroke={isSelected ? '#0369a1' : '#ffffff'}
                           strokeWidth={isSelected ? 1.5 : 0.5}
-                          className="transition-colors duration-150 cursor-pointer outline-none"
+                          className="geography-map-country cursor-pointer outline-none"
                           onMouseEnter={() => {
                             if (country) {
                               setHoveredCountry(country);

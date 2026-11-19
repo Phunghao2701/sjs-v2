@@ -1,0 +1,24 @@
+.geography-map-country {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    fill 160ms ease,
+    transform 460ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 460ms ease;
+}
+
+.geography-map-country:hover,
+.geography-map-country:focus-visible {
+  transform: translateY(-3px) scale(1.025);
+  transition-duration: 180ms;
+  filter: drop-shadow(0 3px 3px rgb(2 132 199 / 35%));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .geography-map-country:hover,
+  .geography-map-country:focus-visible {
+    transform: none;
+    transition: filter 160ms ease;
+    filter: drop-shadow(0 2px 2px rgb(2 132 199 / 25%));
+  }
+}

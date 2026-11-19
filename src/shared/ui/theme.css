@@ -44,6 +44,10 @@
   --ds-font-size-body: 14px;
   --ds-font-size-emphasis: 15px;
   --ds-font-size-heading: 16px;
+  --ds-font-weight-regular: 400;
+  --ds-font-weight-medium: 500;
+  --ds-font-weight-semibold: 600;
+  --ds-font-weight-bold: 700;
   --ds-page-gutter: clamp(1rem, 2vw, 2rem);
   --ds-motion-fast: 150ms;
   --ds-motion-base: 200ms;

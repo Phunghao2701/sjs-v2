@@ -151,13 +151,11 @@ export function isArticleNode(node) {
   return false;
 }
 
-export function hasFullArticleInfo(node) {
+export function hasRenderableArticleInfo(node) {
   const props = node?.properties || {};
 
   const id = props.id ?? node?.id;
-  const title = props.title;
-  const doi = props.doi;
-  const year = props.publication_year ?? props.year;
+  const title = props.title ?? props.display_name ?? props.name ?? node?.label;
 
   return (
     id !== undefined &&
@@ -165,13 +163,7 @@ export function hasFullArticleInfo(node) {
     String(id).trim() !== '' &&
     title !== undefined &&
     title !== null &&
-    String(title).trim() !== '' &&
-    doi !== undefined &&
-    doi !== null &&
-    String(doi).trim() !== '' &&
-    year !== undefined &&
-    year !== null &&
-    String(year).trim() !== ''
+    String(title).trim() !== ''
   );
 }
 
@@ -213,17 +205,22 @@ export function buildGraphData(apiResponse) {
   const articleMap = new Map();
 
   for (const n of nodesIn) {
-    const properties = n?.properties || {};
+    const sourceProperties = n?.properties || {};
+    const title = sourceProperties.title || sourceProperties.display_name || sourceProperties.name || n?.label;
+    const properties = title
+      ? { ...sourceProperties, title: String(title) }
+      : sourceProperties;
+    const normalizedNode = { ...n, properties };
     const id = String(n?.id ?? properties?.id);
 
     if (!id || id === 'undefined' || id === 'null') continue;
 
     allNodeMap.set(id, n);
 
-    if (!isArticleNode(n)) continue;
-    if (!hasFullArticleInfo(n)) continue;
+    if (!isArticleNode(normalizedNode)) continue;
+    if (!hasRenderableArticleInfo(normalizedNode)) continue;
 
-    const label = getDisplayLabel(properties, id);
+    const label = getDisplayLabel(properties, n?.label || id);
 
     articleMap.set(id, {
       id,

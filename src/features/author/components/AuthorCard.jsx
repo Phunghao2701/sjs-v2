@@ -21,7 +21,11 @@ export default function AuthorCard({ author }) {
   const hIndex = author.h_index ?? author.hindex ?? 0;
   const citations = author.citation_count ?? author.citations ?? 0;
   const articlesCount = author.article_count ?? author.papers ?? 0;
-  const tags = Array.isArray(author.subject_areas) ? author.subject_areas : author.subject_area ? [author.subject_area] : [];
+  const tags = (Array.isArray(author.subject_areas) ? author.subject_areas : author.subject_area ? [author.subject_area] : [])
+    .map((tag) => typeof tag === 'string'
+      ? tag
+      : tag?.name || tag?.display_name || tag?.subject_area || tag?.field || tag?.domain || '')
+    .filter(Boolean);
   const avatarUrl = author.url_image || author.avatar_url || '';
   const avatarColor = author.avatar_color ?? '#0071BC';
 

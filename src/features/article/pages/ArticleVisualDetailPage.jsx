@@ -676,6 +676,7 @@ export default function ArticleVisualDetailPage() {
           <div className="flex-1 w-full h-full relative min-h-[360px] overflow-hidden bg-background">
             <ArticleGraphWidget
               data={activeGraphData}
+              centerNodeId={originArticle.article_id || id}
               loading={isRecommendedLoading || graphLoading}
               onNodeClick={(node) => {
                 const targetId = node?.properties?.id || node?.id;

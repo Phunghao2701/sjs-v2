@@ -134,7 +134,7 @@ export default function useAuthors() {
           apiParams.sort_by = 'cited_by_count';
           apiParams.order = 'desc';
         } else if (authorsParams?.sort === 'impact' || authorsParams?.sort === 'h_index') {
-          apiParams.sort_by = 'h_index';
+          apiParams.sort_by = 'cited_by_count';
           apiParams.order = 'desc';
         } else {
           apiParams.sort_by = 'works_count';

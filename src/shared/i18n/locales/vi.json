@@ -572,7 +572,8 @@
     "tongCitationsTrenTrangHienTai": "Tổng citations trên trang hiện tại",
     "danhSachNhaKhoaHocTacGia": "Danh sách Nhà khoa học & Tác giả",
     "traCuuThongTinChiSoHocThuatHin": "Tra cứu thông tin, chỉ số học thuật h-index, số trích dẫn và các công trình khoa học của các tác giả hàng đầu.",
-    "timTheoTenVienNghienCuuTuKhoa": "Tìm theo tên, viện nghiên cứu, từ khóa...",
+    "timTheoTenVienNghienCuuTuKhoa": "Tìm kiếm theo tên...",
+    "searchByName": "Tìm kiếm theo tên...",
     "tacGia": "Tác giả"
   },
   "catalog": {

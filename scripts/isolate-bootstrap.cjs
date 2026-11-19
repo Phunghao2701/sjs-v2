@@ -31,7 +31,9 @@ const components = lines.slice(739, 7321).join('\n');
 // - Strip all !important so Tailwind utilities always win
 // - Strip all 504 Bootstrap spacing rules (.p-0..5, .m-0..5, .pt-*, .pb-*, .mt-*, .mb-*)
 //   so Tailwind's spacing scale has 100% uncontested ownership!
-const utilitiesRaw = lines.slice(7321).join('\n').replace(/\s*!important/g, '');
+const utilitiesRaw = lines.slice(7321).join('\n')
+  .replace(/\/\*# sourceMappingURL=[^*]*\*\//g, '')
+  .replace(/\s*!important/g, '');
 const utilities = utilitiesRaw.replace(/\.(?:p|m)[xytbes]?-(?:(?:sm|md|lg|xl|xxl)-)?[0-5]\s*\{[^}]*\}/g, '');
 
 const isolated = `/* ==========================================================================
