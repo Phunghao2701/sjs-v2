@@ -47,9 +47,9 @@ export const AnalyticsDashboard = () => {
     if (pagination.totalCount && page * limit < pagination.totalCount) {
       const nextPage = page + 1;
       queryClient.prefetchQuery({
-        queryKey: ['trackedJournals', projectId, nextPage, limit],
+        queryKey: ['trackedJournalsV2', projectId, nextPage, limit],
         queryFn: async () => {
-          const response = await apiClient.get('/analytics/journals/ranking', {
+          const response = await apiClient.get('/analytics/tracked-journals', {
             params: { project_id: projectId, page: nextPage, limit },
           });
           const rawData = response?.data || response;

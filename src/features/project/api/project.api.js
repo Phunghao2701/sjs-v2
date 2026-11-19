@@ -31,6 +31,11 @@ export const getProjectByIdApi = (id, config) => {
   return api.get(`/projects/${id}`, config);
 };
 
+/** Get keyword watch-list entries for a project. */
+export const getProjectKeywordsApi = (id) => {
+  return api.get(`/projects/${id}/keywords`);
+};
+
 /**
  * Get project overview statistics and charts
  * @param {number|string} id - Project ID

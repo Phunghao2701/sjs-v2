@@ -11,11 +11,7 @@ import GlobalCollaborationNetwork from '../components/collaboration-analytics/Gl
 import TopicIntensityMatrix from '../components/collaboration-analytics/TopicIntensityMatrix';
 import CollaborationAnalyticsSkeleton from '../components/collaboration-analytics/CollaborationAnalyticsSkeleton';
 import {
-  useInfluentialRankingsQuery,
-  useAuthorProductivityMatrixQuery,
-  useCollaborationInsightsQuery,
-  useGlobalCollaborationNetworkQuery,
-  useTopicIntensityMatrixQuery
+  useCollaborationDashboardQuery,
 } from '../hooks/useCollaborationAnalyticsQueries';
 import { useParams } from 'react-router-dom';
 import ErrorStateSection from '../../../shared/components/common/ErrorStateSection';
@@ -26,25 +22,13 @@ const CollaborationAnalyticsPage = () => {
   const { id } = useParams();
   const projectId = id === 'default-id' ? '1' : id;
 
-  const { data: rankings, isLoading: isLoadingRankings, error: errRankings, refetch: refetchRankings } = useInfluentialRankingsQuery(projectId);
-  const { data: impactMatrix, isLoading: isLoadingImpact, error: errImpact, refetch: refetchImpact } = useAuthorProductivityMatrixQuery(projectId);
-  const { data: keyInsights, isLoading: isLoadingInsights, error: errInsights, refetch: refetchInsights } = useCollaborationInsightsQuery(projectId);
-  const { data: globalNetwork, isLoading: isLoadingNetwork, error: errNetwork, refetch: refetchNetwork } = useGlobalCollaborationNetworkQuery(projectId);
-
   const [intensityType, setIntensityType] = React.useState('author');
-  const { data: topicIntensity, isLoading: isLoadingIntensity, error: errIntensity, refetch: refetchIntensity } = useTopicIntensityMatrixQuery(projectId, intensityType);
-
-  const hasData = rankings && impactMatrix && keyInsights && globalNetwork && topicIntensity;
-  const isLoading = (isLoadingRankings || isLoadingImpact || isLoadingInsights || isLoadingNetwork || isLoadingIntensity) && !hasData;
-  const error = errRankings || errImpact || errInsights || errNetwork || errIntensity;
-
-  const handleRefetch = () => {
-    refetchRankings();
-    refetchImpact();
-    refetchInsights();
-    refetchNetwork();
-    refetchIntensity();
-  };
+  const { data: dashboard, isLoading, error, refetch } = useCollaborationDashboardQuery(projectId, intensityType);
+  const rankings = dashboard?.rankings;
+  const impactMatrix = dashboard?.impactMatrix;
+  const keyInsights = dashboard?.keyInsights;
+  const globalNetwork = dashboard?.globalNetwork;
+  const topicIntensity = dashboard?.topicIntensity;
 
   return (
     <>
@@ -57,7 +41,7 @@ const CollaborationAnalyticsPage = () => {
           <ErrorStateSection
             title={t('common.error', 'Collaboration Analytics Failed')}
             message={error?.message || error || t('dashboard.loadingFailedDesc', 'Something went wrong')}
-            onRetry={handleRefetch}
+            onRetry={refetch}
             minHeight={400}
           />
         ) : !rankings && !impactMatrix && !keyInsights && !globalNetwork && !topicIntensity ? (

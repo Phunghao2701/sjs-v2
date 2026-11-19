@@ -10,9 +10,9 @@ import apiClient from '../../../shared/api/axios';
  */
 export const useTrackedJournalsQuery = (projectId, page = 1, limit = 4) => {
   return useQuery({
-    queryKey: ['trackedJournals', projectId, page, limit],
+    queryKey: ['trackedJournalsV2', projectId, page, limit],
     queryFn: async () => {
-      const response = await apiClient.get('/analytics/journals/ranking', {
+      const response = await apiClient.get('/analytics/tracked-journals', {
         params: {
           project_id: projectId,
           page,

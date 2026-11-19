@@ -77,19 +77,19 @@ export const JournalTable = ({ journals, page = 1, limit = 4, totalCount = 0, on
                 <div className={styles.journalInfo}>
                   <div className={styles.journalCover}>
                     <span style={{ color: '#999', fontSize: '13px', fontWeight: 'bold' }}>
-                      {journal.name.substring(0, 2).toUpperCase()}
+                      {String(journal.name || '').substring(0, 2).toUpperCase()}
                     </span>
                   </div>
                   <div>
-                    <h3 className={styles.journalTitle}>{journal.name}</h3>
+                    <h3 className={styles.journalTitle}>{journal.name || t('common.unknown', 'Unknown journal')}</h3>
                     <p className={styles.journalPublisher}>{t('analytics.publishedBy', 'Published by')} {journal.publisher}</p>
                   </div>
                 </div>
               </td>
-              <td className={styles.issn}>{journal.issn}</td>
-              <td className={styles.impactFactor}>{journal.impactFactor?.toFixed(2) || '0.00'}</td>
+              <td className={styles.issn}>{journal.issn || '—'}</td>
+              <td className={styles.impactFactor}>{journal.impactFactor != null && Number.isFinite(Number(journal.impactFactor)) ? Number(journal.impactFactor).toFixed(2) : '—'}</td>
               <td>
-                <span className={styles.sjrBadge}>{journal.sjrRank}</span>
+                <span className={styles.sjrBadge}>{journal.sjrRank || '—'}</span>
               </td>
               <td>
                 <Sparkline data={journal.trend} />

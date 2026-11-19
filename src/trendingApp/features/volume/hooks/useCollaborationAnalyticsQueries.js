@@ -1,6 +1,72 @@
 import { useQuery } from '@tanstack/react-query';
 import apiClient from '../../../shared/api/axios';
 
+const mapProductivityData = (data = []) => {
+  if (!Array.isArray(data) || !data.length) return [];
+  const rawMaxX = Math.max(...data.map(item => item.yearlyOutput || 0));
+  const rawMaxY = Math.max(...data.map(item => item.hIndex || 0));
+  const maxX = Math.max(5, rawMaxX * 1.1);
+  const maxY = Math.max(5, rawMaxY * 1.1);
+  return data.map((item, index) => ({
+    id: item.authorId || index,
+    authorId: item.authorId || `#${index + 1}`,
+    authorName: item.authorName || null,
+    hIndex: item.hIndex ?? 0,
+    yearlyOutput: item.yearlyOutput ?? 0,
+    x: maxX > 0 ? (item.yearlyOutput / maxX) * 100 : 0,
+    y: maxY > 0 ? (item.hIndex / maxY) * 100 : 0,
+    r: 5,
+    type: 'author',
+  }));
+};
+
+const mapNetworkData = (data = {}) => ({
+  nodes: (data.nodes || []).map(node => ({
+    ...node,
+    id: node.id,
+    type: node.type === 'AUTHOR' ? 'author' : 'institution',
+    val: node.size,
+  })),
+  links: (data.edges || []).map(edge => ({
+    ...edge,
+    source: edge.source || edge.from,
+    target: edge.target || edge.to,
+  })),
+});
+
+const mapTopicIntensityData = (rawData = []) => {
+  if (!Array.isArray(rawData) || rawData.length === 0) return null;
+  const rows = [...new Set(rawData.map(item => item.rowName).filter(Boolean))];
+  const columns = [...new Set(rawData.map(item => item.topic).filter(Boolean))];
+  const data = rows.map(row => columns.map(column => (
+    rawData.find(item => item.rowName === row && item.topic === column)?.intensity || 0
+  )));
+  return { columns, rows, data };
+};
+
+export const useCollaborationDashboardQuery = (projectId, intensityType = 'author') => useQuery({
+  queryKey: ['collaboration', 'dashboard', projectId],
+  queryFn: () => apiClient.get('/analytics/network/collaboration-dashboard', {
+    params: { project_id: projectId },
+  }),
+  enabled: !!projectId,
+  staleTime: 5 * 60 * 1000,
+  select: (response) => {
+    const payload = response?.data || {};
+    const rankings = payload.rankings || {};
+    return {
+      rankings: {
+        authors: Array.isArray(rankings.authors) ? rankings.authors : [],
+        institutions: Array.isArray(rankings.institutions) ? rankings.institutions : [],
+      },
+      impactMatrix: mapProductivityData(payload.impactMatrix),
+      keyInsights: payload.keyInsights || null,
+      globalNetwork: mapNetworkData(payload.globalNetwork),
+      topicIntensity: mapTopicIntensityData(payload.topicIntensity?.[intensityType]),
+    };
+  },
+});
+
 /**
  * @typedef {Object} TopEntity
  * @property {string} name

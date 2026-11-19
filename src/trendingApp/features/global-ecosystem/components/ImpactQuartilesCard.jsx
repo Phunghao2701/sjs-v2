@@ -50,7 +50,7 @@ export default function ImpactQuartilesCard() {
         </CardHeader>
         <CardContent className="p-4">
           <p className="text-xs text-muted-foreground m-0">
-            {t('dashboard.quartilesNoData', 'OpenAlex does not provide journal quartile rankings.')}
+            {t('dashboard.quartilesNoData', "No matching SCImago quartile data was found for this project's journals.")}
           </p>
         </CardContent>
       </Card>

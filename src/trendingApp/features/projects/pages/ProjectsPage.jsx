@@ -15,7 +15,6 @@ const mapProjectFromApi = (project) => {
   const title = project.title || project.project_name || 'Untitled Project';
   const subjectArea = project.subject_area || project.domain || 'GENERAL';
   const createdAt = project.created_at || project.updated_at || new Date().toISOString();
-
   return {
     id: String(projectId),
     title,

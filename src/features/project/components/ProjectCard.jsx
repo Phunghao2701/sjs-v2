@@ -6,6 +6,7 @@ import { Icon } from '@iconify/react';
 import { Card } from '../../../shared/ui/card';
 import { Badge } from '../../../shared/ui/badge';
 import { formatCount } from '../../../shared/utils/formatNumber';
+import { getProjectKeywordCount } from '../utils/projectKeywordCount';
 
 const ProjectCard = ({
   project,
@@ -23,7 +24,7 @@ const ProjectCard = ({
   const projectId = project.project_id || project.id;
   const title = project.title || 'Untitled Project';
   const createdAt = project.created_at ? new Date(project.created_at).toLocaleDateString('vi-VN') : 'N/A';
-  const keywordCount = project.keywords_count || project.watch_keywords?.length || 0;
+  const keywordCount = getProjectKeywordCount(project);
   const articleCount = project.articles_count ?? project.article_count ?? project.total_articles ?? 0;
   const isDeleted = project.status === 'DELETED';
   const isActive = project.status === 'ACTIVE' || (!isDeleted && project.status !== 'INACTIVE');

@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PageContainer, PageHeader } from '../../../shared/ui/page-layout';
 import { MotionPage, MotionGrid, MotionItem, fadeUp } from '../../../shared/ui/motion';
 import { getSubjectAreasApi } from '../../catalog/api/catalogApi';
+import { getProjectKeywordCount } from '../utils/projectKeywordCount';
 
 const ProjectListPage = () => {
   const navigate = useNavigate();
@@ -127,7 +128,7 @@ const ProjectListPage = () => {
   );
   const totalKeywordsMonitored = useMemo(() => {
     return nonDeletedProjects.reduce((sum, p) => {
-      const count = p.keywords_count || p.watch_keywords?.length || 0;
+      const count = getProjectKeywordCount(p);
       return sum + count;
     }, 0);
   }, [nonDeletedProjects]);
@@ -159,8 +160,8 @@ const ProjectListPage = () => {
         if (sortBy === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
         if (sortBy === 'title') return (a.title || '').localeCompare(b.title || '');
         if (sortBy === 'keywords') {
-          const countA = a.keywords_count || a.watch_keywords?.length || 0;
-          const countB = b.keywords_count || b.watch_keywords?.length || 0;
+          const countA = getProjectKeywordCount(a);
+          const countB = getProjectKeywordCount(b);
           return countB - countA;
         }
         return 0;

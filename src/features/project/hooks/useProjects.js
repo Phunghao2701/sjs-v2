@@ -5,7 +5,8 @@
  */
 import { useState, useCallback } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getProjectsApi, createProjectApi, deleteProjectApi, restoreProjectApi } from '../api/project.api';
+import { getProjectsApi, getProjectKeywordsApi, createProjectApi, deleteProjectApi, restoreProjectApi } from '../api/project.api';
+import { getProjectKeywordCount } from '../utils/projectKeywordCount';
 
 export default function useProjects() {
   const queryClient = useQueryClient();
@@ -17,7 +18,29 @@ export default function useProjects() {
     queryFn: async () => {
       const response = await getProjectsApi();
       if (response.data && response.data.success !== false) {
-        return response.data.data || [];
+        const projects = response.data.data || [];
+        return Promise.all(projects.map(async (project) => {
+          if (getProjectKeywordCount(project) > 0) return project;
+
+          const projectId = project.project_id || project.id;
+          if (!projectId) return project;
+
+          try {
+            const keywordResponse = await getProjectKeywordsApi(projectId);
+            const keywordRows = Array.isArray(keywordResponse.data?.data)
+              ? keywordResponse.data.data
+              : Array.isArray(keywordResponse.data?.data?.items)
+                ? keywordResponse.data.data.items
+                : [];
+            const keywordCount = getProjectKeywordCount({ project_keywords: keywordRows });
+            return keywordCount > 0
+              ? { ...project, keywords_count: keywordCount, keyword_count: keywordCount }
+              : project;
+          } catch (error) {
+            console.warn(`Could not load keyword count for project ${projectId}:`, error);
+            return project;
+          }
+        }));
       }
       throw new Error(response.data?.message || 'Failed to fetch projects');
     },

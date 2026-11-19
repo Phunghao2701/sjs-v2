@@ -40,11 +40,13 @@ export const SummaryCards = ({ summary = {} }) => {
         <div className={styles.summaryCardHeader}>
           <span>{t('analytics.avgIfScore', 'Average IF Score')}</span>
         </div>
-        <div className={styles.summaryCardValue}>{averageImpactFactor.toFixed(2)}</div>
+        <div className={styles.summaryCardValue}>
+          {averageImpactFactor != null && Number.isFinite(Number(averageImpactFactor)) ? Number(averageImpactFactor).toFixed(2) : '—'}
+        </div>
         <div className={styles.summaryCardSubtext}>
-          {t('analytics.changeFromLastPeriod', { 
-            change: percentageChange, 
-            defaultValue: `${percentageChange} from last period` 
+          {percentageChange == null ? t('analytics.changeUnavailable', 'SJR change data unavailable') : t('analytics.changeFromLastPeriod', {
+            change: percentageChange,
+            defaultValue: `${percentageChange} from last period`
           })}
         </div>
       </Card>
