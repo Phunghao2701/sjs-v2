@@ -1674,6 +1674,8 @@
 
 /* ─── 13. RESEARCH NETWORK VISUALIZATION ─── */
 .ap-network-wrapper {
+  position: relative;
+  width: 100%;
   background-color: #fafafa;
   border: 1px solid var(--border, #e6e6e6);
   border-radius: 8px;
@@ -1685,11 +1687,47 @@
 
 .ap-network-svg {
   width: 100%;
-  max-height: 250px;
+  height: clamp(250px, 34vw, 340px);
+  max-height: none;
+  touch-action: none;
+  cursor: grab;
+}
+
+.ap-network-svg:active {
+  cursor: grabbing;
+}
+
+.ap-network-controls {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ap-network-controls button {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--border, #e6e6e6);
+  border-radius: 0.5rem;
+  background: #fff;
+  color: var(--text-main, #0d1b1c);
+  font: inherit;
+  font-size: var(--ds-font-size-body);
+  line-height: 1;
+  box-shadow: 0 1px 3px rgb(16 24 40 / 12%);
+  cursor: pointer;
+}
+
+.ap-network-controls button:hover {
+  border-color: var(--primary, #0071bc);
+  color: var(--primary, #0071bc);
 }
 
 .ap-network-node-group {
-  cursor: pointer;
+  cursor: grab;
   outline: none;
   transform-box: fill-box;
   transform-origin: center;
@@ -1705,6 +1743,10 @@
 
 .ap-network-node-group.is-selected {
   filter: drop-shadow(0 2px 4px rgba(0, 113, 188, 0.28));
+}
+
+.ap-network-node-group:active {
+  cursor: grabbing;
 }
 
 .ap-network-node-group:hover > circle:nth-of-type(2),
@@ -2213,7 +2255,7 @@
 }
 
 .ap-main-container .ap-hero-name {
-  font-size: var(--text-xl, 1.25rem);
+  font-size: var(--ds-font-size-heading);
   font-weight: var(--ds-font-weight-bold);
   line-height: 1.2;
 }
@@ -2256,10 +2298,10 @@
   .ap-edu-type-tag,
   .ap-related-meta
 ) {
-  font-size: var(--text-xs, 0.75rem);
+  font-size: var(--ds-font-size-caption);
 }
 
 .ap-main-container :is(.ap-hero-summary-val, .ap-metric-tile-val, .ap-impact-stat-number, .ap-cited-citations-num) {
-  font-size: var(--text-lg, 1.125rem);
+  font-size: var(--ds-font-size-heading);
   font-weight: var(--ds-font-weight-bold);
 }

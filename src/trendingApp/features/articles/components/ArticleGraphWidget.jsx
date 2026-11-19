@@ -9,11 +9,13 @@ import {
   clamp,
   compactText,
   getId,
+  getNodeColor,
+  getYearRange,
+  toRgba,
 } from '../utils/articleGraph.utils';
 
 export default function ArticleGraphWidget({
   data,
-  centerNodeId,
   loading = false,
   error = '',
   onNodeClick,
@@ -34,6 +36,10 @@ export default function ArticleGraphWidget({
     return buildGraphData(data);
   }, [data]);
 
+  const { minYear, maxYear } = useMemo(() => {
+    return getYearRange(graph.nodes);
+  }, [graph.nodes]);
+
   useEffect(() => {
     const el = graphBoxRef.current;
     if (!el) return;
@@ -53,30 +59,6 @@ export default function ArticleGraphWidget({
 
   useEffect(() => {
     if (!graph.nodes.length || !fgRef.current) return;
-
-    // Keep the queried article in the hub and arrange related papers as satellites,
-    // matching the compact hub-and-spoke maps used elsewhere in the app.
-    const centerNode = graph.nodes.find((node) => String(node.id) === String(centerNodeId))
-      || graph.nodes.reduce((best, node) => (node.degree > (best?.degree ?? -1) ? node : best), null);
-    const satellites = graph.nodes
-      .filter((node) => node !== centerNode)
-      .sort((a, b) => String(a.label).localeCompare(String(b.label)));
-    const radius = Math.min(155, Math.max(92, Math.min(dims.width, dims.height) * 0.3));
-
-    if (centerNode) {
-      centerNode.x = 0;
-      centerNode.y = 0;
-      centerNode.fx = 0;
-      centerNode.fy = 0;
-
-      satellites.forEach((node, index) => {
-        const angle = (-Math.PI / 2) + ((Math.PI * 2 * index) / Math.max(satellites.length, 1));
-        node.x = Math.cos(angle) * radius;
-        node.y = Math.sin(angle) * radius;
-        node.fx = node.x;
-        node.fy = node.y;
-      });
-    }
 
     // Lực đẩy vừa phải để các cụm không văng quá xa
     fgRef.current.d3Force('charge')?.strength(-130);
@@ -103,7 +85,7 @@ export default function ArticleGraphWidget({
     );
 
     fgRef.current.d3ReheatSimulation?.();
-  }, [graph.nodes, graph.links.length, centerNodeId, dims.width, dims.height]);
+  }, [graph.nodes.length, graph.links.length, dims.width, dims.height]);
 
   const updateHighlight = useCallback(
     (node) => {
@@ -170,78 +152,82 @@ export default function ArticleGraphWidget({
     (node, ctx, globalScale) => {
       const isSelected = selectedNode?.id === node.id;
       const isHovered = hoverNode?.id === node.id;
-      const isCenter = String(node.id) === String(centerNodeId);
       const hasHighlight = highlightNodes.size > 0;
       const isActive = !hasHighlight || highlightNodes.has(String(node.id));
 
-      const radius = isCenter ? 20 : 7;
-      const color = isCenter ? '#0071BC' : '#0EA5E9';
-      const label = compactText(node.label, isCenter ? 16 : 25);
-      const displayRadius = radius + (isHovered || isSelected ? 2 : 0);
+      const radius = node.val || 10;
+      const color = getNodeColor(node, minYear, maxYear);
+      const label = compactText(node.label, radius > 24 ? 16 : 12);
 
       ctx.save();
       ctx.globalAlpha = isActive ? 1 : 0.18;
 
-      if (isCenter || isSelected) {
-        ctx.beginPath();
-        ctx.fillStyle = 'rgba(0, 113, 188, 0.13)';
-        ctx.arc(node.x, node.y, displayRadius + (isCenter ? 12 : 7), 0, Math.PI * 2);
-        ctx.fill();
-      }
-
       if (isSelected) {
         ctx.beginPath();
+        ctx.fillStyle = ARTICLE_GRAPH_THEME.selectedGlow;
+        ctx.arc(node.x, node.y, radius + 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
         ctx.strokeStyle = ARTICLE_GRAPH_THEME.selectedRing;
-        ctx.lineWidth = 2 / globalScale;
-        ctx.arc(node.x, node.y, displayRadius + 4, 0, Math.PI * 2);
+        ctx.lineWidth = 3 / globalScale;
+        ctx.arc(node.x, node.y, radius + 4, 0, Math.PI * 2);
         ctx.stroke();
       }
 
       ctx.beginPath();
-      ctx.fillStyle = color;
-      ctx.arc(node.x, node.y, displayRadius, 0, Math.PI * 2);
+      ctx.fillStyle = toRgba(color, isSelected ? 0.86 : 0.72);
+      ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
       ctx.fill();
 
       ctx.beginPath();
-      ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-      ctx.lineWidth = 1.2 / globalScale;
-      ctx.arc(node.x, node.y, displayRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = isHovered
+        ? 'rgba(255,255,255,0.98)'
+        : 'rgba(255,255,255,0.55)';
+      ctx.lineWidth = isHovered ? 2.2 / globalScale : 1.2 / globalScale;
+      ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
       ctx.stroke();
 
-      if (isCenter) {
-        const words = String(node.label || '').split(/\s+/);
-        const midpoint = Math.ceil(words.length / 2);
-        const lines = [words.slice(0, midpoint).join(' '), words.slice(midpoint).join('')];
-        ctx.font = `700 ${clamp(9 / globalScale, 8, 10)}px Arial, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#fff';
-        ctx.fillText(compactText(lines[0], 12), node.x, node.y - 3 / globalScale);
-        if (lines[1]) ctx.fillText(compactText(lines[1], 12), node.x, node.y + 6 / globalScale);
-      } else {
-        const fontSize = clamp(10 / globalScale, 9, 11);
-        ctx.font = `${isSelected ? 700 : 600} ${fontSize}px Arial, sans-serif`;
-        ctx.textBaseline = 'middle';
-        ctx.textAlign = 'center';
+      const fontSize = clamp(14 / globalScale, 13, 16);
+
+      ctx.font = `${isSelected ? 700 : 500} ${fontSize}px Arial, sans-serif`;
+      ctx.textBaseline = 'middle';
+
+      if (radius < 11) {
+        ctx.textAlign = 'left';
+
         ctx.strokeStyle = 'rgba(255,255,255,0.95)';
         ctx.lineWidth = 3 / globalScale;
-        ctx.strokeText(label, node.x, node.y - (displayRadius + 8) / globalScale);
-        ctx.fillStyle = isSelected ? '#005A96' : '#344054';
-        ctx.fillText(label, node.x, node.y - (displayRadius + 8) / globalScale);
+        ctx.strokeText(label, node.x + radius + 3, node.y);
+
+        ctx.fillStyle = isSelected
+          ? ARTICLE_GRAPH_THEME.selectedTextColor
+          : ARTICLE_GRAPH_THEME.textColor;
+        ctx.fillText(label, node.x + radius + 3, node.y);
+      } else {
+        ctx.textAlign = 'center';
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = 3.2 / globalScale;
+        ctx.strokeText(label, node.x, node.y);
+
+        ctx.fillStyle = isSelected
+          ? ARTICLE_GRAPH_THEME.selectedTextColor
+          : ARTICLE_GRAPH_THEME.textColor;
+        ctx.fillText(label, node.x, node.y);
       }
 
       ctx.restore();
     },
-    [selectedNode, hoverNode, highlightNodes, centerNodeId]
+    [selectedNode, hoverNode, highlightNodes, minYear, maxYear]
   );
 
   const drawPointerArea = useCallback((node, color, ctx) => {
     ctx.fillStyle = color;
     ctx.beginPath();
-    const isCenter = String(node.id) === String(centerNodeId);
-    ctx.arc(node.x, node.y, isCenter ? 26 : 13, 0, Math.PI * 2);
+    ctx.arc(node.x, node.y, Math.max(10, (node.val || 10) + 4), 0, Math.PI * 2);
     ctx.fill();
-  }, [centerNodeId]);
+  }, []);
 
   const getLinkColor = useCallback(
     (link) => {
@@ -297,7 +283,6 @@ export default function ArticleGraphWidget({
           d3AlphaDecay={0.022}
           d3VelocityDecay={0.27}
           nodeRelSize={1}
-          enableNodeDrag={false}
           nodeCanvasObject={drawNode}
           nodePointerAreaPaint={drawPointerArea}
           nodeLabel={(node) => {
@@ -337,7 +322,6 @@ export default function ArticleGraphWidget({
           }}
           linkColor={getLinkColor}
           linkWidth={(link) => (highlightLinks.has(link) ? 1.4 : 0.65)}
-          linkLineDash={() => [4, 3]}
           linkDirectionalParticles={0}
           linkDirectionalArrowLength={0}
           onNodeHover={updateHighlight}
@@ -414,26 +398,33 @@ export default function ArticleGraphWidget({
             position: 'absolute',
             right: 16,
             bottom: 12,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 14,
-            padding: '7px 10px',
-            border: '1px solid #e4e7ec',
-            borderRadius: 999,
-            background: 'rgba(255,255,255,0.94)',
-            color: '#344054',
-            fontSize: 12,
+            width: 340,
+            maxWidth: '42vw',
             zIndex: 5,
           }}
         >
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
-            <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#0071BC' }} />
-            Selected article
-          </span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap' }}>
-            <span style={{ width: 9, height: 9, borderRadius: '50%', background: '#0EA5E9' }} />
-            Connected papers
-          </span>
+          <div
+            style={{
+              height: 16,
+              borderRadius: 999,
+              background: `linear-gradient(to right, ${ARTICLE_GRAPH_THEME.yearStartColor}, ${ARTICLE_GRAPH_THEME.yearEndColor})`,
+              boxShadow: '0 4px 12px rgba(234, 88, 12, 0.18)',
+            }}
+          />
+
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              marginTop: 5,
+              color: '#9a3412',
+              fontSize: 14,
+              fontWeight: 600,
+            }}
+          >
+            <span>{minYear}</span>
+            <span>{maxYear}</span>
+          </div>
         </div>
       </div>
     </div>
