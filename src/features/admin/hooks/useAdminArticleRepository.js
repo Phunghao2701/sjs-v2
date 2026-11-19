@@ -5,6 +5,7 @@ import { getArticlesListApi } from '../../article/api/articleApi';
 const PAGE_SIZE = 4;
 
 const DEFAULT_FILTERS = {
+  search: '',
   journal: JOURNAL_FILTER_OPTIONS[0],
   status: STATUS_FILTER_OPTIONS[0].value,
   submittedDate: '',
@@ -47,6 +48,7 @@ const buildInsights = (stats, totalItems) => ({
 });
 
 export default function useAdminArticleRepository() {
+  const [searchQuery, setSearchQuery] = useState(DEFAULT_FILTERS.search);
   const [journalFilter, setJournalFilter] = useState(DEFAULT_FILTERS.journal);
   const [statusFilter, setStatusFilter] = useState(DEFAULT_FILTERS.status);
   const [submittedDateFilter, setSubmittedDateFilter] = useState(DEFAULT_FILTERS.submittedDate);
@@ -106,6 +108,7 @@ export default function useAdminArticleRepository() {
 
   const handleApplyFilters = () => {
     setAppliedFilters({
+      search: searchQuery,
       journal: journalFilter,
       status: statusFilter,
       submittedDate: submittedDateFilter,
@@ -114,6 +117,7 @@ export default function useAdminArticleRepository() {
   };
 
   const handleClearFilters = () => {
+    setSearchQuery(DEFAULT_FILTERS.search);
     setJournalFilter(DEFAULT_FILTERS.journal);
     setStatusFilter(DEFAULT_FILTERS.status);
     setSubmittedDateFilter(DEFAULT_FILTERS.submittedDate);
@@ -123,20 +127,30 @@ export default function useAdminArticleRepository() {
 
   const pageItems = useMemo(() => {
     return articles.filter((article) => {
+      const q = (appliedFilters.search || searchQuery || '').trim().toLowerCase();
+      const matchSearch =
+        !q ||
+        (article.title || '').toLowerCase().includes(q) ||
+        (article.leadAuthor || '').toLowerCase().includes(q) ||
+        (article.msId || '').toLowerCase().includes(q) ||
+        (article.journal || '').toLowerCase().includes(q);
+
       const matchJournal =
         appliedFilters.journal === JOURNAL_FILTER_OPTIONS[0] || article.journal === appliedFilters.journal;
       const matchStatus = appliedFilters.status === 'all' || article.status === appliedFilters.status;
       const matchDate = !appliedFilters.submittedDate || article.submittedDate === formatDate(appliedFilters.submittedDate);
 
-      return matchJournal && matchStatus && matchDate;
+      return matchSearch && matchJournal && matchStatus && matchDate;
     });
-  }, [appliedFilters, articles]);
+  }, [appliedFilters, searchQuery, articles]);
 
   const safePage = Math.min(currentPage, totalPages);
   const startIndex = totalItems === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
   const endIndex = Math.min((safePage - 1) * PAGE_SIZE + pageItems.length, totalItems);
 
   return {
+    searchQuery,
+    setSearchQuery,
     journalFilter,
     statusFilter,
     submittedDateFilter,

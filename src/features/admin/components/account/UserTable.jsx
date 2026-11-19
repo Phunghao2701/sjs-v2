@@ -14,13 +14,14 @@ export default function UserTable({
   users = [],
   loading = false,
   onEdit,
-  onDelete
+  onDelete,
+  asCard = true
 }) {
   const { t: _t } = useTranslation();
 
   if (loading) {
     return (
-      <div className="p-4 space-y-3 bg-surface rounded-lg border border-border">
+      <div className={asCard ? "p-4 space-y-3 bg-surface rounded-lg border border-border" : "p-4 space-y-3 bg-surface"}>
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="flex items-center justify-between py-2 border-b border-border/50 last:border-0">
             <div className="flex items-center gap-3">
@@ -41,7 +42,7 @@ export default function UserTable({
 
   if (users.length === 0) {
     return (
-      <div className="text-center py-8 border border-border rounded-lg bg-surface">
+      <div className={asCard ? "text-center py-8 border border-border rounded-lg bg-surface" : "text-center py-8 bg-surface"}>
         <Icon icon="lucide:users" width="48" className="text-muted-foreground mx-auto mb-2 opacity-50" />
         <h6 className="text-foreground font-bold text-base">No Users Found</h6>
         <p className="text-muted-foreground text-xs mb-0">Try adjusting your search query or role/status filters.</p>
@@ -50,9 +51,9 @@ export default function UserTable({
   }
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-surface shadow-2xs">
+    <div className={asCard ? "border border-border rounded-lg overflow-hidden bg-surface shadow-2xs" : "table-responsive"}>
       <Table className="w-full text-left">
-        <TableHeader className="bg-muted/40">
+        <TableHeader className="bg-surface-muted/60">
           <TableRow>
             <TableHead className="py-3 px-4 text-xs font-semibold text-muted-foreground uppercase w-[45%]">User Profile</TableHead>
             <TableHead className="py-3 px-3 text-xs font-semibold text-muted-foreground uppercase w-[20%]">Role</TableHead>

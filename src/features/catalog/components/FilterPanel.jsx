@@ -415,18 +415,16 @@ export default function FilterPanel({
                     <div className="grid grid-cols-4 gap-2">
                       {['Q1', 'Q2', 'Q3', 'Q4'].map((q) => {
                         const isSelected = selectedQuartiles.includes(q);
-                        const quartileStyles = {
-                          Q1: isSelected ? 'bg-emerald-600 text-white font-bold border-emerald-700 shadow-xs' : 'border-emerald-500/30 text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20',
-                          Q2: isSelected ? 'bg-blue-600 text-white font-bold border-blue-700 shadow-xs' : 'border-blue-500/30 text-blue-700 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20',
-                          Q3: isSelected ? 'bg-amber-600 text-white font-bold border-amber-700 shadow-xs' : 'border-amber-500/30 text-amber-700 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20',
-                          Q4: isSelected ? 'bg-rose-600 text-white font-bold border-rose-700 shadow-xs' : 'border-rose-500/30 text-rose-700 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20',
-                        };
                         return (
                           <button
                             key={q}
                             type="button"
                             onClick={() => onQuartileSelect(q)}
-                            className={`h-9 rounded-control border text-xs font-semibold transition-all flex items-center justify-center cursor-pointer ${quartileStyles[q]}`}
+                            className={`h-9 rounded-control border text-xs font-semibold transition-all flex items-center justify-center cursor-pointer shadow-2xs ${
+                              isSelected
+                                ? 'bg-primary text-white border-primary shadow-xs'
+                                : 'border-border bg-surface text-foreground hover:bg-surface-muted hover:border-foreground/30'
+                            }`}
                             aria-pressed={isSelected}
                           >
                             {q}

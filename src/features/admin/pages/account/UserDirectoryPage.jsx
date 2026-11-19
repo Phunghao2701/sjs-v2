@@ -180,16 +180,6 @@ export default function UserDirectoryPage() {
         }
       />
 
-      <UserFilterBar
-        search={search}
-        onSearchChange={handleSearchChange}
-        selectedRole={selectedRole}
-        onRoleChange={handleRoleChange}
-        selectedStatus={selectedStatus}
-        onStatusChange={handleStatusChange}
-        totalCount={totalItems}
-      />
-
       {error ? (
         <Alert variant="destructive" className="mb-3 items-center">
           <Icon icon="lucide:alert-circle" width="18" className="shrink-0" />
@@ -197,17 +187,36 @@ export default function UserDirectoryPage() {
         </Alert>
       ) : null}
 
-      <div className="admin-card p-0 overflow-hidden">
-        <UserTable users={users} loading={loading} />
-      </div>
+      {/* Unified User Section: Integrated Filter Bar + Table Content + Pagination in ONE Card */}
+      <Card className="rounded-card border border-border bg-surface shadow-card">
+        <UserFilterBar
+          search={search}
+          onSearchChange={handleSearchChange}
+          selectedRole={selectedRole}
+          onRoleChange={handleRoleChange}
+          selectedStatus={selectedStatus}
+          onStatusChange={handleStatusChange}
+          totalCount={totalItems}
+          asCard={false}
+        />
 
-      <Pagination
-        totalItems={totalItems}
-        currentPage={currentPage}
-        limit={ITEMS_PER_PAGE}
-        onPageChange={handlePageChange}
-        entityName="users"
-      />
+        <div className="border-t border-border">
+          <UserTable users={users} loading={loading} asCard={false} />
+        </div>
+
+        {totalItems > 0 && (
+          <div className="border-t border-border px-4 py-3 bg-surface">
+            <Pagination
+              totalItems={totalItems}
+              currentPage={currentPage}
+              limit={ITEMS_PER_PAGE}
+              onPageChange={handlePageChange}
+              entityName="users"
+              className="pt-0"
+            />
+          </div>
+        )}
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
         <Card className="admin-card p-4 flex flex-col justify-between h-full bg-surface border border-border shadow-2xs">

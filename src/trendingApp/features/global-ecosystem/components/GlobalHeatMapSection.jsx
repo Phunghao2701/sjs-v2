@@ -1,13 +1,14 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
-import { FiSearch, FiX } from 'react-icons/fi';
+import { FiSearch, FiX, FiChevronDown } from 'react-icons/fi';
 import { useDashboardContext } from '../../dashboard/contexts/DashboardContext';
 import { useGeoDistribution } from '../hooks/useGeoDistribution';
 import { mapFiltersToQueryParams } from '../services/globalEcosystem.service';
 import apiClient from '../../../shared/api/axios';
 import LoadingSkeleton from '../../../shared/components/common/LoadingSkeleton';
 import InlineErrorState from '../../../shared/components/common/InlineErrorState';
+import { Card } from '../../../../shared/ui/card';
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
@@ -115,8 +116,20 @@ export default function GlobalHeatMapSection({
   const { t } = useTranslation();
   const [selectedCountryName, setSelectedCountryName] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const [allZones, setAllZones] = useState({ regions: [], countries: [] });
   const { projectId, filters, refreshTrigger, refreshData } = useDashboardContext();
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Load all system zones/countries for complete dropdown selection
   useEffect(() => {
@@ -229,6 +242,19 @@ export default function GlobalHeatMapSection({
     return list;
   }, [allZones, mapData]);
 
+  const filteredCountries = useMemo(() => {
+    if (!searchQuery || searchQuery === selectedCountryName) return availableCountries;
+    const q = searchQuery.toLowerCase().trim();
+    return availableCountries.filter(
+      c => c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q)
+    );
+  }, [availableCountries, searchQuery, selectedCountryName]);
+
+  const currentCountryData = useMemo(() => {
+    if (!selectedCountryCode && !selectedCountryName) return null;
+    return heatMapData[selectedCountryCode] || heatMapData[selectedCountryName] || null;
+  }, [selectedCountryCode, selectedCountryName, heatMapData]);
+
   // Sync state with parent country code parameter
   useEffect(() => {
     if (selectedCountryCode) {
@@ -290,25 +316,25 @@ export default function GlobalHeatMapSection({
 
   if (isGeoLoading) {
     return (
-      <div className="world-heatmap-container dashboard-card">
+      <Card className="world-heatmap-container dashboard-card bg-surface border-border shadow-card rounded-card p-5">
         <LoadingSkeleton height="500px" />
-      </div>
+      </Card>
     );
   }
 
   if (geoError) {
     return (
-      <div className="world-heatmap-container dashboard-card">
+      <Card className="world-heatmap-container dashboard-card bg-surface border-border shadow-card rounded-card p-5">
         <InlineErrorState 
           message={t('dashboard.mapError', 'Failed to load geographical map')}
           onRetry={refreshData}
         />
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="world-heatmap-container dashboard-card">
+    <Card className="world-heatmap-container dashboard-card bg-surface border-border shadow-card rounded-card p-5">
       <div className="world-heatmap-header">
         <div>
           <h2 className="world-heatmap-title">{t('dashboard.geoHeatMap', 'Geographical Heat Map')}</h2>
@@ -318,40 +344,124 @@ export default function GlobalHeatMapSection({
               : t('dashboard.geoHeatMapSub', 'Global research output intensity by jurisdiction')}
           </p>
         </div>
-        <div className="world-heatmap-actions">
-          <div className="country-search-wrapper">
-            <FiSearch className="search-icon" onClick={handleSearchSubmit} />
+        <div className="world-heatmap-actions" ref={dropdownRef} style={{ position: 'relative' }}>
+          <div className="country-search-wrapper" style={{ minWidth: '240px' }}>
+            <FiSearch className="search-icon" onClick={handleSearchSubmit} style={{ cursor: 'pointer' }} />
             <input
               type="text"
               placeholder={t('dashboard.searchCountry', 'Search country...')}
               className="country-search-input"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsDropdownOpen(true)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsDropdownOpen(true);
+              }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSearchSubmit();
+                if (e.key === 'Enter') {
+                  handleSearchSubmit();
+                  setIsDropdownOpen(false);
+                }
               }}
             />
-            {searchQuery && (
-              <button type="button" className="search-clear-btn" onClick={handleReset}>
+            {selectedCountryCode && (
+              <button
+                type="button"
+                className="search-clear-btn"
+                onClick={handleReset}
+                title="Clear selection"
+              >
                 <FiX />
               </button>
             )}
+            <button
+              type="button"
+              className="search-clear-btn"
+              onClick={() => setIsDropdownOpen(prev => !prev)}
+              title="Toggle list"
+              tabIndex={-1}
+            >
+              <FiChevronDown style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s ease' }} />
+            </button>
           </div>
 
-          <div className="country-select-wrapper">
-            <select
-              value={selectedCountryCode || ''}
-              onChange={(e) => onCountryChange(e.target.value)}
-              className="country-select-dropdown"
+          {isDropdownOpen && (
+            <div
+              className="country-dropdown-menu"
+              style={{
+                position: 'absolute',
+                top: '100%',
+                right: 0,
+                marginTop: '4px',
+                width: '100%',
+                minWidth: '240px',
+                maxHeight: '260px',
+                overflowY: 'auto',
+                background: '#1e293b',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                borderRadius: '8px',
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.4)',
+                zIndex: 100,
+                padding: '4px'
+              }}
             >
-              <option value="">{t('dashboard.allCountries', 'All Countries')}</option>
-              {availableCountries.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
+              <div
+                style={{
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  color: !selectedCountryCode ? '#38bdf8' : '#e2e8f0',
+                  fontWeight: !selectedCountryCode ? '600' : '400',
+                  background: !selectedCountryCode ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
+                }}
+                onClick={() => {
+                  onCountryChange('');
+                  setIsDropdownOpen(false);
+                }}
+              >
+                {t('dashboard.allCountries', 'All Countries (Global)')}
+              </div>
+              {filteredCountries.map((c) => {
+                const isSelected = selectedCountryCode === c.code;
+                return (
+                  <div
+                    key={c.code}
+                    style={{
+                      padding: '6px 10px',
+                      fontSize: '12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      color: isSelected ? '#38bdf8' : '#cbd5e1',
+                      fontWeight: isSelected ? '600' : '400',
+                      background: isSelected ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) e.currentTarget.style.background = 'transparent';
+                    }}
+                    onClick={() => {
+                      onCountryChange(c.code);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    <span>{c.name}</span>
+                    <span style={{ fontSize: '10px', opacity: 0.6 }}>{c.code}</span>
+                  </div>
+                );
+              })}
+              {filteredCountries.length === 0 && (
+                <div style={{ padding: '8px', fontSize: '12px', color: '#94a3b8', textAlign: 'center' }}>
+                  No country found
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -408,13 +518,53 @@ export default function GlobalHeatMapSection({
               <div className="country-detail-name">{selectedCountryName}</div>
               <div className="country-detail-divider"></div>
 
+              {/* National Summary Stats */}
+              <div
+                className="country-summary-stats"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 10px',
+                  marginBottom: '12px',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(255, 255, 255, 0.08)'
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#94a3b8', fontWeight: 600 }}>Total Output</span>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: '#f8fafc', marginTop: '2px' }}>
+                    {currentCountryData?.count ? currentCountryData.count.toLocaleString() : '0 papers'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  <span style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#94a3b8', fontWeight: 600 }}>Activity Density</span>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      marginTop: '2px',
+                      backgroundColor: currentCountryData?.intensity
+                        ? getIntensityColor(currentCountryData.intensity)
+                        : '#475569',
+                      color: '#ffffff'
+                    }}
+                  >
+                    {currentCountryData?.intensityLabel || (currentCountryData?.count > 0 ? 'Active' : 'No Data')}
+                  </span>
+                </div>
+              </div>
+
               {(isRegionalLoading && selectedCountryCode !== '') ? (
                 <div className="py-6 flex flex-col items-center justify-center gap-2">
                   <div className="province-spinner"></div>
                   <span className="text-xs text-neutral-400">{t('dashboard.loadingRegionalDetails', 'Loading regional details...')}</span>
                 </div>
               ) : (!regionalData || regionalData.length === 0) ? (
-                <div className="py-8 text-center text-xs text-neutral-400">
+                <div className="py-4 text-center text-xs text-neutral-400">
                   {t('dashboard.noRegionalData', 'No regional data found for this country.')}
                 </div>
               ) : (
@@ -448,7 +598,7 @@ export default function GlobalHeatMapSection({
                 </div>
               )}
 
-              <p className="country-detail-hint">Click close or click country to zoom out</p>
+              <p className="country-detail-hint">Click close or click country to deselect</p>
             </div>
           )}
 
@@ -467,6 +617,6 @@ export default function GlobalHeatMapSection({
           </div>
         </div>
       </div>
-    </div>
+    </Card>
   );
 }

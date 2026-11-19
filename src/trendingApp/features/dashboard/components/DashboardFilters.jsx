@@ -4,6 +4,9 @@ import { FiFilter, FiRefreshCw } from 'react-icons/fi';
 import { useDashboardContext } from '../contexts/DashboardContext';
 import FilterDropdown from './FilterDropdown';
 import apiClient from '../../../shared/api/axios';
+import { Card } from '../../../../shared/ui/card';
+import { Button } from '../../../../shared/ui/button';
+import { Badge } from '../../../../shared/ui/badge';
 import '../styles/DashboardFilters.css';
 
 const TIMEFRAME_OPTIONS = [
@@ -106,7 +109,7 @@ export default function DashboardFilters() {
   };
 
   return (
-    <div className="dashboard-filters">
+    <Card className="dashboard-filters bg-surface border-border shadow-card rounded-card p-4">
       <div className="dashboard-filters-top">
         <div className="dashboard-filters-controls">
           <div className="dashboard-filter-label">
@@ -159,35 +162,39 @@ export default function DashboardFilters() {
           </div>
         </div>
 
-        <button
-          className={`dashboard-update-btn ${loading ? 'loading' : ''}`}
+        <Button
+          variant="default"
+          size="sm"
+          className="dashboard-update-btn font-medium"
           onClick={handleUpdate}
           disabled={loading}
+          isLoading={loading}
+          loadingText={t('dashboard.filters.updating', 'Updating...')}
           aria-live="polite"
         >
-          <FiRefreshCw className={`update-icon ${loading ? 'spin' : ''}`} aria-hidden="true" />
-          {loading ? t('dashboard.filters.updating', 'Updating...') : t('dashboard.filters.updateAnalysis', 'Update Analysis')}
-        </button>
+          {!loading && <FiRefreshCw className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />}
+          {t('dashboard.filters.updateAnalysis', 'Update Analysis')}
+        </Button>
       </div>
 
-      <div className="dashboard-filter-chips">
-        <div className="dashboard-chip">
-          <span className="chip-label">{t('dashboard.filters.timeframe', 'Timeframe')}:</span>
-          <span className="chip-value">{t(`dashboard.filters.${filters.timeframe}`, filters.timeframe)}</span>
-        </div>
-        <div className="dashboard-chip">
-          <span className="chip-label">{t('dashboard.filters.subjectArea', 'Subject Area')}:</span>
-          <span className="chip-value">{filters.subject_area || 'All Areas'}</span>
-        </div>
-        <div className="dashboard-chip">
-          <span className="chip-label">{t('dashboard.filters.subjectCategory', 'Subject Category')}:</span>
-          <span className="chip-value">{t(`dashboard.filters.${filters.subject_category}`, filters.subject_category || 'All Categories')}</span>
-        </div>
-        <div className="dashboard-chip">
-          <span className="chip-label">{t('dashboard.filters.zone', 'Zone')}:</span>
-          <span className="chip-value">{filters.zone || 'Global Distribution'}</span>
-        </div>
+      <div className="dashboard-filter-chips flex flex-wrap items-center gap-2 pt-3 border-t border-border mt-3">
+        <Badge variant="secondary" className="px-2.5 py-1 text-xs font-normal bg-surface-muted border border-border">
+          <span className="text-muted-foreground mr-1">{t('dashboard.filters.timeframe', 'Timeframe')}:</span>
+          <span className="font-semibold text-foreground">{t(`dashboard.filters.${filters.timeframe}`, filters.timeframe)}</span>
+        </Badge>
+        <Badge variant="secondary" className="px-2.5 py-1 text-xs font-normal bg-surface-muted border border-border">
+          <span className="text-muted-foreground mr-1">{t('dashboard.filters.subjectArea', 'Subject Area')}:</span>
+          <span className="font-semibold text-foreground">{filters.subject_area || 'All Areas'}</span>
+        </Badge>
+        <Badge variant="secondary" className="px-2.5 py-1 text-xs font-normal bg-surface-muted border border-border">
+          <span className="text-muted-foreground mr-1">{t('dashboard.filters.subjectCategory', 'Subject Category')}:</span>
+          <span className="font-semibold text-foreground">{t(`dashboard.filters.${filters.subject_category}`, filters.subject_category || 'All Categories')}</span>
+        </Badge>
+        <Badge variant="secondary" className="px-2.5 py-1 text-xs font-normal bg-surface-muted border border-border">
+          <span className="text-muted-foreground mr-1">{t('dashboard.filters.zone', 'Zone')}:</span>
+          <span className="font-semibold text-foreground">{filters.zone || 'Global Distribution'}</span>
+        </Badge>
       </div>
-    </div>
+    </Card>
   );
 }

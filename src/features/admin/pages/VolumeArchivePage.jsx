@@ -1,9 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '@iconify/react';
 import { Button } from '../../../shared/ui/button';
 import { Card } from '../../../shared/ui/card';
+import { Badge } from '../../../shared/ui/badge';
 import { useJournalManagement } from '../../journal/hooks/useJournalManagement';
 import Pagination from '../../../shared/components/Pagination';
 import SwitchJournalModal from '../components/modals/SwitchJournalModal';
@@ -30,6 +31,30 @@ export default function VolumeArchivePage() {
   const [frequencyFilter, setFrequencyFilter] = useState('All');
   const [sortBy, setSortBy] = useState('newest');
   const [showSwitchModal, setShowSwitchModal] = useState(false);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterDropdownRef = useRef(null);
+
+  // Close filter dropdown on outside click or Escape
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target)) {
+        setIsFilterOpen(false);
+      }
+    }
+    function handleEscape(event) {
+      if (event.key === 'Escape') {
+        setIsFilterOpen(false);
+      }
+    }
+    if (isFilterOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [isFilterOpen]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -88,60 +113,201 @@ export default function VolumeArchivePage() {
         }
       />
 
-      {/* Filter Bar */}
-      <div className="bg-surface p-4 rounded-xl border border-border mb-2 mt-2 shadow-2xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-4 items-end">
-          {/* Search by Volume number */}
-          <div className="md:col-span-5">
-            <label className="font-semibold text-xs text-foreground uppercase tracking-wider block mb-2">
-              Search Volumes
-            </label>
-            <div className="relative flex items-center">
-              <span className="absolute left-3 text-muted-foreground pointer-events-none">
-                <Icon icon="lucide:search" width="16" />
-              </span>
+      {/* Integrated Filter Bar */}
+      <div className="bg-surface p-3 sm:p-3.5 rounded-card border border-border mb-3 shadow-card">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+          {/* Search + Filter */}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="relative flex-1 min-w-[200px] max-w-md">
+              <Icon
+                icon="lucide:search"
+                width={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"
+                aria-hidden="true"
+              />
               <input
                 type="text"
-                placeholder={t("admin.searchByVolumeNumberEgVolume1")}
+                placeholder={t("admin.searchByVolumeNumberEgVolume1", "Search by volume number...")}
                 value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="w-full h-10 pl-9 pr-3 rounded-lg border border-border bg-surface text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary"
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full h-9 pl-9 pr-8 rounded-control border border-border bg-surface text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors shadow-2xs"
               />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 rounded border-0 bg-transparent cursor-pointer"
+                  aria-label="Clear search"
+                >
+                  <Icon icon="lucide:x" width={13} />
+                </button>
+              )}
+            </div>
+
+            {/* Filter Button with Dropdown */}
+            <div className="relative" ref={filterDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setIsFilterOpen((prev) => !prev)}
+                className={`h-9 px-3 text-xs rounded-control border transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-2xs font-medium whitespace-nowrap ${
+                  (frequencyFilter !== 'All' || sortBy !== 'newest') || isFilterOpen
+                    ? 'border-primary text-primary bg-primary-subtle font-semibold ring-1 ring-primary/20'
+                    : 'border-border bg-surface text-foreground hover:bg-surface-muted hover:border-foreground/30'
+                }`}
+                aria-expanded={isFilterOpen}
+                aria-label="Filter options"
+              >
+                <Icon
+                  icon="lucide:sliders-horizontal"
+                  width={14}
+                  className={(frequencyFilter !== 'All' || sortBy !== 'newest') ? "text-primary" : "text-muted-foreground"}
+                />
+                <span>{t("filter", "Filter")}</span>
+                {(frequencyFilter !== 'All' || sortBy !== 'newest') && (
+                  <span className="inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full text-[10px] font-bold bg-primary text-white">
+                    {(frequencyFilter !== 'All' ? 1 : 0) + (sortBy !== 'newest' ? 1 : 0)}
+                  </span>
+                )}
+                <Icon
+                  icon="lucide:chevron-down"
+                  width={12}
+                  className={`transition-transform duration-200 text-muted-foreground ${isFilterOpen ? "rotate-180" : ""}`}
+                />
+              </button>
+
+              {/* Floating Dropdown */}
+              {isFilterOpen && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40 bg-black/10 backdrop-blur-[0.5px] sm:bg-transparent"
+                    onClick={() => setIsFilterOpen(false)}
+                    aria-hidden="true"
+                  />
+
+                  <div
+                    className="absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-[calc(100vw-2rem)] sm:w-[340px] bg-surface border border-border rounded-xl shadow-2xl z-50 flex flex-col animate-in fade-in-0 zoom-in-95 duration-150"
+                    style={{ zIndex: 60 }}
+                  >
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface-muted/30">
+                      <div className="flex items-center gap-2">
+                        <div className="size-7 rounded-lg bg-primary-subtle text-primary flex items-center justify-center">
+                          <Icon icon="lucide:sliders-horizontal" width={14} />
+                        </div>
+                        <h4 className="text-xs font-bold text-foreground">Archive Filters</h4>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsFilterOpen(false)}
+                        className="size-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-surface-muted inline-flex items-center justify-center border-0 bg-transparent cursor-pointer"
+                        aria-label="Close"
+                      >
+                        <Icon icon="lucide:x" width={14} />
+                      </button>
+                    </div>
+
+                    <div className="p-4 space-y-4">
+                      {/* Period Filter */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                          <Icon icon="lucide:calendar" width={13} />
+                          <span>Publication Period</span>
+                        </label>
+                        <select
+                          value={frequencyFilter}
+                          onChange={(e) => setFrequencyFilter(e.target.value)}
+                          className="w-full h-9 px-3 rounded-control border border-border bg-surface text-xs text-foreground focus:outline-none focus:border-primary cursor-pointer shadow-2xs"
+                        >
+                          <option value="All">All Periods</option>
+                          <option value="Quarterly">{t("admin.quarterlyHangQuy")}</option>
+                          <option value="Bi-annual">{t("admin.biannualNuaNam")}</option>
+                          <option value="Annual">{t("admin.annualHangNam")}</option>
+                        </select>
+                      </div>
+
+                      {/* Sort Order */}
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                          <Icon icon="lucide:arrow-up-down" width={13} />
+                          <span>Sort Order</span>
+                        </label>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="w-full h-9 px-3 rounded-control border border-border bg-surface text-xs text-foreground focus:outline-none focus:border-primary cursor-pointer shadow-2xs"
+                        >
+                          <option value="newest">Newest to Oldest</option>
+                          <option value="oldest">Oldest to Newest</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-border bg-surface-muted/30">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFrequencyFilter('All');
+                          setSortBy('newest');
+                        }}
+                        className="text-xs font-semibold text-muted-foreground hover:text-foreground border-0 bg-transparent cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <Icon icon="lucide:rotate-ccw" width={12} />
+                        <span>{t("article.xoaBoLoc", "Clear all")}</span>
+                      </button>
+                      <Button
+                        size="sm"
+                        onClick={() => setIsFilterOpen(false)}
+                        className="h-8 px-4 text-xs font-semibold"
+                      >
+                        {t("apply", "Done")}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-
-          {/* Filter by Frequency */}
-          <div className="md:col-span-3.5">
-            <label className="font-semibold text-xs text-foreground uppercase tracking-wider block mb-2">
-              Publication Period
-            </label>
-            <select
-              value={frequencyFilter}
-              onChange={e => setFrequencyFilter(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="All">All Periods</option>
-              <option value="Quarterly">{t("admin.quarterlyHangQuy")}</option>
-              <option value="Bi-annual">{t("admin.biannualNuaNam")}</option>
-              <option value="Annual">{t("admin.annualHangNam")}</option>
-            </select>
-          </div>
-
-          {/* Sort by Year */}
-          <div className="md:col-span-3.5">
-            <label className="font-semibold text-xs text-foreground uppercase tracking-wider block mb-2">
-              Sort Order
-            </label>
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="w-full h-10 px-3 rounded-lg border border-border bg-surface text-sm text-foreground focus:outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="newest">Newest to Oldest</option>
-              <option value="oldest">Oldest to Newest</option>
-            </select>
-          </div>
         </div>
+
+        {/* Active Chips */}
+        {(frequencyFilter !== 'All' || sortBy !== 'newest') && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-2 mt-2 border-t border-border/50">
+            <span className="text-[11px] font-medium text-muted-foreground mr-1">Active filters:</span>
+            {frequencyFilter !== 'All' && (
+              <Badge variant="secondary" className="gap-1 text-[11px] py-0.5 px-2 font-normal">
+                <span>Period: {frequencyFilter}</span>
+                <button
+                  type="button"
+                  onClick={() => setFrequencyFilter('All')}
+                  className="hover:text-foreground border-0 bg-transparent p-0 cursor-pointer"
+                >
+                  <Icon icon="lucide:x" width={11} />
+                </button>
+              </Badge>
+            )}
+            {sortBy !== 'newest' && (
+              <Badge variant="secondary" className="gap-1 text-[11px] py-0.5 px-2 font-normal">
+                <span>Sort: Oldest first</span>
+                <button
+                  type="button"
+                  onClick={() => setSortBy('newest')}
+                  className="hover:text-foreground border-0 bg-transparent p-0 cursor-pointer"
+                >
+                  <Icon icon="lucide:x" width={11} />
+                </button>
+              </Badge>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setFrequencyFilter('All');
+                setSortBy('newest');
+              }}
+              className="text-[11px] text-primary hover:underline font-semibold ml-1 border-0 bg-transparent cursor-pointer"
+            >
+              Clear all
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Volumes Grid */}

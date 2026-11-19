@@ -13,9 +13,6 @@ import { Button } from '../../../shared/ui/button';
 import { PageContainer } from '../../../shared/ui/page-layout';
 import { Breadcrumbs } from '../../../shared/ui/breadcrumb';
 
-// Layout
-import Header from '../../landing/components/Header';
-
 // Auth
 import useAuth from '../../auth/hooks/useAuth';
 
@@ -220,19 +217,24 @@ export default function ArticleDetailPage() {
     toast.info(t("article.hienChuaCoCongTruyCapToChucRie"));
   };
   const articleDoiUrl = getDoiUrl(article?.doi);
-  return <div className="article-detail-page grid-bg">
-      <Header />
-
-      <PageContainer className="position-relative z-1">
-        {isLoading ? <ArticleDetailSkeleton /> : error ? <ArticleDetailError errorMsg={error} onRetry={fetchArticleDetail} /> : !article ? <ArticleDetailEmpty articleId={id} /> : <main className="article-detail-container">
-            <div className="article-detail-shell">
+  return (
+    <PageContainer className="space-y-4">
+      {isLoading ? (
+        <ArticleDetailSkeleton />
+      ) : error ? (
+        <ArticleDetailError errorMsg={error} onRetry={fetchArticleDetail} />
+      ) : !article ? (
+        <ArticleDetailEmpty articleId={id} />
+      ) : (
+        <main className="article-detail-container rounded-card border border-border bg-surface shadow-card overflow-hidden">
+          <div className="article-detail-shell">
               <aside className="article-detail-sidebar d-none d-xl-block">
                 <h2 className={`article-detail-journal-title mb-4 ${article.journal_id ? 'is-clickable' : ''}`} role={article.journal_id ? 'button' : undefined} onClick={() => article.journal_id && navigate(`/journals/${article.journal_id}`)}>
                   {article.journal_name || 'Scientific Journal'}
                 </h2>
 
                 <div className="article-detail-meta-list">
-                  <span><strong>Date:</strong> {article.publication_year || t("article.dangCapNhat")}</span>
+                  <span><strong>Date:</strong> {article.publication_year || '—'}</span>
                   <span><strong>Article:</strong> {article.article_id}</span>
                   <span>
                     <strong>Volume:</strong>{' '}
@@ -251,9 +253,9 @@ export default function ArticleDetailPage() {
 
                 <div className="article-detail-divider" />
 
-                <div className="text-muted-custom text-xs fw-bold text-uppercase mb-2">{t("article.publisher")}</div>
+                <div className="text-muted-custom text-xs fw-bold text-uppercase mb-2">{t("article.publisher", "Publisher")}</div>
                 <div className="text-xs text-muted-custom fw-semibold text-uppercase d-flex flex-column gap-1">
-                  <span>{article.publisher_name || t("article.dangCapNhat")}</span>
+                  <span>{article.publisher_name || '—'}</span>
                   <span>Coverage: {article.publication_year || '—'}</span>
                 </div>
               </aside>
@@ -347,7 +349,7 @@ export default function ArticleDetailPage() {
                       <section id="section-snippets" className="article-section">
                         <h2 className="article-section-title text-base font-semibold">Section snippets</h2>
                         <p className="article-section-text text-sm leading-relaxed">{t("article.tomTatNhanhBaiBaoThuocChuDe")} <strong>{article.topic_name || 'Research'}</strong>{t("article.congBoTrong")} <strong>{article.journal_name || 'Scientific Journal'}</strong>
-                          {article.publication_year ? ` năm ${article.publication_year}` : ''}.
+                          {article.publication_year ? ` (${article.publication_year})` : ''}.
                         </p>
                       </section>
                     </article>
@@ -425,35 +427,36 @@ export default function ArticleDetailPage() {
               </section>
             </div>
 
-          </main>}
-      </PageContainer>
+          </main>
+        )}
 
-      <Modal show={showCitationsModal} onHide={() => setShowCitationsModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title className="font-display font-semibold text-base">{t("article.citationsCitedBy")}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="article-modal-stat-box p-3 rounded-lg border border-border bg-surface-muted mb-3">
-            <div className="text-muted-custom text-xs font-semibold text-uppercase mb-1">{t("article.tongLuotTrichDan")}</div>
-            <div className="font-display font-bold text-base text-text-main">
-              {(article?.citations ?? 0).toLocaleString('en-US')}
+        <Modal show={showCitationsModal} onHide={() => setShowCitationsModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title className="font-display font-semibold text-base">{t("article.citationsCitedBy")}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <div className="article-modal-stat-box p-3 rounded-lg border border-border bg-surface-muted mb-3">
+              <div className="text-muted-custom text-xs font-semibold text-uppercase mb-1">{t("article.tongLuotTrichDan")}</div>
+              <div className="font-display font-bold text-base text-text-main">
+                {(article?.citations ?? 0).toLocaleString('en-US')}
+              </div>
             </div>
-          </div>
 
-          <p className="text-muted-custom text-sm mb-3 leading-relaxed">
-            <strong className="text-text-main">Citations</strong>{t("article.laSoLuongBaiBaoHoacCongTrinhKh")}</p>
+            <p className="text-muted-custom text-sm mb-3 leading-relaxed">
+              <strong className="text-text-main">Citations</strong>{t("article.laSoLuongBaiBaoHoacCongTrinhKh")}</p>
 
-          <div className="grid gap-2 text-sm">
-            <div><strong>DOI:</strong>{t("article.maDinhDanhCoDinhCuaBaiBao")}</div>
-            <div><strong>References:</strong>{t("article.danhSachTaiLieuMaBaiBaoNayTric")}</div>
-            <div><strong>Citations / Cited by:</strong>{t("article.soCongTrinhKhacTrichDanLaiBaiB")}</div>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="outline" size="sm" onClick={() => setShowCitationsModal(false)}>{t("article.dong")}</Button>
-        </Modal.Footer>
-      </Modal>
+            <div className="grid gap-2 text-sm">
+              <div><strong>DOI:</strong>{t("article.maDinhDanhCoDinhCuaBaiBao")}</div>
+              <div><strong>References:</strong>{t("article.danhSachTaiLieuMaBaiBaoNayTric")}</div>
+              <div><strong>Citations / Cited by:</strong>{t("article.soCongTrinhKhacTrichDanLaiBaiB")}</div>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="outline" size="sm" onClick={() => setShowCitationsModal(false)}>{t("article.dong")}</Button>
+          </Modal.Footer>
+        </Modal>
 
-      <AuthRequiredModal show={showLoginModal} onHide={() => setShowLoginModal(false)} />
-    </div>;
-}
+        <AuthRequiredModal show={showLoginModal} onHide={() => setShowLoginModal(false)} />
+      </PageContainer>
+    );
+  }

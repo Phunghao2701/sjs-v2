@@ -18,6 +18,7 @@ export default function ArticleGraphWidget({
   data,
   loading = false,
   error = '',
+  onNodeClick,
 }) {
   const { t } = useTranslation();
   const fgRef = useRef(null);
@@ -129,6 +130,10 @@ export default function ArticleGraphWidget({
       fgRef.current?.zoom?.(2.15, 500);
     }
 
+    if (onNodeClick) {
+      onNodeClick(node);
+    }
+
     if (window.parent && window.parent !== window) {
       window.parent.postMessage(
         {
@@ -145,7 +150,7 @@ export default function ArticleGraphWidget({
         import.meta.env.VITE_PARENT_ORIGIN || '*'
       );
     }
-  }, []);
+  }, [onNodeClick]);
 
   const drawNode = useCallback(
     (node, ctx, globalScale) => {

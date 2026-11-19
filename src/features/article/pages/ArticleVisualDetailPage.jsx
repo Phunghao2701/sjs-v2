@@ -9,12 +9,8 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Modal } from '../../../shared/ui/modal';
 import { Dropdown } from '../../../shared/ui/dropdown-menu';
-import { Container } from '../../../shared/ui/layout-grid';
 import { Icon } from '@iconify/react';
 import { Button } from '../../../shared/ui/button';
-
-// Layout
-import Header from '../../landing/components/Header';
 
 // Auth
 import useAuth from '../../auth/hooks/useAuth';
@@ -26,13 +22,14 @@ import { getArticleDetailApi, bookmarkArticleApi, getArticlesListApi } from '../
 import ArticleDetailSkeleton from '../components/ArticleDetailSkeleton';
 import ArticleDetailEmpty from '../components/ArticleDetailEmpty';
 import ArticleDetailError from '../components/ArticleDetailError';
-import ErrorState from '../../../shared/components/ErrorState';
 import AuthRequiredModal from '../../../shared/components/AuthRequiredModal';
 import { toast } from '../../../shared/utils/toast';
 import { getDoiUrl, normalizeArticleDetail } from '../utils/articleFormatters';
 import { downloadArticleCsv } from '../utils/csvExport';
 import { downloadArticlePdf } from '../utils/pdfExport';
 import LatexText from '../../../shared/components/LatexText/LatexText';
+import ArticleGraphWidget from '../../../trendingApp/features/articles/components/ArticleGraphWidget';
+import { searchArticlesGraph } from '../../../trendingApp/features/articles/services/articleGraph.service';
 import '../Article.css';
 const formatAuthorsLine = (authors = [], limit = 3) => {
   if (!authors || authors.length === 0) return t("article.dangCapNhatTacGia");
@@ -217,7 +214,7 @@ const ArticleDetailPane = ({
         return <span key={authorId || `${authorLabel}-${index}`} className={`article-detail-author-span ${authorId ? 'is-link' : ''}`} onClick={() => authorId && navigate(`/authors/${authorId}`)}>
                 {authorLabel}{index < visibleAuthors.length - 1 ? ', ' : ''}
               </span>;
-      }) : <span className="text-muted-custom">{t("article.dangCapNhatTacGia")}</span>}
+      }) : <span className="text-muted-custom">—</span>}
         {hiddenAuthorCount > 0 && !showAllAuthors && <Button variant="link" size="sm" onClick={() => setShowAllAuthors(true)} className="article-detail-author-toggle p-0 ms-1 h-auto text-xs">
             +{hiddenAuthorCount} authors
           </Button>}
@@ -229,15 +226,15 @@ const ArticleDetailPane = ({
       <div className="article-detail-meta-list mb-3">
         <span className="meta-item">
           <Icon icon="lucide:calendar" width="14" />
-          <strong>{t("article.namXuatBan")}</strong> {article.publication_year || '—'}
+          <strong>{t("article.namXuatBan", "Year")}:</strong> {article.publication_year || '—'}
         </span>
         <span className="meta-item">
           <Icon icon="lucide:building" width="14" />
-          <strong>{t("article.publisher")}:</strong> {article.publisher_name || '—'}
+          <strong>{t("article.publisher", "Publisher")}:</strong> {article.publisher_name || '—'}
         </span>
         <span className="meta-item">
           <Icon icon="lucide:globe" width="14" />
-          <strong>{t("article.viTriVenue")}</strong> {article.journal_name || '—'}
+          <strong>{t("article.viTriVenue", "Location")}:</strong> {article.journal_name || '—'}
         </span>
         {article.volume_number && <span className="meta-item">
             <Icon icon="lucide:book" width="14" />
@@ -358,9 +355,7 @@ const ArticleDetailPane = ({
 // Main Page Component
 // ======================================================================
 export default function ArticleVisualDetailPage() {
-  const {
-    id
-  } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const [originArticle, setOriginArticle] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -368,23 +363,19 @@ export default function ArticleVisualDetailPage() {
   const [recommendedArticles, setRecommendedArticles] = useState([]);
   const [isRecommendedLoading, setIsRecommendedLoading] = useState(false);
   const [selectedArticleId, setSelectedArticleId] = useState(id);
-  // State để quản lý trạng thái của iframe: 'loading', 'loaded', 'error'
-  const [iframeStatus, setIframeStatus] = useState('loading');
-  // State để trigger việc re-mount iframe khi cần tải lại
-  // eslint-disable-next-line react-hooks/purity
-  const [iframeReloadKey, setIframeReloadKey] = useState(Date.now());
-  const [isIframeLoading, setIsIframeLoading] = useState(true);
-  const [iframeError, setIframeError] = useState(false);
-  const iframeRef = useRef(null);
+  const [apiGraphData, setApiGraphData] = useState(null);
+  const [graphLoading, setGraphLoading] = useState(false);
+
   useEffect(() => {
     setSelectedArticleId(id);
   }, [id]);
-  const fetchRecommendedArticles = useCallback(async parsedArticle => {
+
+  const fetchRecommendedArticles = useCallback(async (parsedArticle) => {
     try {
       setIsRecommendedLoading(true);
       const params = {
         limit: 15,
-        page: 1
+        page: 1,
       };
       const journalId = Number(parsedArticle.journal_id);
       const topicId = Number(parsedArticle.primary_topic || parsedArticle.topic_id);
@@ -393,7 +384,10 @@ export default function ArticleVisualDetailPage() {
       const response = await getArticlesListApi(params);
       const payload = response.data?.data || response.data || {};
       const rawItems = payload.items || payload.articles || payload.data || [];
-      const normalizedItems = rawItems.map(normalizeRecommendedArticle).filter(item => String(item.article_id) !== String(parsedArticle.article_id)).slice(0, 10);
+      const normalizedItems = rawItems
+        .map(normalizeRecommendedArticle)
+        .filter((item) => String(item.article_id) !== String(parsedArticle.article_id))
+        .slice(0, 10);
       setRecommendedArticles(normalizedItems);
     } catch (err) {
       console.warn('Error fetching recommended articles:', err);
@@ -402,6 +396,7 @@ export default function ArticleVisualDetailPage() {
       setIsRecommendedLoading(false);
     }
   }, []);
+
   const fetchOriginArticleDetail = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -413,210 +408,299 @@ export default function ArticleVisualDetailPage() {
         setOriginArticle(parsedArticle);
         fetchRecommendedArticles(parsedArticle);
       } else {
-        throw new Error(t("article.khongTheTaiChiTietBaiBaoKhoaHo"));
+        throw new Error(t("article.khongTheTaiChiTietBaiBaoKhoaHo", "Unable to load article details"));
       }
     } catch (err) {
       console.error('Error fetching article detail:', err);
-      setError(err.response?.data?.message || err.message || t("article.loiKhiTaiDuLieuBaiBaoKhoaHoc"));
+      setError(err.response?.data?.message || err.message || t("article.loiKhiTaiDuLieuBaiBaoKhoaHoc", "Error loading article data"));
     } finally {
       setIsLoading(false);
     }
   }, [id, fetchRecommendedArticles]);
+
   useEffect(() => {
     fetchOriginArticleDetail();
   }, [fetchOriginArticleDetail]);
 
-  // Logic mới: Ping server trước khi render iframe
+  // Try fetching enhanced graph data from backend if available
   useEffect(() => {
-    // Chỉ chạy khi có originArticle
-    if (!originArticle) return;
-    let isMounted = true;
-    setIframeStatus('loading');
-    const iframeUrl = `${import.meta.env.VITE_ORIGIN_URL || 'http://localhost:5174'}/embed/article-graph?keyword=${encodeURIComponent(originArticle.title)}&limit=1`;
-    const origin = import.meta.env.VITE_ORIGIN_URL || 'http://localhost:5174';
-    const checkServiceAvailability = async () => {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 5000);
-        await fetch(origin, {
-          mode: 'no-cors',
-          signal: controller.signal
-        });
-        clearTimeout(timeoutId);
-        if (isMounted) {
-          setIframeStatus('content-loading');
+    if (!originArticle?.title) return;
+    let cancelled = false;
+    setGraphLoading(true);
+
+    searchArticlesGraph({ keyword: originArticle.title, limit: 30 })
+      .then((res) => {
+        if (!cancelled && res?.nodes && res.nodes.length > 0) {
+          setApiGraphData(res);
         }
-      } catch (error) {
-        console.error('[Parent] Iframe service is not available:', error.name, error.message);
-        if (isMounted) {
-          setIframeStatus('error');
-        }
-      }
-    };
-    checkServiceAvailability();
-    const handleMessage = event => {
-      if (event.origin !== origin) return;
-    };
-    window.addEventListener('message', handleMessage);
-    return () => {
-      isMounted = false;
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [originArticle, iframeReloadKey]);
-  useEffect(() => {
-    setIframeStatus('loading');
-    const timeoutId = setTimeout(() => {
-      setIframeStatus(currentStatus => {
-        if (currentStatus === 'loading') {
-          console.warn('[Parent] Iframe load timed out.');
-          return 'error';
-        }
-        return currentStatus;
+      })
+      .catch((err) => {
+        console.warn('Backend graph search not available, falling back to local citation network:', err);
+      })
+      .finally(() => {
+        if (!cancelled) setGraphLoading(false);
       });
-    }, 10000);
-    setIsIframeLoading(true);
-    setIframeError(false);
-    const iframeLoadTimeout = setTimeout(() => {
-      // Nếu iframe không gửi message 'graph-ready' trong 10s, coi như lỗi
-      if (isIframeLoading) {
-        console.warn('[Parent] Iframe load timed out after 10 seconds.');
-        setIframeError(true);
-        setIsIframeLoading(false);
-      }
-    }, 10000); // 10 giây timeout
 
-    // Xử lý message từ iframe
-    const handleMessage = event => {
-      const allowedOrigin = import.meta.env.VITE_ORIGIN_URL || 'http://localhost:5174';
-      if (event.origin !== allowedOrigin) return;
-      const message = event.data;
-      if (message?.source !== 'article-graph-widget') return;
-      if (message.type === 'GRAPH_READY') {
-        console.log('[Parent] Received GRAPH_READY message from iframe.');
-        setIframeStatus('loaded'); // Đánh dấu đã tải xong nếu nhận được message
-        clearTimeout(iframeLoadTimeout);
-        setIsIframeLoading(false);
-        setIframeError(false);
-      }
-      if (message.type === 'NODE_CLICK') {
-        console.log('[Parent] Node clicked, received payload:', message.payload);
-        let newId = message.payload?.id;
-        if (newId) {
-          // Attempt to parse ID to integer as per API spec
-          const parsedId = parseInt(newId, 10);
-          if (!isNaN(parsedId)) {
-            console.log(`[Parent] Updating selected article ID from '${selectedArticleId}' to parsed integer ID: '${parsedId}'`);
-            setSelectedArticleId(parsedId);
-          } else {
-            console.warn(`[Parent] Received ID '${newId}' is not a valid integer. Cannot fetch article details.`);
-            setSelectedArticleId(null); // Clear sidebar if ID is invalid
-          }
-        } else {
-          console.warn('[Parent] No ID found in node click payload. Clearing sidebar.');
-          setSelectedArticleId(null); // Clear sidebar if no ID
-        }
-      }
-    };
-    window.addEventListener('message', handleMessage);
     return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('message', handleMessage);
-      clearTimeout(iframeLoadTimeout);
+      cancelled = true;
     };
-  }, [id, originArticle?.title, iframeReloadKey]); // Re-run effect khi id, title, hoặc key tải lại thay đổi
+  }, [originArticle?.title]);
 
-  const handleTitleClick = articleId => {
+  // Construct local graph network from origin paper + recommended papers
+  const localGraphData = useMemo(() => {
+    if (!originArticle) return { nodes: [], relationships: [] };
+
+    const originId = String(originArticle.article_id || originArticle.id || id);
+    const originAuthorName =
+      Array.isArray(originArticle.authors) && originArticle.authors.length > 0
+        ? (originArticle.authors[0]?.display_name || originArticle.authors[0]?.name || 'Author')
+        : (typeof originArticle.authors === 'string' ? originArticle.authors.split(',')[0] : 'Author');
+
+    const nodes = [
+      {
+        id: originId,
+        labels: ['Article', 'Origin'],
+        properties: {
+          id: originId,
+          title: originArticle.title || 'Target Article',
+          doi: originArticle.doi || '',
+          publication_year: originArticle.publication_year || new Date().getFullYear(),
+          display_label: `${originAuthorName} (${originArticle.publication_year || 'Recent'})`,
+          is_origin: true,
+        },
+      },
+    ];
+
+    const relationships = [];
+
+    if (Array.isArray(recommendedArticles) && recommendedArticles.length > 0) {
+      recommendedArticles.forEach((rec, idx) => {
+        const recId = String(rec.article_id || rec.id || `rec-${idx}`);
+        const recAuthorName = rec.authors
+          ? (typeof rec.authors === 'string' ? rec.authors.split(',')[0] : 'Author')
+          : 'Author';
+
+        nodes.push({
+          id: recId,
+          labels: ['Article'],
+          properties: {
+            id: recId,
+            title: rec.title || 'Related Article',
+            doi: rec.doi || '',
+            publication_year: rec.publication_year || originArticle.publication_year || '—',
+            display_label: `${recAuthorName} (${rec.publication_year || '—'})`,
+          },
+        });
+
+        relationships.push({
+          id: `rel-${originId}-${recId}`,
+          start: originId,
+          end: recId,
+          type: 'REFERENCES',
+        });
+      });
+    }
+
+    return { nodes, relationships };
+  }, [originArticle, recommendedArticles, id]);
+
+  const activeGraphData = useMemo(() => {
+    if (apiGraphData?.nodes?.length > 0) {
+      return apiGraphData;
+    }
+    return localGraphData;
+  }, [apiGraphData, localGraphData]);
+
+  const handleTitleClick = (articleId) => {
     navigate(`/articles/${articleId}`);
   };
 
-  // Hàm để thử tải lại iframe
-  const handleReloadIframe = () => {
-    setIframeStatus('loading'); // Reset trạng thái về loading
-    setIframeReloadKey(Date.now()); // Thay đổi key để re-mount iframe
-  };
   if (isLoading) {
-    return <div className="article-detail-page grid-bg">
-        <Header />
-        <Container fluid className="position-relative z-1 p-0">
-          <ArticleDetailSkeleton />
-        </Container>
-      </div>;
+    return (
+      <div className="p-6">
+        <ArticleDetailSkeleton />
+      </div>
+    );
   }
+
   if (error) {
-    return <div className="article-detail-page grid-bg">
-        <Header />
-        <Container fluid className="position-relative z-1 p-0">
-          <ArticleDetailError errorMsg={error} onRetry={fetchOriginArticleDetail} />
-        </Container>
-      </div>;
+    return (
+      <div className="p-6">
+        <ArticleDetailError errorMsg={error} onRetry={fetchOriginArticleDetail} />
+      </div>
+    );
   }
+
   if (!originArticle) {
-    return <div className="article-detail-page grid-bg">
-        <Header />
-        <Container fluid className="position-relative z-1 p-0">
-          <ArticleDetailEmpty articleId={id} />
-        </Container>
-      </div>;
+    return (
+      <div className="p-6">
+        <ArticleDetailEmpty articleId={id} />
+      </div>
+    );
   }
-  return <div className="article-detail-page grid-bg">
-      <Header />
-      <Container fluid className="position-relative z-1 p-0">
-        <main className="article-connected-shell">
-          {/* Left Column: Related Papers list */}
-          <aside className="article-connected-left">
-            <div className="section-header-tag px-3 pt-3 pb-2 text-uppercase fw-bold text-muted-custom">Origin Paper</div>
-            <div className="related-paper-card is-origin px-3 py-3">
-              <div className="d-flex align-items-center justify-content-between mb-1">
-                <span className="origin-badge">Active</span>
-                <span className="paper-year font-display">{originArticle.publication_year || '—'}</span>
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] bg-background overflow-hidden">
+      {/* 1. Header Toolbar */}
+      <div className="flex items-center justify-between px-4 sm:px-6 py-2.5 border-b border-border bg-surface shrink-0 z-10 shadow-2xs">
+        <div className="flex items-center gap-3 min-w-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate(`/articles/${id}`)}
+            className="gap-1.5 text-xs h-8 shrink-0 rounded-control border-border hover:bg-surface-muted"
+          >
+            <Icon icon="lucide:arrow-left" width={14} />
+            <span>{t("article.quayLaiBaiBao", "Back to Article")}</span>
+          </Button>
+
+          <div className="h-4 w-px bg-border shrink-0 hidden sm:block" />
+
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="size-6 rounded-control bg-primary-subtle text-primary flex items-center justify-center shrink-0">
+              <Icon icon="lucide:network" width={14} />
+            </div>
+            <h2 className="font-bold text-xs sm:text-sm text-foreground truncate max-w-sm sm:max-w-md lg:max-w-xl m-0">
+              {originArticle.title}
+            </h2>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs text-muted-foreground hidden md:inline font-mono">
+            {activeGraphData.nodes.length} nodes · {activeGraphData.relationships.length} links
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-primary-subtle text-primary border border-primary/20">
+            <span className="size-1.5 rounded-full bg-primary animate-pulse" />
+            Interactive Graph
+          </span>
+        </div>
+      </div>
+
+      {/* 2. Main 3-Column Workspace */}
+      <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 min-h-0 overflow-hidden divide-y lg:divide-y-0 lg:divide-x divide-border">
+        {/* Left Column (Col 3): Target & Related Papers */}
+        <aside className="lg:col-span-3 bg-surface flex flex-col min-h-0 overflow-hidden">
+          <div className="px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground bg-surface-muted/40 border-b border-border flex items-center gap-1.5 shrink-0">
+            <Icon icon="lucide:target" width={13} className="text-primary" />
+            <span>Target Article</span>
+          </div>
+
+          <div
+            onClick={() => setSelectedArticleId(originArticle.article_id)}
+            className={`p-3 border-b border-border transition-colors cursor-pointer shrink-0 ${
+              String(selectedArticleId) === String(originArticle.article_id)
+                ? 'bg-primary-subtle/25 border-l-4 border-l-primary'
+                : 'hover:bg-surface-muted/50'
+            }`}
+          >
+            <div className="flex items-center justify-between text-xs mb-1">
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-primary text-primary-foreground">
+                Active Node
+              </span>
+              <span className="font-mono text-muted-foreground text-xs font-semibold">
+                {originArticle.publication_year || '—'}
+              </span>
+            </div>
+            <h3 className="text-xs font-bold text-foreground line-clamp-2 leading-snug m-0">
+              <LatexText text={originArticle.title} />
+            </h3>
+            <div className="text-[11px] text-muted-foreground mt-1 truncate">
+              {formatAuthorsLine(originArticle.authors, 2)}
+            </div>
+          </div>
+
+          <div className="px-3.5 py-2 text-[11px] font-bold uppercase tracking-wider text-muted-foreground bg-surface-muted/40 border-b border-border flex items-center justify-between shrink-0">
+            <span className="flex items-center gap-1.5">
+              <Icon icon="lucide:files" width={13} className="text-muted-foreground" />
+              <span>Connected Papers</span>
+            </span>
+            <span className="font-mono text-[11px] text-muted-foreground">
+              ({recommendedArticles.length})
+            </span>
+          </div>
+
+          <div className="flex-1 overflow-y-auto divide-y divide-border/60 min-h-0">
+            {isRecommendedLoading ? (
+              <div className="p-5 text-center text-xs text-muted-foreground">
+                <span className="inline-block animate-spin mr-1.5">⏳</span>
+                Loading connected publications...
               </div>
-              <h3 className="paper-title font-display" onClick={() => handleTitleClick(originArticle.article_id)} title={t("article.xemChiTietBaiBao")}>
-                <LatexText text={originArticle.title} />
-              </h3>
-              <div className="paper-authors font-display mt-2">{formatAuthorsLine(originArticle.authors, 3)}</div>
-            </div>
-            <div className="section-header-tag px-3 pt-4 pb-2 text-uppercase fw-bold text-muted-custom border-top">Related Papers ({recommendedArticles.length})</div>
-            <div className="related-papers-list">
-              {isRecommendedLoading ? <div className="p-3 text-center text-muted-custom">
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                  Loading recommendations...
-                </div> : recommendedArticles.length === 0 ? <div className="p-3 text-center text-muted-custom font-display">No related papers found.</div> : recommendedArticles.map(rec => <div key={rec.article_id} className="related-paper-card px-3 py-3" onClick={() => navigate(`/articles/${rec.article_id}/visual`)}>
-                    <div className="d-flex align-items-center justify-content-between mb-1">
-                      <span className="paper-year font-display">{rec.publication_year}</span>
+            ) : recommendedArticles.length === 0 ? (
+              <div className="p-5 text-center text-xs text-muted-foreground">
+                No related articles found.
+              </div>
+            ) : (
+              recommendedArticles.map((rec) => {
+                const isSelected = String(selectedArticleId) === String(rec.article_id);
+                return (
+                  <div
+                    key={rec.article_id}
+                    onClick={() => setSelectedArticleId(rec.article_id)}
+                    className={`p-3 transition-colors cursor-pointer ${
+                      isSelected
+                        ? 'bg-primary-subtle/25 border-l-4 border-l-primary font-medium'
+                        : 'hover:bg-surface-muted/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="font-mono text-muted-foreground text-[11px] font-semibold">
+                        {rec.publication_year}
+                      </span>
                     </div>
-                    <h4 className="paper-title font-display"><LatexText text={rec.title} /></h4>
-                    <div className="paper-authors font-display mt-2">{rec.authors}</div>
-                  </div>)}
-            </div>
-          </aside>
+                    <h4 className="text-xs font-semibold text-foreground line-clamp-2 leading-snug m-0">
+                      <LatexText text={rec.title} />
+                    </h4>
+                    <div className="text-[11px] text-muted-foreground mt-1 truncate">
+                      {rec.authors}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </aside>
 
-          {/* Middle Column: Interactive network graph placeholder */}
-          <section className="article-connected-middle">
-            <div className="middle-panel-header px-3 py-2 d-flex align-items-center justify-content-between border-bottom">
-              <span className="panel-title font-display fw-bold text-main">Interactive Network Graph</span>
-              <span className="text-muted-custom text-xs">Concentric Radar Plot</span>
+        {/* Center Column (Col 5): Canvas Graph */}
+        <section className="lg:col-span-5 bg-surface flex flex-col min-h-0 relative">
+          <div className="px-3.5 py-2 text-xs font-semibold text-foreground bg-surface border-b border-border flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-1.5">
+              <Icon icon="lucide:network" width={14} className="text-primary" />
+              <span>Citation & Topic Network</span>
             </div>
-            <div className="iframe-container" style={{
-            background: 'var(--bg-main)'
-          }}>
-              {/* Giao diện Loading ban đầu (khi đang ping) */}
-              {iframeStatus === 'loading' && <div className="iframe-state-overlay">
-                  <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>{t("article.dangKiemTraDichVuBieuDo")}</div>}
+            <span className="text-[11px] text-muted-foreground font-normal">
+              Scroll to zoom · Drag to pan · Click node
+            </span>
+          </div>
 
-              {/* Chỉ render iframe khi dịch vụ đã được xác nhận là có sẵn */}
-              {iframeStatus === 'content-loading' && <iframe key={iframeReloadKey} src={`${import.meta.env.VITE_ORIGIN_URL || 'http://localhost:5174'}/embed/article-graph?keyword=${encodeURIComponent(originArticle.title)}&limit=1`} title="Interactive Article Graph" className="article-graph-iframe"
-            // Sự kiện onLoad này vẫn hữu ích để ẩn spinner nếu iframe tải xong
-            // nhưng không gửi postMessage.
-            onLoad={() => console.log('[Parent] Iframe content loaded.')} onError={() => setIframeStatus('error')} />}
+          <div className="flex-1 w-full h-full relative min-h-[360px] overflow-hidden bg-background">
+            <ArticleGraphWidget
+              data={activeGraphData}
+              loading={isRecommendedLoading || graphLoading}
+              onNodeClick={(node) => {
+                const targetId = node?.properties?.id || node?.id;
+                if (targetId) setSelectedArticleId(targetId);
+              }}
+            />
+          </div>
+        </section>
 
-              {iframeStatus === 'error' && <ErrorState className="border-0" icon="lucide:server-off" title={t("article.khongTheTaiBieuDo")} message={t("article.dichVuNhungCoTheDangKhongHoatD")} onRetry={handleReloadIframe} retryLabel=" Tải lại biểu đồ" />}
+        {/* Right Column (Col 4): Selected Article Details */}
+        <aside className="lg:col-span-4 bg-surface flex flex-col min-h-0 overflow-y-auto">
+          {selectedArticleId ? (
+            <ArticleDetailPane
+              articleId={selectedArticleId}
+              onTitleClick={handleTitleClick}
+            />
+          ) : (
+            <div className="p-8 text-center text-xs text-muted-foreground m-auto">
+              <Icon icon="lucide:mouse-pointer-click" width={28} className="mx-auto mb-2 text-muted-foreground/60" />
+              <p className="font-medium text-foreground text-sm mb-1">No Paper Selected</p>
+              <p className="m-0">Click any node on the graph or a paper in the list to view detailed metrics and abstract.</p>
             </div>
-          </section>
-          {/* Right Column: Active Article details */}
-          <aside className="article-connected-right">
-            {selectedArticleId && <ArticleDetailPane articleId={selectedArticleId} onTitleClick={handleTitleClick} />}
-          </aside>
-        </main>
-      </Container>
-    </div>;
+          )}
+        </aside>
+      </main>
+    </div>
+  );
 }

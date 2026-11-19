@@ -29,10 +29,24 @@ function Spinner({ className = '', label = 'Loading' }) {
 
 const Button = React.forwardRef(({ className = '', variant, size, asChild = false, isLoading = false, loadingText, children, disabled, ...props }, ref) => {
   const Comp = asChild ? Slot : 'button';
-  return <Comp ref={ref} className={cn(buttonVariants({ variant, size }), className)} disabled={disabled || (isLoading && !asChild)} aria-busy={isLoading || undefined} {...props}>
-    {isLoading && <Spinner label={loadingText || 'Loading'} className="shrink-0" />}
-    {isLoading && loadingText ? loadingText : children}
-  </Comp>;
+  return (
+    <Comp
+      ref={ref}
+      className={cn(buttonVariants({ variant, size }), className)}
+      disabled={disabled || (isLoading && !asChild)}
+      aria-busy={isLoading || undefined}
+      {...props}
+    >
+      {asChild ? (
+        children
+      ) : (
+        <>
+          {isLoading && <Spinner label={loadingText || 'Loading'} className="shrink-0" />}
+          {isLoading && loadingText ? loadingText : children}
+        </>
+      )}
+    </Comp>
+  );
 });
 Button.displayName = 'Button';
 

@@ -12,7 +12,8 @@ import { StateCard } from '../../../../shared/components/Card';
  * @param {Array} journals - Danh sách tạp chí sau khi đã qua bộ lọc search/status
  */
 export default function JournalTableAdmin({
-  journals
+  journals,
+  asCard = true
 }) {
   const { t: _t } = useTranslation();
   const navigate = useNavigate();
@@ -25,9 +26,9 @@ export default function JournalTableAdmin({
   const basePath = isPreview ? '/admin-preview' : '/admin';
 
   return (
-    <div className="border border-border rounded-lg overflow-hidden bg-surface shadow-2xs">
+    <div className={asCard ? "border border-border rounded-lg overflow-hidden bg-surface shadow-2xs" : "table-responsive"}>
       <Table className="w-full text-left">
-        <TableHeader className="bg-muted/40">
+        <TableHeader className="bg-surface-muted/60">
           <TableRow>
             <TableHead className="py-3.5 pl-4 text-xs font-semibold text-muted-foreground uppercase">JOURNAL TITLE & CATEGORY</TableHead>
             <TableHead className="py-3.5 text-xs font-semibold text-muted-foreground uppercase">ISSN</TableHead>

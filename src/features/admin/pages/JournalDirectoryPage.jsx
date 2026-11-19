@@ -10,6 +10,7 @@ import { Alert } from '../../../shared/ui/alert';
 import { PageHeader } from '../../../shared/ui/page-layout';
 import { Skeleton } from '../../../shared/ui/skeleton';
 import { StatePanel } from '../../../shared/ui/state-panel';
+import { Card } from '../../../shared/ui/card';
 
 /**
  * JournalDirectoryPage - Màn hình chính quản lý thư mục các Tạp chí dành cho Admin.
@@ -71,66 +72,77 @@ export default function JournalDirectoryPage() {
         description="Manage and monitor the entire publication lifecycle for your academic portfolio."
       />
 
-      {/* Filters and Search toolbar */}
-      <JournalFilterBar
-        search={search}
-        onSearchChange={setSearch}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        subjectFilter={subjectFilter}
-        onSubjectChange={setSubjectFilter}
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        onOpenAddModal={() => setShowAddModal(true)}
-      />
+      {/* Unified Journal Section: Integrated Filter Bar + Content + Pagination in ONE Card */}
+      <Card className="rounded-card border border-border bg-surface shadow-card">
+        {/* Filters and Search toolbar */}
+        <JournalFilterBar
+          search={search}
+          onSearchChange={setSearch}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          subjectFilter={subjectFilter}
+          onSubjectChange={setSubjectFilter}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          onOpenAddModal={() => setShowAddModal(true)}
+          asCard={false}
+        />
 
-      {/* Display journals */}
-      {loading ? (
-        <div className="admin-card p-4 space-y-3 bg-white">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
-              <div className="space-y-1.5 flex-1 max-w-md">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </div>
-              <Skeleton className="h-6 w-20 rounded-full" />
-              <Skeleton className="h-8 w-24 rounded" />
+        {/* Display journals */}
+        <div className="border-t border-border">
+          {loading ? (
+            <div className="p-4 space-y-3 bg-surface">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
+                  <div className="space-y-1.5 flex-1 max-w-md">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                  </div>
+                  <Skeleton className="h-6 w-20 rounded-full" />
+                  <Skeleton className="h-8 w-24 rounded" />
+                </div>
+              ))}
             </div>
-          ))}
+          ) : error ? (
+            <div className="p-4">
+              <Alert variant="destructive" className="items-center mb-0">
+                <Icon icon="lucide:alert-circle" width="18" className="shrink-0" />
+                <div className="flex-1 text-xs">{error}</div>
+              </Alert>
+            </div>
+          ) : filteredJournals.length === 0 ? (
+            <div className="p-6">
+              <StatePanel
+                variant="neutral"
+                title="No Journals Found"
+                description="No journals match the selected filters. Try adjusting your search query or filters."
+              />
+            </div>
+          ) : viewMode === 'table' ? (
+            <JournalTableAdmin journals={paginatedJournals} asCard={false} />
+          ) : (
+            <div className="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {paginatedJournals.map((j) => (
+                <JournalCardAdmin key={j.id || j.journal_id} journal={j} />
+              ))}
+            </div>
+          )}
         </div>
-      ) : error ? (
-        <Alert variant="destructive" className="items-center mb-0">
-          <Icon icon="lucide:alert-circle" width="18" className="shrink-0" />
-          <div className="flex-1 text-xs">{error}</div>
-        </Alert>
-      ) : filteredJournals.length === 0 ? (
-        <StatePanel
-          variant="neutral"
-          title="No Journals Found"
-          description="No journals match the selected filters. Try adjusting your search query or filters."
-        />
-      ) : viewMode === 'table' ? (
-        <div className="admin-card p-0 overflow-hidden">
-          <JournalTableAdmin journals={paginatedJournals} />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paginatedJournals.map((j) => (
-            <JournalCardAdmin key={j.id || j.journal_id} journal={j} />
-          ))}
-        </div>
-      )}
 
-      {/* Pagination Controls */}
-      {filteredJournals.length > 0 && (
-        <Pagination
-          totalItems={filteredJournals.length}
-          currentPage={safePage}
-          limit={limit}
-          onPageChange={setCurrentPage}
-          entityName="journals"
-        />
-      )}
+        {/* Pagination Controls Footer */}
+        {filteredJournals.length > 0 && (
+          <div className="border-t border-border px-4 py-3 bg-surface">
+            <Pagination
+              totalItems={filteredJournals.length}
+              currentPage={safePage}
+              limit={limit}
+              onPageChange={setCurrentPage}
+              entityName="journals"
+              className="pt-0"
+            />
+          </div>
+        )}
+      </Card>
 
       {/* Add Journal Modal */}
       <AddJournalModal

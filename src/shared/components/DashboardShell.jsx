@@ -66,7 +66,7 @@ function getHeaderBreadcrumbs(pathname, lang, t) {
         breadcrumbs.push({ label: t('article.trucQuan', 'Visual Details') });
       } else {
         breadcrumbs.push({ label: t('navigation.articles', 'Articles'), to: `/${lang}/articles` });
-        breadcrumbs.push({ label: t('article.chiTiet', 'Details') });
+        breadcrumbs.push({ label: t('navigation.details', 'Details') });
       }
       break;
 

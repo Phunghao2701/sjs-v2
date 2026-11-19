@@ -5,6 +5,7 @@ import { useTopEntities } from '../hooks/useTopEntities';
 import { mapFiltersToQueryParams } from '../services/globalEcosystem.service';
 import LoadingSkeleton from '../../../shared/components/common/LoadingSkeleton';
 import InlineErrorState from '../../../shared/components/common/InlineErrorState';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../../shared/ui/card';
 
 export default function TopEntitiesCard() {
   const { t } = useTranslation();
@@ -14,54 +15,60 @@ export default function TopEntitiesCard() {
 
   if (isLoading) {
     return (
-      <div className="ranking-list-container dashboard-card">
-        <div className="ranking-list-header">
-          <h3 className="ranking-list-title">{t('dashboard.topAuthors', 'Top Authors')}</h3>
-        </div>
-        <LoadingSkeleton height="150px" />
-      </div>
+      <Card className="ranking-list-container dashboard-card bg-surface border-border shadow-card rounded-card overflow-hidden">
+        <CardHeader className="px-4 py-3 border-b border-border">
+          <CardTitle className="text-sm font-semibold text-foreground">{t('dashboard.topAuthors', 'Top Authors')}</CardTitle>
+        </CardHeader>
+        <CardContent className="p-4">
+          <LoadingSkeleton height="150px" />
+        </CardContent>
+      </Card>
     );
   }
 
   if (error) {
     return (
-      <div className="ranking-list-container dashboard-card">
-        <InlineErrorState 
-          message={t('dashboard.topEntitiesError', 'Failed to load top entities')}
-          onRetry={refreshData}
-        />
-      </div>
+      <Card className="ranking-list-container dashboard-card bg-surface border-border shadow-card rounded-card overflow-hidden">
+        <CardContent className="p-4">
+          <InlineErrorState 
+            message={t('dashboard.topEntitiesError', 'Failed to load top entities')}
+            onRetry={refreshData}
+          />
+        </CardContent>
+      </Card>
     );
   }
 
   const maxValue = items.length > 0 ? Math.max(...items.map(item => item.value)) : 1;
 
   return (
-    <div className="ranking-list-container dashboard-card">
-      <div className="ranking-list-header">
-          <h3 className="ranking-list-title">{t('dashboard.topAuthors', 'Top Authors')}</h3>
-      </div>
+    <Card className="ranking-list-container dashboard-card bg-surface border-border shadow-card rounded-card overflow-hidden">
+      <CardHeader className="px-4 py-3 border-b border-border">
+        <CardTitle className="text-sm font-semibold text-foreground">{t('dashboard.topAuthors', 'Top Authors')}</CardTitle>
+      </CardHeader>
       
-      <div className="ranking-list-content">
-        {items.length === 0 ? (
-          <div className="ranking-empty-state">
-            {t('dashboard.topAuthorsNoData', 'No author data is available for this project yet.')}
-          </div>
-        ) : items.map((item, index) => (
-          <div key={index} className="ranking-item">
-            <div className="ranking-item-info">
-              <span className="ranking-item-name">{item.name}</span>
-              <span className="ranking-item-value">{item.displayValue}</span>
+      <CardContent className="p-4">
+        <div className="ranking-list-content">
+          {items.length === 0 ? (
+            <div className="ranking-empty-state text-xs text-muted-foreground py-4 text-center">
+              {t('dashboard.topAuthorsNoData', 'No author data is available for this project yet.')}
             </div>
-            <div className="ranking-item-bar-container">
-              <div 
-                className="ranking-item-bar" 
-                style={{ width: `${(item.value / maxValue) * 100}%` }}
-              ></div>
+          ) : items.map((item, index) => (
+            <div key={index} className="ranking-item">
+              <div className="ranking-item-info">
+                <span className="ranking-item-name">{item.name}</span>
+                <span className="ranking-item-value">{item.displayValue}</span>
+              </div>
+              <div className="ranking-item-bar-container">
+                <div 
+                  className="ranking-item-bar" 
+                  style={{ width: `${(item.value / maxValue) * 100}%` }}
+                ></div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
